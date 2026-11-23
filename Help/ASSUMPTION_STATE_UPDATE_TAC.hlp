@@ -1,0 +1,29 @@
+\DOC ASSUMPTION_STATE_UPDATE_TAC
+
+\TYPE {ASSUMPTION_STATE_UPDATE_TAC : tactic}
+
+\SYNOPSIS
+On a goal whose conclusion is an implication whose antecedent equates a nest of
+state writes applied to a state {t} with a state {u}, it adds assumptions about
+{t}, re-stated for {u}, to the assumption list.
+
+\DESCRIBE
+The tactic takes no arguments.
+{
+   A ?- (write ... t = u) ==> P
+   ============================  ASSUMPTION_STATE_UPDATE_TAC
+   A, A' ?- (write ... t = u) ==> P
+}
+\noindent Here {A'} consists of new assumptions obtained from assumptions in
+{A} by replacing the pre-state {t} with the post-state {u}: typically facts of
+the form {read c t = v}, {read c t <=> b}, {~read c t}, or more general
+properties mentioning {t}, re-stated for {u}. Only assumptions whose components
+are untouched by the writes in the antecedent appear in {A'}, so {A'} is
+generally a strict subset of the translatable assumptions. In principle {A'}
+may be empty, though in every observed trace at least one assumption is added.
+
+\COMMENTS
+All observed traces show this single kind of transformation, on goals whose
+conclusion is such a state-equation implication.
+
+\ENDDOC

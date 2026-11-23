@@ -1,0 +1,38 @@
+\DOC LOCAL_JDOUBLE_SAFETY_TAC
+
+\TYPE {LOCAL_JDOUBLE_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Applies a named universally quantified subroutine-correctness assumption to
+discharge a point-doubling call inside an {eventually} goal, advancing the
+symbolic state from one step index to the next and replacing the old state's
+assumptions by ones describing the state after the call.
+
+\DESCRIBE
+The first argument, {assump_name : string}, is the label of the assumption in
+the goal's assumption list that gets instantiated and used for the call; the
+second, {n : int}, is the index used to name the new symbolic state variable
+introduced for the post-call state. The goal's conclusion must be an
+{eventually} statement about a state variable; the resulting conclusion is the
+same {eventually} statement about a freshly named successor state variable. All
+assumptions mentioning the old state variable — register/flag/memory reads, the
+loaded-bytes fact, the event-trace equation and the accumulated {MAYCHANGE}
+relation — are dropped and replaced by corresponding assumptions about the new
+state, with the {MAYCHANGE} relation extended by the frame of the called
+routine and the event trace rewritten as an {APPEND} of a fresh existential
+trace variable {x1} with the previous trace. Two further assumptions about {x1}
+are added: one equating it to a trace-generating function applied to the call's
+arguments, and one asserting that its memory accesses are in bounds. The named
+assumption itself is kept, but moved to the end of the assumption list; the
+other quantified correctness assumption keeps its label.
+{
+       A ?- t
+     ======================================  LOCAL_JDOUBLE_SAFETY_TAC assump_name n
+       A' ?- t'
+}
+
+\COMMENTS
+In all observed traces, this single-subgoal transformation is applied to goals
+of this one shape.
+
+\ENDDOC

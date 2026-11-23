@@ -1,0 +1,42 @@
+\DOC X86_SIM_TAC
+
+\TYPE {X86_SIM_TAC : ?preprocess_tac:tactic -> ?canonicalize_pc_diff:bool -> thm * (thm option array) -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes the numbered x86 instruction steps of an {ensures}-style
+machine-code goal, discharging the precondition and frame conditions and
+leaving only the residual arithmetic/memory side conditions of the
+postcondition.
+
+\DESCRIBE
+{X86_SIM_TAC} takes {preprocess_tac : tactic}, an optional tactic run on the
+goal before symbolic execution starts; {canonicalize_pc_diff : bool}, an
+optional flag controlling normalisation of program-counter differences; {execth
+: thm * (thm option array)}, the execution/decoding data for the program being
+simulated paired with a theorem giving the byte length of the program (its
+statement appears in the observed traces); and {snums : int list}, the step
+numbers to simulate, given as a range or an explicit list, which fixes how many
+instructions are executed and the names of the intermediate states. Applied to
+a goal whose conclusion is an {ensures} statement, it introduces an initial
+state and a final state after the requested number of steps, turning the
+precondition conjuncts into new assumptions {A'} about that final state
+(register and flag reads, {bytes_loaded}, memory contents) together with one
+{MAYCHANGE ... s0 sn} assumption recording the frame, and replaces the
+conclusion by the leftover conjuncts {u} of the postcondition that symbolic
+execution could not settle:
+{
+           A ?- t
+     ================================  X86_SIM_TAC preprocess_tac canonicalize_pc_diff execth snums
+           A, A' ?- u
+}
+\noindent In some applications a few of the original assumptions are also
+deleted and re-added, reordered or re-instantiated, and in some cases the
+final-state {RIP} assumption is left as a conditional branch target. When
+symbolic execution settles the whole postcondition it produces no subgoals,
+closing the goal.
+
+\COMMENTS
+The observed traces show only these two outcomes, always on goals whose
+conclusion is an {ensures} statement for an x86 program.
+
+\ENDDOC

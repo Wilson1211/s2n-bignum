@@ -1,0 +1,31 @@
+\DOC LOCAL_ADD5_4_TAC
+
+\TYPE {LOCAL_ADD5_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal across one inlined modular-addition
+subroutine call, replacing the current state variable by a successor state and
+adding assumptions describing the subroutine's result.
+
+\DESCRIBE
+The first argument is an {int}, an offset/index selecting the call site within
+the surrounding code. The second is a {string list} naming the logical
+variables for the operation's output and its two inputs: the first name becomes
+the new result variable, while the other two name the already-known input
+quantities whose bound and congruence appear in the new assumption. The goal's
+conclusion is an {eventually} statement about a state variable; it becomes the
+same statement about a fresh successor state variable. The assumptions about
+the old state — the program counter value, {bytes_loaded}, register and
+memory-content readings, and the accumulated {MAYCHANGE} frame — are discharged
+and re-added phrased in the new state, with the program counter advanced and
+the {MAYCHANGE} frame extended by the newly written memory region; the input
+assumption for the consumed operand is dropped. Two new assumptions appear: an
+equation reading the output memory region of the new state as the freshly named
+result variable, and an implication bounding that variable and giving its
+congruence to the sum of the two named inputs. Exactly one subgoal results.
+
+\COMMENTS
+In all observed traces, only this single kind of transformation occurs, always
+on goals carrying a large assumption list of this symbolic-execution form.
+
+\ENDDOC

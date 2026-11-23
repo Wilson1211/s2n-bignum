@@ -1,0 +1,39 @@
+\DOC LOCAL_JMIXADD_TAC
+
+\TYPE {LOCAL_JMIXADD_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal past a called subroutine,
+replacing the state variable by its successor and re-deriving the assumptions
+about the new state, including a new correctness assumption about the
+subroutine's output buffer.
+
+\DESCRIBE
+The single {int} argument is the index N of the state variable: the goal's
+current state {sN} is replaced by the next state {s(N+1)} throughout the
+conclusion and in the rebuilt assumptions. Exactly one subgoal results. In the
+conclusion, only the state term to which the {eventually} predicate is applied
+changes; the predicate body is left as is. All assumptions mentioning the old
+state are discharged and replaced by corresponding assumptions about the new
+state: the program-loaded fact, the register and memory read facts (those
+describing the call's argument registers are dropped, and flag facts are
+dropped in some cases), and the accumulated {MAYCHANGE} frame, now extended
+with further memory components. Two further assumptions give the new
+instruction pointer and stack pointer at the return site, and one newly added
+universally quantified assumption states the group-law property relating the
+subroutine's inputs to the three memory fields it wrote, read in the new state.
+Assumptions that do not refer to the state (side conditions, non-overlapping
+facts, arithmetic facts, earlier quantified properties) are retained unchanged,
+so the newly added quantified property is among the retained assumptions on the
+next application.
+{
+   A, assumptions about sN ?- eventually step (\s. P s) sN
+   ========================================================  LOCAL_JMIXADD_TAC N
+   A, rebuilt assumptions about s(N+1), (!z1 ... zp. group-law property at s(N+1)) ?- eventually step (\s. P s) s(N+1)
+}
+
+\COMMENTS
+In all observed traces, only this single kind of transformation occurs, always
+on goals of this {eventually}-with-machine-state shape.
+
+\ENDDOC

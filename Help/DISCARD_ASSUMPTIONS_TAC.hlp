@@ -1,0 +1,29 @@
+\DOC DISCARD_ASSUMPTIONS_TAC
+
+\TYPE {DISCARD_ASSUMPTIONS_TAC : (thm -> bool) -> tactic}
+
+\SYNOPSIS
+Deletes from the goal's assumption list every assumption whose theorem
+satisfies the supplied predicate, leaving the conclusion unchanged.
+
+\DESCRIBE
+The argument {P : thm -> bool} is applied to each assumption viewed as a
+theorem; every assumption for which it holds is removed. In the observed traces
+the predicates test the conclusion's free variables, its shape, or match it
+against a list of patterns.
+{
+          A ?- t
+     ===============  DISCARD_ASSUMPTIONS_TAC P
+          A' ?- t
+}
+\noindent Here {A'} is {A} minus the assumptions satisfying {P}, with the
+survivors in their original relative order. The removed set may be empty, in
+which case the goal is returned unchanged; it may equally range from a single
+assumption up to most of a large assumption list. Nothing is ever added, and
+the conclusion is never touched.
+
+\COMMENTS
+Across all observed traces, the only behaviour shown is this in-place filtering
+of assumptions yielding one subgoal.
+
+\ENDDOC

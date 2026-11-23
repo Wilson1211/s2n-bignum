@@ -1,0 +1,35 @@
+\DOC MEMSAFE_ARITH_TAC
+
+\TYPE {MEMSAFE_ARITH_TAC : tactic}
+
+\SYNOPSIS
+Closes a goal whose conclusion is an arithmetic statement by linear arithmetic
+over the numeric assumptions of the goal.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal {A ?- t} where {t} is a natural-number
+(in)equality, or a conjunction or disjunction of such, it selects the
+arithmetic assumptions from {A}, builds the single implication from them to
+{t}, and discharges it with an arithmetic decision procedure; non-arithmetic
+assumptions (machine-state reads, list and event facts, quantified statements)
+are discarded.
+{
+       A ?- t
+     ==========  MEMSAFE_ARITH_TAC
+      (no goals)
+}
+
+\FAILURE
+Fails when {t} does not follow by linear arithmetic from the extracted
+arithmetic assumptions, the underlying decision procedure reporting that no
+contradiction can be derived. In the observed failures the conclusion asserts
+containment relations between two independent address variables, the needed
+facts being non-arithmetic assumptions about address regions rather than the
+arithmetic ones used.
+
+\COMMENTS
+In all observed traces it is applied to goals with large assumption lists
+mixing arithmetic and non-arithmetic facts, with conclusions that are linear
+bounds on sums and products of variables and constants.
+
+\ENDDOC

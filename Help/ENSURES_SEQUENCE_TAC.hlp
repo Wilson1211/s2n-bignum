@@ -1,0 +1,31 @@
+\DOC ENSURES_SEQUENCE_TAC
+
+\TYPE {ENSURES_SEQUENCE_TAC : term -> term -> tactic}
+
+\SYNOPSIS
+Splits an {ensures} goal at an intermediate program point by inserting a
+user-supplied midpoint state predicate, yielding the conjunction of the two
+sub-executions as a single new goal.
+
+\DESCRIBE
+The first argument {n : term} is the program location of the cut point, given
+as an address expression (or an offset form), and is used to build the
+midpoint's program-counter condition. The second argument {q : term} is a state
+predicate {\s. ...} describing what holds at that point; it serves as the
+postcondition of the first segment and the precondition of the second. The
+intermediate predicate {R} is built from {q} by conjoining the program-loading
+condition carried over from the precondition {P} together with a
+program-counter condition fixed by {n}; the same frame {C} is used in both
+halves. Where {q} has leading existential variables {x1 ... xn} (with {n}
+possibly zero), these appear as explicit existential quantifiers inside {R}.
+{
+          A ?- ensures model P Q C
+   ====================================  ENSURES_SEQUENCE_TAC n q
+   A ?- ensures model P R C /\ ensures model R Q C
+}
+
+\COMMENTS
+All observed traces show this single transformation on {ensures} goals for one
+machine model.
+
+\ENDDOC

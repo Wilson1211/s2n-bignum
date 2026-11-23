@@ -1,0 +1,33 @@
+\DOC LOCAL_AMONTSQR_P256_TAC
+
+\TYPE {LOCAL_AMONTSQR_P256_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-execution goal past an inlined
+almost-Montgomery-squaring subroutine, replacing the current symbolic state
+with a successor state and recording the squaring result as new assumptions.
+
+\DESCRIBE
+The first argument is an {int} selecting which variant/entry of the subroutine
+block to step over; the second is a {string list} naming the output and input
+quantities, the first name being used for the result value and the second for
+the squared input, thereby fixing the names appearing in the new assumptions.
+The resulting single subgoal keeps the same {eventually} postcondition but
+applies it to a fresh successor state variable in place of the previous one.
+Assumptions mentioning the old state — the program-counter value,
+{bytes_loaded}, register reads, memory-content equations, and the accumulated
+{MAYCHANGE} frame from the initial state — are discharged and re-added restated
+for the new state, with the program counter advanced, the {MAYCHANGE} frame
+extended by the newly written memory component, and an extra memory-content
+equation giving the result value at the output location. Two further arithmetic
+facts are added: one bounding the result below {2 EXP 256}, and one asserting
+it is congruent to the Montgomery-scaled square of the input. Pre-existing side
+conditions that do not refer to the state, such as nonoverlapping conditions
+and earlier arithmetic facts, are retained, and an initial trivial {MAYCHANGE}
+reflexivity assumption, when present, is dropped.
+
+\COMMENTS
+The observed traces show only this single transformation, on goals of this
+machine-state form.
+
+\ENDDOC

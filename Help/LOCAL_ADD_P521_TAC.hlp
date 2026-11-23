@@ -1,0 +1,40 @@
+\DOC LOCAL_ADD_P521_TAC
+
+\TYPE {LOCAL_ADD_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic {eventually} execution goal across an inlined
+modular-addition subroutine, replacing the current state variable with a later
+one and adding an assumption characterising the computed result.
+
+\DESCRIBE
+The first argument is an {int} selecting which code/offset configuration (i.e.
+which calling context) to use; the second is a {string list} naming the
+destination and the two operand buffers of the addition, which determine the
+names used for the result variable and the memory locations read and written.
+The conclusion is advanced to a fresh later state variable {s'}, with the
+postcondition {P} unchanged:
+{
+   A ?- eventually x86 (\s'. P s') s
+   ================================================  LOCAL_ADD_P521_TAC n [dest; op1; op2]
+   A' ?- eventually x86 (\s'. P s') s'
+}
+\noindent Here {A'} is obtained as follows. All assumptions of {A} mentioning
+the old state (program-counter value, {bytes_loaded}, register and memory
+contents, and the accumulated {MAYCHANGE} frame relation from the initial
+state) are discharged and re-added with the new state variable, the program
+counter advanced, and the {MAYCHANGE} frame extended with any further
+components clobbered (additional registers and the destination buffer); purely
+arithmetic side conditions are retained, sometimes being re-added rather than
+kept in place. One new assumption records the destination buffer's contents in
+the new state as a variable, and another gives that variable's value as the
+modular sum of the two operands under hypotheses that each operand is below the
+modulus; the result variable is renamed with a prime if the given name already
+occurs. Assumptions not referring to any state (such as non-overlap conditions)
+are left untouched.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of this symbolic-execution shape.
+
+\ENDDOC

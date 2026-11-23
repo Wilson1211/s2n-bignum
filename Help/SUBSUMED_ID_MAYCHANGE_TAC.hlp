@@ -1,0 +1,25 @@
+\DOC SUBSUMED_ID_MAYCHANGE_TAC
+
+\TYPE {SUBSUMED_ID_MAYCHANGE_TAC : tactic}
+
+\SYNOPSIS
+Proves goals stating that the identity relation {(=)} is subsumed by a
+{MAYCHANGE}-style state-component relation built from {ASSIGNS} components
+combined with {,,}.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion is {(=) subsumed t},
+where {t} is a single {ASSIGNS} term or a {,,}-chain of such terms, it closes
+the goal outright; the assumptions {A} are untouched and play no role in the
+outcome.
+{
+   A ?- (=) subsumed t
+   =================== SUBSUMED_ID_MAYCHANGE_TAC
+}
+
+\COMMENTS
+In all observed traces, only this outcome occurs, on conclusions of exactly
+that shape, with the subsuming relation ranging over single components and long
+{,,}-chains alike.
+
+\ENDDOC

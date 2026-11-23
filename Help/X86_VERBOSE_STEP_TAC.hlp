@@ -1,0 +1,37 @@
+\DOC X86_VERBOSE_STEP_TAC
+
+\TYPE {X86_VERBOSE_STEP_TAC : thm * (thm option array) -> string -> tactic}
+
+\SYNOPSIS
+Symbolically executes one x86 instruction from the current symbolic state,
+replacing the state term in an {eventually} goal by a fresh successor state and
+adding assumptions describing that state.
+
+\DESCRIBE
+The first argument {(exth1,exth2) : thm * (thm option array)} is the execution
+context for the code being stepped: {exth1} gives the length of the
+machine-code list and {exth2} is an array of per-instruction decoding theorems.
+The second argument {sname : string} names the new state variable introduced by
+the step. The goal must have the form {A ?- eventually x86 P t}, with {t} the
+current state variable, and one subgoal results whose conclusion is the same
+{eventually} statement at a new state {u} named by {sname}:
+{
+   A ?- eventually x86 P t
+   ========================================  X86_VERBOSE_STEP_TAC (exth1,exth2) sname
+   A' ?- eventually x86 P u
+}
+\noindent Here {A'} is obtained from {A} by dropping the assumption describing
+the loaded code at the old state and the accumulated {MAYCHANGE} relation
+ending at the old state, and adding: a code-loading assumption for {u}; the
+component-reading assumptions that the instruction does not affect, restated at
+{u}; a {MAYCHANGE} relation reaching {u} with the newly-written components
+appended; and new assumptions giving the values of the components written by
+the instruction (registers, flags, memory, event trace and the instruction
+pointer), some of which may introduce fresh variables {z1 ... zp} and extra
+derived equations. Assumptions not about machine state are left untouched.
+
+\COMMENTS
+All observed traces show this single-subgoal state-advancing behaviour on
+{eventually} goals carrying a symbolic-execution context.
+
+\ENDDOC

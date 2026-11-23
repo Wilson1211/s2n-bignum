@@ -1,0 +1,28 @@
+\DOC SAFE_META_EXISTS_TAC
+
+\TYPE {SAFE_META_EXISTS_TAC : term list ref -> tactic}
+
+\SYNOPSIS
+Strips the leading existential quantifier from the goal's conclusion, replacing
+the bound variable by a free variable of the same name (primed as needed to
+avoid clashing with names already in use in the goal).
+
+\DESCRIBE
+The single argument {freevars : term list ref} is a reference cell holding a
+list of terms; it does not appear in the printed goal. Applied to a goal whose
+conclusion is {?x1. t}, the tactic yields one subgoal whose conclusion is the
+body with the bound variable instantiated to a free variable {x1'}, every
+occurrence in the body being renamed accordingly; {x1'} is {x1} itself unless
+that name already occurs elsewhere in the goal, in which case a primed variant
+is used.
+{
+       A ?- ?x1. t
+   =============================  SAFE_META_EXISTS_TAC freevars
+       A ?- t[x1'/x1]
+}
+
+\COMMENTS
+All observed traces show this single kind of outcome, always on goals whose
+conclusion begins with one existential quantifier.
+
+\ENDDOC

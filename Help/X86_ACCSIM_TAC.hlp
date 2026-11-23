@@ -1,0 +1,36 @@
+\DOC X86_ACCSIM_TAC
+
+\TYPE {X86_ACCSIM_TAC : thm * (thm option array) -> int list -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a straight-line block of x86 machine code in an {ensures}
+goal, accumulating arithmetic/flag facts as new assumptions and reducing the
+goal to the remaining postcondition obligations, or closing it outright.
+
+\DESCRIBE
+{X86_ACCSIM_TAC execth anums snums} takes {execth : thm * (thm option array)},
+the precomputed execution data for the code being simulated (its length theorem
+together with per-instruction decoding information); {anums : int list}, the
+step numbers whose results are recorded as "accumulated" arithmetic equations;
+and {snums : int list}, the range of instruction steps to simulate. Applied to
+a goal {A ?- ensures ...}, it either closes the goal outright or leaves one
+subgoal whose conclusion is the residual arithmetic/word content of the
+postcondition, re-expressed in terms of freshly introduced symbolic variables
+for the intermediate results and for the final machine state. In the latter
+case:
+{
+      A ?- t
+   ================================ X86_ACCSIM_TAC execth anums snums
+      A, h1 ... hn ?- u
+}
+\noindent where {h1 ... hn} are real-arithmetic equations for the accumulated
+steps (relating products, sums and carry bits of the introduced variables), the
+rewritten precondition facts transported to the final state, equations giving
+the final state's register, flag and memory reads, the loaded-code fact, and a
+{MAYCHANGE} relation between the initial and final symbolic states.
+
+\COMMENTS
+The observed traces show only these two outcomes, on {ensures} goals for x86
+code with a straight-line instruction range.
+
+\ENDDOC

@@ -1,0 +1,35 @@
+\DOC LOCAL_DOUBLE_TWICE4_TAC
+
+\TYPE {LOCAL_DOUBLE_TWICE4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a machine-state {eventually} goal past one inlined "double modulo
+p_25519" code block, replacing the current symbolic state by its successor and
+adding an assumption characterising the doubled result.
+
+\DESCRIBE
+The first argument is an {int} giving the offset/index of the code block to
+step over; the second is a {string list} naming the output variable and the
+input variable of the doubling step — the first name fixes the variable used
+for the new result value in the added assumptions, the second identifies the
+source operand appearing in the arithmetic conclusion. A single subgoal
+results. The conclusion {eventually x86 (\s'. ...) sk} becomes the same
+postcondition applied to the next state {s(k+1)}, the postcondition body being
+unchanged. All assumptions about the old state (program counter, register and
+memory reads, {bytes_loaded}, and the accumulated {MAYCHANGE ... s0 sk} frame)
+are discharged and re-asserted for the new state: the program counter is
+advanced, the {MAYCHANGE} frame is extended by the memory region written by the
+block, flag-read assumptions about the old state are dropped, and a new
+memory-read assumption gives the destination buffer the value of the named
+output variable. A numeric assumption is also added relating that output
+variable to twice the input value modulo {p_25519}, sometimes guarded by a
+bound hypothesis on the input, and sometimes stated as an unconditional
+congruence. Mathematical side assumptions not mentioning the state are
+retained, although their order in the assumption list may change.
+
+\COMMENTS
+In all observed traces, only this single kind of forward-stepping
+transformation occurs, always on goals whose conclusion is an {eventually}
+statement about a symbolic machine state.
+
+\ENDDOC

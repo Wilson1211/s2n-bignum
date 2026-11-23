@@ -1,0 +1,30 @@
+\DOC REABBREV_TAC
+
+\TYPE {REABBREV_TAC : term -> tactic}
+
+\SYNOPSIS
+Given an equation {v = t} whose right-hand side {t} already occurs as the
+left-hand side of an assumption {t = u}, replaces that assumption by {t = v}
+together with {u = v}, and rewrites {u} to {v} in the conclusion.
+
+\DESCRIBE
+The argument {tm : term} is an equation of the form {v = t}, where {v} is the
+new name to abbreviate with and {t} is a term occurring as the left-hand side
+of an existing assumption. The assumption {t = u} is dropped from {A}, and the
+two assumptions {t = v} and the defining equation {u = v} are appended at the
+end; all other assumptions keep their order and content. In the conclusion
+every occurrence of {u} is replaced by {v}; where {u} does not occur in the
+conclusion, the conclusion is unchanged.
+{
+   A ?- t'
+   ========================  REABBREV_TAC `v = t`
+   A' ?- t'[v/u]
+}
+\noindent where {A} contains {t = u} and {A'} is {A} with {t = u} dropped and
+{t = v}, {u = v} appended.
+
+\COMMENTS
+In all observed traces only this kind of change occurs, always on goals whose
+assumptions contain a matching equation.
+
+\ENDDOC

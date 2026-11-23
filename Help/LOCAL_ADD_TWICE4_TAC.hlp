@@ -1,0 +1,40 @@
+\DOC LOCAL_ADD_TWICE4_TAC
+
+\TYPE {LOCAL_ADD_TWICE4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic {eventually} execution goal across one inlined
+modular-addition subroutine, replacing the current state variable with a
+successor state and recording the new buffer contents together with an
+arithmetic characterisation of the result.
+
+\DESCRIBE
+The tactic takes an {int} — in all observed traces the same fixed value —
+selecting an offset/variant used to locate the code segment being stepped over,
+and a {string list} of three names giving the destination variable and the two
+operand variables of the addition; these names are those that appear in the new
+assumptions and in the updated memory-read assumption. Applied to a goal whose
+conclusion is an {eventually} statement about a state {s}, it produces one goal
+about a fresh successor state variable {s'}:
+{
+   A ?- eventually ... s
+   ================================================ LOCAL_ADD_TWICE4_TAC n [dest; op1; op2]
+   A' ?- eventually ... s'
+}
+\noindent Here the conclusion retains the same postcondition body with only the
+state argument updated. In {A'}, every assumption mentioning the old state —
+the program-counter read, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} frame — is discharged and re-added in the same form for
+{s'}, with the program counter advanced, the {MAYCHANGE} frame possibly
+extended with a further memory component, and the memory read for the
+destination buffer now equated to the newly named result value. Purely
+mathematical assumptions that do not mention the state are kept unchanged, and
+one new assumption is added stating that the new result is congruent to the sum
+of the two operands modulo the prime, sometimes guarded by a bound hypothesis
+on an operand.
+
+\COMMENTS
+All observed traces show exactly this single-goal state-advancing behaviour on
+goals of this one shape.
+
+\ENDDOC

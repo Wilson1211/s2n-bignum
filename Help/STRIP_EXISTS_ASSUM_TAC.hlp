@@ -1,0 +1,33 @@
+\DOC STRIP_EXISTS_ASSUM_TAC
+
+\TYPE {STRIP_EXISTS_ASSUM_TAC : tactic}
+
+\SYNOPSIS
+Finds an existentially quantified assumption, removes it, and replaces it by
+its body with the witnesses as free variables and the body's conjuncts as
+separate assumptions.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose assumption list contains an
+assumption of the form {?x1 ... xn. t1 /\ ... /\ tk}, the tactic removes that
+assumption and puts the conjuncts {t1}, ..., {tk} in its place as individual
+assumptions, with {x1 ... xn} now free. The conclusion is untouched. Note that
+the removed assumption's position is not preserved: the new assumptions are
+appended at the end, while the remaining assumptions keep their relative order.
+{
+       A, (?x1 ... xn. t1 /\ ... /\ tk) ?- u
+       ===================================== STRIP_EXISTS_ASSUM_TAC
+       A, t1, ..., tk ?- u
+}
+
+\FAILURE
+Fails whenever no assumption in the list is an existentially quantified
+statement of the shape it can strip; the failure is a search failure raised by
+the tactic itself when none of the candidate assumptions is suitable.
+
+\COMMENTS
+The observed traces show only this one kind of transformation, always on goals
+carrying a sizeable assumption list and a conclusion that is not itself
+touched.
+
+\ENDDOC

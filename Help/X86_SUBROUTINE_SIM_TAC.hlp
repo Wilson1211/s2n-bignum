@@ -1,0 +1,62 @@
+\DOC X86_SUBROUTINE_SIM_TAC
+
+\TYPE {X86_SUBROUTINE_SIM_TAC : ?is_safety_thm:bool -> thm * (thm * (thm option array)) * int * thm * thm -> term list -> int -> tactic}
+
+\SYNOPSIS
+Discharges one call to a verified subroutine inside an
+{eventually x86 ... s<n>} goal by applying a supplied correctness (or safety)
+theorem for the callee, replacing the pre-call state assumptions with the
+callee's post-state assumptions and advancing the symbolic state index.
+
+\DESCRIBE
+The arguments are: an optional flag {is_safety_thm : bool}, which when given
+makes the supplied subroutine theorem be treated as a safety/event-trace
+specification, additionally producing a side goal about the event list; a tuple
+{(machinecode,execth,offset,submachinecode,subth) : thm * (thm * (thm option
+array)) * int * thm * thm} consisting of the caller's machine-code definition,
+its execution/decoding data (including the code-length theorem), the byte
+offset at which the callee code sits inside the caller, the callee's
+machine-code definition, and the correctness/safety theorem for the callee;
+{ilist0 : term list}, the terms, read in the current state, used to instantiate
+the callee theorem's universally quantified parameters (may be empty); and
+{n : int}, the index of the current symbolic state, used to name the successor
+state. The tactic instantiates the callee theorem with the terms in {ilist0},
+matches it against the current state's register/memory assumptions, and
+advances the state index, leaving the conclusion otherwise unchanged:
+{
+   A ?- eventually x86 (\s'. ...) s<n>
+   ==================================== X86_SUBROUTINE_SIM_TAC (machinecode,execth,offset,submachinecode,subth) ilist0 n
+   A' ?- eventually x86 (\s'. ...) s<n+1>
+}
+\noindent In {A'}, the pre-call facts about the state at index {n} (program
+counter, stack pointer, argument registers, memory contents, event list, and
+the accumulated {MAYCHANGE} frame) are removed and replaced by the
+corresponding facts about the state at index {n+1}: the return program counter
+and stack pointer, the callee's postconditions (results in memory or registers,
+possibly as implications or universally quantified statements), the preserved
+reads carried over, and an extended {MAYCHANGE} frame. Assumptions unrelated to
+the machine state are kept. When the supplied theorem is a safety/trace
+specification, an extra first goal is produced before the advanced {eventually}
+goal:
+{
+   A ?- eventually x86 (\s'. ...) s<n>
+   ==================================== X86_SUBROUTINE_SIM_TAC is_safety_thm (machinecode,execth,offset,submachinecode,subth) ilist0 n
+   A ?- <current event list> = APPEND z1 <base trace>
+   A' ?- eventually x86 (\s'. ...) s<n+1>
+}
+\noindent where {z1} is a fresh trace-tail variable.
+
+\FAILURE
+Fails when the supplied subroutine theorem cannot be matched against the
+current goal, reported as a match failure from the internal {MATCH_MP_TAC}
+step; in the failing cases the instantiated specification did not line up with
+the goal's conclusion and state assumptions, whereas in the successful cases it
+did. This can come either from the tactic's own matching of the goal or from
+the shape of the theorem supplied as an argument.
+
+\COMMENTS
+The observed traces show only these two shapes, always on goals whose
+conclusion is an {eventually x86} statement with a full set of machine-state
+assumptions.
+
+\ENDDOC

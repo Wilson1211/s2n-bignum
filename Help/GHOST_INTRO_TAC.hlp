@@ -1,0 +1,33 @@
+\DOC GHOST_INTRO_TAC
+
+\TYPE {GHOST_INTRO_TAC : term -> term -> tactic}
+
+\SYNOPSIS
+Rewrites the precondition of an {ensures} goal, replacing every occurrence of a
+state-dependent component expression by a fresh variable and appending a
+conjunct equating the component to that variable.
+
+\DESCRIBE
+The first argument {t : term} is the variable (of the component's value type)
+that stands for the component's value in the precondition; the second argument
+{comp : term} is the component reader, given either as a partially applied read
+function or as a lambda over the state producing the value, whose occurrences
+in the precondition are abstracted. All subterms of the form "{comp} applied to
+the state" in the precondition (the first state predicate) are replaced by {t},
+and a conjunct stating that {comp} of the state equals {t} is appended at the
+end of the precondition's conjunction; the precondition's conjuncts are also
+re-associated to the right, so any bracketing in the original is flattened. The
+substitution reaches inside nested binders and quantified subformulas of the
+precondition. The postcondition and the frame are left as they are, and
+occurrences of the component there are untouched.
+{
+      A ?- ensures ...
+      ==========================================  GHOST_INTRO_TAC t comp
+      A ?- ensures ...   (precondition rewritten as above)
+}
+
+\COMMENTS
+In all observed traces the tactic performs exactly this single transformation
+of an {ensures} goal, always producing exactly one subgoal.
+
+\ENDDOC

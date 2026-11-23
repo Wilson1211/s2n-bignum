@@ -1,0 +1,38 @@
+\DOC LOCAL_TOMONT_TAC
+
+\TYPE {LOCAL_TOMONT_TAC : int -> tactic}
+
+\SYNOPSIS
+Discharges a called subroutine in an {eventually} goal by applying its proved
+specification, advancing the symbolic state to a fresh successor state at the
+return point.
+
+\DESCRIBE
+The single {int} argument is the index of the current symbolic state, i.e. the
+state variable that the goal's {eventually} conclusion is stated about; the
+state produced is the one at the next index.
+{
+   A ?- eventually x86 (\s'. P s' /\ C s0 s') s_n
+   ================================================  LOCAL_TOMONT_TAC n
+   A' ?- eventually x86 (\s'. P s' /\ C s0 s') s_m
+}
+\noindent The postcondition is unchanged and {s_m} is a new, later state
+variable. In the new assumption list {A'}, the persistent state-independent
+assumptions of {A} (bounds, nonoverlapping and arithmetic facts about the data)
+are kept unchanged. All assumptions mentioning the old state — register, flag
+and memory reads, the {bytes_loaded} fact, and the accumulated {MAYCHANGE}
+frame relating the initial state to the old state — are removed, and replaced
+by corresponding assumptions about the new state: the program-image fact; the
+reads preserved across the call, with the program counter and stack pointer set
+to the return site and restored frame; a new assumption describing the
+subroutine's result in the destination memory region; and an extended
+{MAYCHANGE} frame from the initial state to the new state, including the
+components the call may have clobbered. Flag reads and scratch-register reads
+of the old state are simply dropped.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour, on
+goals whose conclusion is an {eventually} statement with the full assumption
+context of a machine-code proof.
+
+\ENDDOC

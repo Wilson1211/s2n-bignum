@@ -1,0 +1,31 @@
+\DOC ADD_IBT_OPEN_EXISTS
+
+\TYPE {ADD_IBT_OPEN_EXISTS : thm -> (thm -> tactic) -> tactic}
+
+\SYNOPSIS
+Proves the current goal outright from a supplied theorem together with a
+user-supplied continuation tactic, leaving no subgoals.
+
+\DESCRIBE
+{th : thm} is the theorem from which the goal is to be derived — a correctness
+statement closely matching the goal; {k : thm -> tactic} is a continuation that
+is handed a theorem and produces the tactic doing the actual work (in the
+observed traces, continuations that specialise and {MP_TAC} the inner theorem,
+rewrite with calling-convention and {MAYCHANGE} definitions, and discharge side
+conditions). Applied to a goal, it closes it completely:
+{
+       A ?- t
+   ============ ADD_IBT_OPEN_EXISTS th k
+}
+{
+   
+}
+
+\COMMENTS
+In every observed trace the conclusion is a universally quantified correctness
+statement, sometimes wrapped in an outer existential, and none of the goals
+carry assumptions, so nothing can be said about assumption handling. The traces
+show only this single outcome — the goal being closed on goals of this one
+shape.
+
+\ENDDOC

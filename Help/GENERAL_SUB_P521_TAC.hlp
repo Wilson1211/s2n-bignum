@@ -1,0 +1,37 @@
+\DOC GENERAL_SUB_P521_TAC
+
+\TYPE {GENERAL_SUB_P521_TAC : (string * (term list)) list -> int -> string list -> tactic}
+
+\SYNOPSIS
+Symbolically executes the modular-subtraction subroutine call at the current
+program point, advancing the recorded machine state to the state after the call
+and adding an assumption characterising the result written to the destination
+local variable.
+
+\DESCRIBE
+Takes {localvars : (string * term list) list}, mapping local-variable names to
+their address/size data and used to resolve operand names; an {int} selecting
+which of the subroutine's entry variants/offset to step over; and a
+{string list} of three local-variable names giving the destination and the two
+source operands of the subtraction. The call transforms one goal into one goal:
+{
+   A ?- t
+   ========================================  GENERAL_SUB_P521_TAC localvars n [dest; src1; src2]
+   A' ?- t'
+}
+\noindent Here {t} keeps its shape — an {eventually} goal about the same
+postcondition — with its final state variable replaced by a later one, giving
+{t'}. In {A'}, the assumptions describing register and memory contents at the
+old state are all discarded and re-added at the new state, and the accumulated
+{MAYCHANGE} assumption is replaced by one at the new state, typically extended
+with the destination's memory component. A new assumption is introduced stating
+that, under the hypothesis that the two source values are below the modulus,
+the destination value equals their modular difference (phrased over the
+integers with {rem}). Existing arithmetic-characterisation assumptions are
+retained, though reordered.
+
+\COMMENTS
+The observed traces show only this single kind of outcome, all on goals of this
+one symbolic-execution form.
+
+\ENDDOC

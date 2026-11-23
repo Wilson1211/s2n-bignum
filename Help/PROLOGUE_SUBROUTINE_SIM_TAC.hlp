@@ -1,0 +1,42 @@
+\DOC PROLOGUE_SUBROUTINE_SIM_TAC
+
+\TYPE {PROLOGUE_SUBROUTINE_SIM_TAC : thm -> term list -> term -> int -> string list -> tactic}
+
+\SYNOPSIS
+Steps an {eventually}-form machine goal forward across a subroutine call,
+instantiating a correctness theorem for the callee and replacing the symbolic
+state in the assumptions with a later one carrying the callee's postcondition.
+
+\DESCRIBE
+The arguments are {corth : thm}, the subroutine correctness theorem used to
+discharge the call; {inargs : term list}, the terms (register and memory reads
+in the pre-state) supplying that theorem's input parameters; {outarg : term}, a
+memory read in the post-state naming the subroutine's result; {m : int}, a
+count of additional instructions to step (values from 0 upwards occur); and
+{inouts : string list}, the names used for the result and the input operands
+when the new assumptions are generated. Exactly one subgoal always results. In
+the conclusion, the state argument of {eventually} is advanced from the current
+state variable {sk} to a fresh later one {sk'}, the body of the {eventually}
+predicate being unchanged. In the assumptions, the block describing the old
+state — program-counter, stack-pointer, register and memory-read equations, the
+loaded-program assumption and the accumulated {MAYCHANGE} relation (or, at the
+start of a proof, a trivial reflexive {MAYCHANGE}) — is deleted and re-asserted
+for the new state, with the {MAYCHANGE} relation extended by the components the
+call may clobber, with new assumptions recording the callee's arguments and
+return address, and with an added implication expressing the subroutine's
+result value under its input bounds; previously derived result implications are
+retained, sometimes re-ordered, and non-state side conditions such as the
+nonoverlapping hypotheses are kept.
+{
+   A, state-facts(sk) ?- eventually ... sk
+   =================================================================  PROLOGUE_SUBROUTINE_SIM_TAC corth inargs outarg m inouts
+   A, result-facts, state-facts(sk') ?- eventually ... sk'
+}
+\noindent where {result-facts} comprises the retained result implications plus
+one new one.
+
+\COMMENTS
+The observed traces show only this single kind of forward step, all on goals of
+this {eventually} machine-correctness shape.
+
+\ENDDOC

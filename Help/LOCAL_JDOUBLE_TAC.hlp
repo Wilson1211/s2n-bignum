@@ -1,0 +1,37 @@
+\DOC LOCAL_JDOUBLE_TAC
+
+\TYPE {LOCAL_JDOUBLE_TAC : int -> tactic}
+
+\SYNOPSIS
+Discharges one inlined subroutine call inside an {eventually} goal, replacing
+the pre-call machine-state assumptions by post-call ones together with a
+summarising implication about the subroutine's result, and advancing the goal's
+state variable by one step.
+
+\DESCRIBE
+The single {int} argument {n} is the index of the state variable in the goal:
+the goal's final state term is advanced from that index to the next one, and
+the newly added assumptions are stated about the new state. Applied to a goal
+whose conclusion is an {eventually} predicate about a machine state and whose
+assumptions include a full symbolic state description, it yields one subgoal
+with the same {eventually} body:
+{
+   A ?- eventually ... s_n
+   ================================  LOCAL_JDOUBLE_TAC n
+   A' ?- eventually ... s_(n+1)
+}
+\noindent Here {A'} keeps the non-state assumptions of {A} unchanged (side
+conditions, non-overlapping facts, arithmetic and earlier result summaries),
+while the block of assumptions describing the state before the call — register
+and memory reads at {s_n}, flag values, the accumulated {MAYCHANGE} relation,
+and the program-counter/stack-pointer facts — is removed and replaced by
+corresponding reads at {s_(n+1)}, a {MAYCHANGE} relation extended with the
+frame clobbered by the call, program-counter and stack-pointer facts for the
+return site, and a new universally quantified assumption relating the
+subroutine's input to the memory contents it writes at {s_(n+1)}.
+
+\COMMENTS
+All observed traces show this single-subgoal transformation, on goals of the
+above form.
+
+\ENDDOC

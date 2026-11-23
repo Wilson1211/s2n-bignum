@@ -1,0 +1,30 @@
+\DOC X86_QUICKSIM_TAC
+
+\TYPE {X86_QUICKSIM_TAC : thm * (thm option array) -> term list -> int list -> tactic}
+
+\SYNOPSIS
+Discharges an {ensures}-style x86 machine-code correctness goal by symbolically
+simulating a specified range of instruction steps, closing the goal outright.
+
+\DESCRIBE
+{execth : thm * (thm option array)} pairs the code-length theorem with the
+precomputed per-instruction decoding table for the program under verification;
+{pats : term list} lists state-component read patterns (with the state variable
+left schematic) to be tracked during the simulation; {snums : int list} gives,
+as a numeric range, the step numbers over which the simulation runs. The goal's
+conclusion must be an {ensures x86} triple with a precondition, a postcondition
+and a {MAYCHANGE} frame, with the bounds and non-overlap side conditions among
+the assumptions {A}.
+{
+   A ?- t
+   =================  X86_QUICKSIM_TAC execth pats snums
+}
+\noindent In all observed traces the postcondition's main conjunction is
+guarded by a hypothesis contradicted by one of the assumptions in {A}, so the
+simulation only has to establish the final program-counter value.
+
+\COMMENTS
+The observed traces show only this one outcome, on goals of this single shape
+with the full assumption context present.
+
+\ENDDOC

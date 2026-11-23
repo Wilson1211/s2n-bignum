@@ -1,0 +1,31 @@
+\DOC ADD_IBT_TAC_PARAMETRIZED
+
+\TYPE {ADD_IBT_TAC_PARAMETRIZED : thm -> thm -> tactic}
+
+\SYNOPSIS
+Completely proves a machine-code correctness goal whose byte list is described
+by a bridging equation, deriving it from the corresponding theorem about the
+variant program.
+
+\DESCRIBE
+{bridge_th : thm} is an equation stating that the program's byte list equals a
+fixed prefix appended to the variant program's byte list at a shifted program
+counter; {th : thm} is the already-proved correctness theorem for that variant
+program, from which the goal is obtained. The goal's conclusion is a
+correctness statement: a universally quantified implication whose conclusion is
+an {ensures} triple, possibly itself under an existential quantifier binding a
+function variable. The tactic discharges such a goal outright.
+{
+         A ?- t
+     ==============  ADD_IBT_TAC_PARAMETRIZED bridge_th th
+}
+{
+   
+}
+
+\COMMENTS
+The observed traces show only this closing behaviour, on goals with no
+assumptions whose conclusions are machine-code correctness specifications
+matching the supplied bridging equation and source theorem.
+
+\ENDDOC

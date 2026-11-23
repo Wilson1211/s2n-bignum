@@ -1,0 +1,49 @@
+\DOC X86_MACRO_SIM_ABBREV_TAC
+
+\TYPE {X86_MACRO_SIM_ABBREV_TAC : thm -> int -> (string * (term list)) list -> term -> tactic -> int -> string list -> tactic}
+
+\SYNOPSIS
+Discharges one inlined macro call inside an {eventually}-style x86 simulation
+goal by proving the macro's local specification, advancing the symbolic state
+to a new state variable and introducing fresh abbreviation variables for the
+macro's results.
+
+\DESCRIBE
+The tactic is applied to an x86 simulation goal of the form
+{A ?- eventually ... s}. Its arguments are: {mc : thm}, the (execution-trimmed)
+machine-code theorem for the program being simulated; {codelen : int}, the
+number of instructions the macro occupies, used to step past it; {localvars :
+(string * term list) list}, the table mapping local-variable names to their
+base pointer and offset, used to instantiate the macro's address arguments;
+{template : term}, the parametrized specification (an {ensures} statement,
+usually under several {!}-quantified parameters and hypotheses) that the
+macro's code is shown to satisfy; {core_tac : tactic}, the tactic proving that
+specification; {prep : int}, a count of preparatory instructions executed
+before the macro body proper; and {ilist : string list}, the names of the local
+variables involved, the first naming the output, to be abbreviated by a fresh
+variable of that name, and the remainder naming the inputs.
+
+The conclusion keeps its {eventually} body unchanged, with only its final state
+argument replaced by a fresh later state variable. In the assumptions, every
+fact mentioning the old state (program-counter value, register and memory
+reads, flags, the accumulated {MAYCHANGE} relation from the initial state, and
+the {bytes_loaded} fact) is removed and re-asserted for the new state, with the
+program counter advanced past the macro, the {MAYCHANGE} relation extended by
+the locations the macro may write, and the memory read for the output location
+equated to a fresh variable {t} named by the first entry of {ilist}; an
+assumption stating the macro's postcondition for {t} (often as an implication
+guarded by the macro's input side conditions) is also added. All assumptions
+not mentioning the state are retained.
+{
+       A ?- eventually ... s
+     ========================================  X86_MACRO_SIM_ABBREV_TAC mc codelen localvars template core_tac prep ilist
+       A' ?- eventually ... s'
+}
+\noindent where {A'} is {A} with the state-dependent facts re-stated at {s'},
+plus the new abbreviation and postcondition assumptions.
+
+\COMMENTS
+The observed traces show only this single kind of outcome, always on x86
+simulation goals of this shape, and always leaving exactly one goal.
+
+\ENDDOC

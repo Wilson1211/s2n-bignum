@@ -1,0 +1,41 @@
+\DOC LOCAL_CMSUB38_P521_TAC
+
+\TYPE {LOCAL_CMSUB38_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Discharges one inlined subroutine block of a p521 point-doubling proof,
+advancing the symbolic-execution goal past the block's code and recording the
+block's arithmetic specification as a new assumption.
+
+\DESCRIBE
+The first argument, an {int}, selects which code/offset variant of the
+enclosing program is being verified: it determines the entry/exit
+program-counter offsets and the register/memory frame that is matched. The
+second, a {string list}, names the result variable followed by the input
+variables of the block; these fix the names used in the newly added arithmetic
+assumption and in the memory-read assumption for the output buffer. Applied to
+an {eventually} goal about state {s}, the tactic produces a single goal whose
+conclusion is unchanged except that the state variable becomes a fresh later
+state:
+{
+   A ?- eventually x86 (\s'. P s') s
+   ================================================  LOCAL_CMSUB38_P521_TAC n ["r"; "x1"; ...; "xn"]
+   A' ?- eventually x86 (\s'. P s') s'
+}
+\noindent In {A'}, every assumption of {A} mentioning the old state — the
+program counter value, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} frame — is removed and re-asserted for the new state,
+with the program-counter assumption now giving the block's exit address and the
+{MAYCHANGE} frame extended by the component written by the block. A new
+memory-read assumption equates that written component with the named result
+variable, and a further implication assumption is added stating, under range
+hypotheses on the named inputs, the modular-arithmetic value of the named
+result. Assumptions of {A} that do not mention the state are kept, possibly
+reordered.
+
+\COMMENTS
+The observed traces show only this single-goal, state-advancing behaviour, on
+goals of this one {eventually}-style shape with a large assumption list
+describing an x86 machine state.
+
+\ENDDOC

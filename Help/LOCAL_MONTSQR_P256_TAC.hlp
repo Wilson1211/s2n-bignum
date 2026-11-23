@@ -1,0 +1,32 @@
+\DOC LOCAL_MONTSQR_P256_TAC
+
+\TYPE {LOCAL_MONTSQR_P256_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances the symbolic execution of the goal's {eventually} statement across one
+inlined Montgomery-squaring subroutine call, replacing the current state
+variable by a fresh successor state and recording the squaring's specification
+as a new assumption.
+
+\DESCRIBE
+The first argument, an {int}, selects which occurrence/variant of the
+subroutine block to step over. The second, a {string list} of two names, gives
+first the variable naming the result value written by the block, and second the
+input value being squared. The conclusion's {eventually} body is unchanged but
+re-stated about a new, later state variable, and the program-counter assumption
+is updated to the address following the executed block. Every assumption
+mentioning the old state — register contents, {bytes_loaded}, memory-content
+equations, and the accumulated {MAYCHANGE} frame relating the initial state to
+the current one — is discharged and replaced by the corresponding assumption
+about the new state, with the {MAYCHANGE} frame extended by the memory
+component this block writes. Two assumptions are added: a memory-content
+equation for the destination buffer holding the freshly named result, and a
+conditional arithmetic assumption bounding the input and equating the result
+with the Montgomery square of the input modulo the prime. Exactly one subgoal
+results.
+
+\COMMENTS
+The observed traces show only this single kind of step, applied to goals in
+Montgomery point-arithmetic symbolic-execution states.
+
+\ENDDOC

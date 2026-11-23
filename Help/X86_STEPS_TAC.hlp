@@ -1,0 +1,38 @@
+\DOC X86_STEPS_TAC
+
+\TYPE {X86_STEPS_TAC : thm * (thm option array) -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a range of x86 machine instructions on a goal of the form
+{A ?- eventually x86 P s}, advancing the state variable and replacing the
+state-component assumptions with ones describing the new state.
+
+\DESCRIBE
+{th : thm * (thm option array)} is the pre-computed execution data for the
+program being verified: a theorem giving the length of the machine-code list,
+paired with a cache array of decoded instructions. {snums : int list} is the
+list of step numbers to execute, typically written as a range; each number
+names the intermediate state produced by the corresponding step.
+{
+      A ?- eventually x86 P s
+     ========================  X86_STEPS_TAC th snums
+      A' ?- eventually x86 P s'
+}
+\noindent Here {s'} is the state named by the last requested step number, and
+the conclusion is unchanged apart from the state argument of {eventually}. In
+the assumptions, those mentioning the old state (register and flag reads,
+memory reads, the {bytes_loaded} assumption, and the accumulated {MAYCHANGE}
+relation) are discharged and replaced by corresponding assumptions about the
+new state, with register/flag/memory values updated to the symbolic results of
+the executed instructions, plus a new {MAYCHANGE} assumption relating the
+original state to the new one; read assumptions for components written by the
+executed instructions are added. Assumptions not referring to the state are
+generally retained, though they may be removed and re-added and hence
+reordered. When the requested range is empty or no step applies, the goal is
+returned unchanged.
+
+\COMMENTS
+The observed traces show only this single-subgoal, state-advancing behaviour,
+always on goals whose conclusion is an {eventually x86} statement.
+
+\ENDDOC

@@ -1,0 +1,29 @@
+\DOC SUBSUMED_ASSIGNS_TAC
+
+\TYPE {SUBSUMED_ASSIGNS_TAC : tactic}
+
+\SYNOPSIS
+Proves goals of the form {ASSIGNS t subsumed ASSIGNS u} outright.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion is a subsumption between
+two {ASSIGNS} components, it closes the goal:
+{
+   ?- ASSIGNS t subsumed ASSIGNS u
+   ========================================  SUBSUMED_ASSIGNS_TAC
+}
+\noindent In the observed traces it succeeds when the two components are
+identical, or when the first denotes a part of the region denoted by the
+second.
+
+\FAILURE
+In the observed traces it fails, with a matching error raised by an internal
+rule application, when the two {ASSIGNS} components are unrelated — neither
+identical nor one a part of the other — so no applicable subsumption rule
+matches the conclusion.
+
+\COMMENTS
+All observed inputs are goals with no assumptions and of this subsumption
+shape, and the only successful outcome seen is the goal being closed.
+
+\ENDDOC

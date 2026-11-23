@@ -1,0 +1,43 @@
+\DOC BIGNUM_DIGITIZE_TAC
+
+\TYPE {BIGNUM_DIGITIZE_TAC : string -> term -> tactic}
+
+\SYNOPSIS
+Given a multi-word memory read term, splits that bignum into individual 64-bit
+digit variables, adding one assumption per digit and rewriting the bignum's
+value as a weighted sum of those digits.
+
+\DESCRIBE
+{s : string} is the prefix used to name the new digit variables, formed by
+appending an index ({0}, {1}, ...) to it; {tm : term} is the multi-word
+memory-read term to digitize, specifying both the base address and the number
+{n} of 64-bit digits. For a goal {A ?- t} where {tm} reads {n} words from some
+base address in some state, the tactic introduces fresh variables named from
+the prefix with indices {0 ... n-1} and adds one equation per digit, each
+stating that the corresponding single-word read at the base address offset by a
+multiple of 8 equals that variable. If an assumption of {A} (or a subterm of
+the conclusion) states that {tm} equals some term, that assumption is replaced
+by (or that occurrence rewritten to) the equation that the weighted sum of the
+digits' values with powers of two to the 64 equals that term; when {tm} is not
+mentioned in this way, only the digit assumptions appear and the rest of {A}
+and {t} are unchanged.
+{
+             A ?- t
+   ===========================================  BIGNUM_DIGITIZE_TAC s tm
+   A', x1 = d_0, ..., xn = d_n-1 ?- t'
+}
+\noindent Here {A'} and {t'} differ from {A} and {t} only by the above
+substitution, possibly nowhere.
+
+\FAILURE
+In the observed traces, failure occurs when the term argument is not a
+multi-word read of the expected shape: a bare state variable (not a combination
+at all), or a single-word read whose size cannot be read off as a numeral. In
+both cases the failure arises inside the tactic while decomposing the term
+argument.
+
+\COMMENTS
+The observed traces only ever show this one kind of transformation, always on
+goals about machine-state reads.
+
+\ENDDOC

@@ -1,0 +1,49 @@
+\DOC X86_PROMOTE_RETURN_STACK_TAC
+
+\TYPE {X86_PROMOTE_RETURN_STACK_TAC : thm -> thm -> term -> int -> tactic}
+
+\SYNOPSIS
+Derives a full ABI-level {ensures x86} specification for a subroutine (with
+prologue/epilogue, stack frame and return) from a correctness or safety theorem
+about its core body, either closing the goal outright or reducing it to a
+residual goal about the event trace.
+
+\DESCRIBE
+{X86_PROMOTE_RETURN_STACK_TAC mc core regs off} takes: {mc}, the theorem
+naming/defining the machine-code byte list of the whole subroutine, used to
+relate the goal's {LENGTH}-based code region to a concrete code length; {core},
+the specification of the core body (stated with {BUTLAST} of the code and
+offset entry/exit program points), which is lifted to the goal's statement;
+{regs}, a term holding the list of callee-saved registers that the prologue
+saves and the epilogue restores (possibly the empty list); and {off}, an
+integer giving the size in bytes of the stack frame allocated below the
+incoming stack pointer. It applies to a goal {A ?- t} where {t} is a
+universally quantified (possibly under an outer existential over an event-trace
+function) implication from nonoverlapping/ALL side conditions to an
+{ensures x86} triple whose precondition reads the stack pointer and return
+address and whose {MAYCHANGE} frame includes the stack slot. Either the goal is
+closed, or exactly one subgoal remains; in the latter case the tactic strips
+the quantifiers and the implication, specialises everything to concrete code
+lengths and a shifted stack pointer, and leaves as conclusion just the
+remaining event-trace obligation {u} — an existentially quantified equation
+about the accumulated event list together with a {memaccess_inbounds} claim.
+The assumption list is replaced by a large new hypothesis set {A'}: the
+instantiated nonoverlapping side conditions and any arithmetic preconditions,
+the facts obtained from {core} about the inner trace, the {bytes_loaded} fact,
+the values of the saved registers and of the stack slots holding them and the
+return address, the argument registers, flag values set by the prologue, the
+final {RIP}/{RSP} and {events} reads, and a {MAYCHANGE ... s0 s_n} relation
+between the initial and final states.
+{
+          A ?- t
+     ======================  X86_PROMOTE_RETURN_STACK_TAC mc core regs off
+           (no goals)
+}
+\noindent        A ?- t   ======================  X86_PROMOTE_RETURN_STACK_TAC
+mc core regs off        A' ?- u ```
+
+\COMMENTS
+The observed traces show only these two outcomes, always on goals of this
+specific x86 subroutine-specification shape.
+
+\ENDDOC

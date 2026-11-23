@@ -1,0 +1,38 @@
+\DOC LOCAL_SQR_4_TAC
+
+\TYPE {LOCAL_SQR_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal across an inlined 4-word modular squaring
+subroutine, swapping the current machine-state assumptions for those of the
+successor state and adding the bound and congruence facts that characterise the
+squared result.
+
+\DESCRIBE
+The tactic takes two arguments: an {int} and a {string list}. The integer is a
+fixed numeric parameter (the same value throughout the observed traces). The
+string list names the output and input quantities of the squaring step —
+destination variable first, then source variable — and these determine the new
+result variable and the term it is equated to in the added facts. The
+conclusion retains its {eventually} postcondition but is restated about a fresh
+later state variable. The assumptions describing the old state (program
+counter, loaded bytes, register and memory reads, and the accumulated
+{MAYCHANGE} relation) are discharged and replaced by the corresponding
+assumptions about the new state; the {MAYCHANGE} frame may be extended by the
+newly written memory component, and the memory assumption for the destination
+location now reads a fresh variable. Two new arithmetic assumptions about that
+fresh variable are added: a bound of the form {t < u} and a modular congruence
+relating it to the square of the source quantity. Purely arithmetic assumptions
+that do not mention the state are kept unchanged.
+{
+   A_arith, A_state(x1 ... xn) ?- eventually ... (old state)
+   =============================================================  LOCAL_SQR_4_TAC n ["dest"; "src"]
+   A_arith, A_state'(z1 ... zp), t < u, (congruence: fresh var vs. square of src)
+     ?- eventually ... (new state)
+}
+
+\COMMENTS
+In all observed traces only this single kind of step occurs, always on goals of
+this symbolic-execution shape and always with the same integer argument.
+
+\ENDDOC

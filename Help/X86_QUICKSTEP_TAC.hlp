@@ -1,0 +1,37 @@
+\DOC X86_QUICKSTEP_TAC
+
+\TYPE {X86_QUICKSTEP_TAC : thm * (thm option array) -> term list -> string -> tactic}
+
+\SYNOPSIS
+Symbolically executes a single x86 instruction in an {eventually}-style goal,
+advancing the current state variable to a freshly named successor state.
+
+\DESCRIBE
+The argument {th : thm * (thm option array)} pairs the code-length theorem for
+the loaded byte list with a cached array of per-instruction decoding theorems,
+used to step the machine; {pats : term list} is a list of state-component
+patterns controlling which reads are selected/retained for the new state;
+{s : string} is the name to give the new state variable produced by the step.
+The goal's assumptions {A} describe the current state {t}: code loaded, stack
+pointer, the accumulated {MAYCHANGE} relation from the initial state, and the
+current instruction pointer. Each assumption mentioning {t} is dropped and
+replaced by the corresponding assumption about the new state {u} named by {s},
+the instruction-pointer assumption being updated to the next instruction
+address and the {MAYCHANGE} assumption re-expressed between the initial state
+and {u} (its component list may grow where the stepped instruction writes
+further components); assumptions not mentioning the state, such as
+nonoverlapping side conditions, are left untouched.
+{
+   A ?- eventually x86 P t
+   ======================================  X86_QUICKSTEP_TAC th pats s
+   A' ?- eventually x86 P u
+}
+\noindent where {u} is the state named by {s} and {A'} consists of the
+untouched assumptions together with the state-dependent assumptions transferred
+to {u}.
+
+\COMMENTS
+The observed traces show only this single-step, one-subgoal behaviour, always
+on goals of this shape with a state-describing assumption set.
+
+\ENDDOC

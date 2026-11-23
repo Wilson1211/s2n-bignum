@@ -1,0 +1,48 @@
+\DOC X86_BIGSTEP_TAC
+
+\TYPE {X86_BIGSTEP_TAC : thm * (thm option array) -> string -> tactic}
+
+\SYNOPSIS
+On a goal whose conclusion is {(p ==> ensures x86 P Q C) ==> eventually x86 R
+s}, this tactic discharges the {ensures} antecedent by instantiating it at the
+current state, re-describing the state assumptions in terms of a fresh
+successor state named by the string argument, and leaving the remaining
+{eventually} obligation.
+
+\DESCRIBE
+The first argument is a pair {(execth1,(unknown)) : thm * (thm option array)},
+an execution record for the program; its theorem component is a
+{LENGTH}-of-code-list equation, used to relate the goal's code and offsets. The
+second argument {sname : string} names the new state variable introduced for
+the post-state of the embedded {ensures}. The tactic discharges the
+implication's antecedent {ensures ...} against the goal: the assumptions
+describing the current state (program loaded, register and memory reads, the
+accumulated {MAYCHANGE ... s0 s} relation, flag conditions) are deleted and
+replaced by assumptions about the new state {s'} named by {sname}, namely the
+post-condition conjuncts of the {ensures} (with existentially quantified
+components stripped and their witnesses added as assumptions, say {z1 ... zp}),
+the frame-preserved reads carried over, and an enlarged {MAYCHANGE ... s0 s'}
+assumption; the conclusion becomes the {eventually} statement at {s'}.
+{
+   A ?- (t ==> ensures x86 P Q C) ==> eventually x86 R s
+   ================================================  X86_BIGSTEP_TAC (execth1,(unknown)) sname
+   A' ?- eventually x86 R s'
+}
+\noindent Sometimes it additionally emits, as the *first* of two subgoals, a
+side condition arising from matching the {ensures} precondition against the
+current state — typically a {bytes_loaded} claim at a shifted code address
+and/or an event-list equation — stated under the original unchanged
+assumptions, with the transformed goal above as the second subgoal.
+
+\FAILURE
+Fails when the {ensures} antecedent of the goal cannot be matched against the
+goal's {eventually} conclusion: in the observed cases the antecedent's own
+hypothesis list (the conjunction guarding the {ensures}) does not line up with
+what the tactic expects, so the internal modus-ponens step finds no match and
+raises a matching failure.
+
+\COMMENTS
+In all observed traces the tactic yields one or two subgoals and never closes
+the goal.
+
+\ENDDOC

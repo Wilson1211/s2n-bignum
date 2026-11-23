@@ -1,0 +1,38 @@
+\DOC LOCAL_CMSUBC9_P521_TAC
+
+\TYPE {LOCAL_CMSUBC9_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+LOCAL_CMSUBC9_P521_TAC advances an {eventually}-style machine-execution goal
+past one inlined subroutine block, replacing the current state variable by a
+fresh successor state and recording the block's arithmetic postcondition as a
+new assumption.
+
+\DESCRIBE
+The first argument is an {int} offset/index used to locate the code block to be
+executed; the second is a {string list} naming the variables of the block's
+specification — the first names the result value written by the block, and the
+remaining ones name its input values, which appear in the newly added
+arithmetic assumption.
+{
+   A ?- eventually ... s
+   ======================================  LOCAL_CMSUBC9_P521_TAC n ["t"; "x1"; ...; "xn"]
+   A' ?- eventually ... s'
+}
+\noindent Here {s'} is a new state variable. Every assumption of {A} mentioning
+the old state — program counter, loaded-bytes, register and memory-contents
+readings, and the accumulated {MAYCHANGE} relation from the initial state — is
+removed and re-asserted about {s'}, with the program counter advanced and the
+memory assumption for the result location now equating it to the result
+variable {t} rather than its previous contents. {A'} also contains one new
+assumption: an implication whose hypotheses bound the input values {x1 ... xn}
+and whose conclusion gives the modular-arithmetic value of {t} in terms of
+them. Assumptions that do not refer to the machine state (nonoverlapping facts
+and earlier arithmetic implications) are carried through unchanged, and the
+conclusion is unchanged apart from the new state variable.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, on goals of
+this one shape, always with the same argument values.
+
+\ENDDOC

@@ -1,0 +1,30 @@
+\DOC LOCAL_NSQR_TAC
+
+\TYPE {LOCAL_NSQR_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-execution goal across one inlined
+repeated-squaring subroutine call, replacing the current state variable by its
+successor and rewriting the state assumptions accordingly.
+
+\DESCRIBE
+The single argument is an {int}, the index of the new state: the state variable
+in the resulting goal and assumptions carries this index, which is one more
+than the index in the incoming goal. The conclusion retains its shape — an
+{eventually} assertion about a postcondition and a frame — with the final state
+argument replaced by the new numbered state. Every assumption mentioning the
+old state is discharged and replaced by a corresponding assumption about the
+new state: the program-code assumption, the register and memory-content
+assumptions carried through the call, a new assumption giving the result
+written at the output buffer as a modular repeated-squaring expression in the
+input value, an updated instruction-pointer assumption, and an updated
+accumulated frame ({MAYCHANGE ... s0 sNew}), which may gain extra components
+for the registers, flags and memory ranges clobbered by the call. Assumptions
+that do not refer to the state (side conditions such as non-overlapping and
+arithmetic facts) are left untouched, and exactly one subgoal results.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of this {eventually} form with a full set of machine-state assumptions.
+
+\ENDDOC

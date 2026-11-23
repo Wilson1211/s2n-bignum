@@ -1,0 +1,31 @@
+\DOC ASSUME_CALLEE_SAFETY_TAC
+
+\TYPE {ASSUME_CALLEE_SAFETY_TAC : thm -> string -> tactic}
+
+\SYNOPSIS
+Adds the body of an existentially quantified safety theorem to the goal's
+assumptions, with the existential witness replaced by a freshly named constant,
+leaving the conclusion untouched.
+
+\DESCRIBE
+The tactic takes {callee_safety_proof : thm}, a theorem of the form
+{|- ?f_events. t}, and {asmname : string}, the label to attach to the new
+assumption (if the string is empty, the assumption is added unlabelled). It
+strips the leading existential quantifier of the theorem and substitutes a
+fresh distinct name for the quantified variable, yielding {u}, the instantiated
+body of {th}; {u} is a universally quantified implication over the remaining
+bound variables {x1 ... xn}. The conclusion is left exactly as it was, and
+existing assumptions are kept, so repeated applications accumulate several such
+assumptions.
+{
+           A ?- t
+   ======================================  ASSUME_CALLEE_SAFETY_TAC (|- ?f_events. t') asmname
+         A, u ?- t
+}
+
+\COMMENTS
+In all observed traces only this single kind of outcome occurs, with goals
+whose conclusion is an existentially quantified statement of the same shape as
+the theorem argument.
+
+\ENDDOC

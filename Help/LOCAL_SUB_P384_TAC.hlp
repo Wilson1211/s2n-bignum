@@ -1,0 +1,39 @@
+\DOC LOCAL_SUB_P384_TAC
+
+\TYPE {LOCAL_SUB_P384_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal through an inlined modular-subtraction
+subroutine, replacing the current machine-state assumptions with those for a
+later state and adding a conditional assumption characterising the computed
+difference modulo the field prime.
+
+\DESCRIBE
+The first argument, an {int}, selects which code variant/offset of the
+subtraction block to step over. The second, a {string list}, names the result
+and the two operand values; these names fix which variables occur in the added
+assumption {u1 < p /\ u2 < p ==> &t = (&u1 - &u2) rem &p} and in the
+memory-content assumption recording where the result is stored. The conclusion,
+an {eventually} statement about a machine state {s}, is rewritten to the same
+statement about a fresh successor state {s'}. All assumptions describing the
+old state — program-counter value, {bytes_loaded}, register and memory-content
+reads, and the accumulated {MAYCHANGE} relation — are discharged and replaced
+by the corresponding assumptions for the new state; the {MAYCHANGE} component
+may gain extra written locations, and a new memory-content assumption binds the
+named result value at its storage location. The new conditional arithmetic fact
+about the named result and operands is added, while previously added facts of
+the same kind and the other purely arithmetic side conditions are retained,
+sometimes re-asserted in a reordered form.
+{
+   A ?- eventually ... s
+   ================================================  LOCAL_SUB_P384_TAC n ["t"; "u1"; "u2"]
+   A' ?- eventually ... s'
+}
+\noindent where {A'} is the rewritten assumption set described above, including
+{u1 < p /\ u2 < p ==> &t = (&u1 - &u2) rem &p}.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of this symbolic-execution shape.
+
+\ENDDOC

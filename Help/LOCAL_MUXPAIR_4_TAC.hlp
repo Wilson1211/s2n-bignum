@@ -1,0 +1,37 @@
+\DOC LOCAL_MUXPAIR_4_TAC
+
+\TYPE {LOCAL_MUXPAIR_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a block of machine code that conditionally swaps two
+4-word field elements, advancing an {eventually} goal to a later machine state
+and recording the two conditionally-selected results as new assumptions.
+
+\DESCRIBE
+{LOCAL_MUXPAIR_4_TAC n [s1;s2;s3;s4]} takes an {int} offset/index {n} selecting
+which pair of destination slots the block writes (and correspondingly which
+program point execution ends at), and a {string list} of four names used for
+the newly introduced result variables and the source values they are defined
+from. The goal has the form {A ?- eventually x86 (\s. ...) s_i}, where {A}
+holds state-component assumptions about the current state variable {s_i}
+together with pure arithmetic side conditions. The conclusion's state variable
+is replaced by a later one, and the assumptions are rewritten: every assumption
+mentioning the old state is discharged and re-added in the same form about the
+new state, the pure arithmetic assumptions are retained (sometimes in a
+different order), and further assumptions {z1 ... zp} are added giving the
+updated program counter, the contents of the newly written destination blocks
+as conditional expressions on the selector, defining equations for the freshly
+named result variables, and an extended {MAYCHANGE} frame relating the initial
+state to the new state; flag-read assumptions may also be introduced or carried
+over.
+{
+   A ?- eventually x86 (\s. ...) s_i
+   =================================================  LOCAL_MUXPAIR_4_TAC n [s1;s2;s3;s4]
+   A[s_j/s_i], z1, ..., zp ?- eventually x86 (\s. ...) s_j
+}
+
+\COMMENTS
+The observed traces show only this single kind of forward-stepping
+transformation, on goals of this {eventually} form.
+
+\ENDDOC

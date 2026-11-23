@@ -1,0 +1,33 @@
+\DOC SAFE_UNIFY_REFL_TAC
+
+\TYPE {SAFE_UNIFY_REFL_TAC : term list ref -> string list ref -> tactic}
+
+\SYNOPSIS
+Closes an equational goal {A ?- t = u} whose right-hand side is a variable (or
+a term headed by a permitted symbol) by instantiating it against the left-hand
+side, leaving no subgoals.
+
+\DESCRIBE
+The first argument, {allowed_vars_ref : term list ref}, is a reference to the
+list of variables that may be instantiated; in the observed traces it holds
+either a designated variable list or an empty one. The second,
+{allowed_var_prefixes_ref : string list ref}, is a reference to a list of name
+prefixes whose matching symbols are additionally permitted during the
+unification. Applied to a goal whose conclusion is a single equation between
+two terms of the same type, the tactic discharges it completely:
+{
+       A ?- t = u
+       ==========  SAFE_UNIFY_REFL_TAC allowed_vars_ref allowed_var_prefixes_ref
+}
+{
+   
+}
+\noindent In the observed traces the right-hand side {u} is either a plain
+variable or an application of a symbol whose name matches the allowed-prefix
+list, and the left-hand side {t} is a concrete term built from the state
+recorded in the assumptions {A}, which are left untouched.
+
+\COMMENTS
+All observed applications close the goal, so no other outcome is demonstrated.
+
+\ENDDOC

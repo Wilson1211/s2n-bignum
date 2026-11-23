@@ -1,0 +1,31 @@
+\DOC ORTHOGONAL_COMPONENTS_BYTES64_TAC
+
+\TYPE {ORTHOGONAL_COMPONENTS_BYTES64_TAC : tactic}
+
+\SYNOPSIS
+Proves that two 64-bit memory components at offsets from a common base pointer
+are orthogonal, closing the goal.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion is
+{orthogonal_components t u}, where {t} and {u} are both 64-byte-word components
+addressed from the same base pointer (with or without an added constant
+offset), it solves the goal:
+{
+   A ?- orthogonal_components t u
+   ========================================  ORTHOGONAL_COMPONENTS_BYTES64_TAC
+}
+\noindent The assumptions are left untouched.
+
+\FAILURE
+Fails with a no-match error from an internal matching step when the two
+components of the {orthogonal_components} conclusion are not 64-bit memory
+components addressed from a base pointer — for instance other kinds of
+component formers — and also when they are such memory components but based on
+two different, unrelated base pointers.
+
+\COMMENTS
+All observed successful traces show only this goal-closing behaviour, on
+conclusions of this single shape with no assumptions present.
+
+\ENDDOC

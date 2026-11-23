@@ -1,0 +1,26 @@
+\DOC FULL_UNIFY_F_EVENTS_TAC
+
+\TYPE {FULL_UNIFY_F_EVENTS_TAC : tactic}
+
+\SYNOPSIS
+Closes a goal whose conclusion equates a concrete event-trace expression with
+an application of a trace-defining function.
+
+\DESCRIBE
+The tactic takes no arguments. Applied to a goal {A ?- t = u} where {t} is a
+built-up event list (lists, {CONS}/{APPEND} combinations, possibly containing
+embedded applications of other trace functions) and {u} is an application of a
+trace function to arguments, it discharges the goal entirely; the assumptions
+{A} are neither extended nor reduced.
+{
+   A ?- t = u
+   ==========  FULL_UNIFY_F_EVENTS_TAC
+               (no subgoals)
+}
+
+\COMMENTS
+In all observed traces the outcome is this complete discharge of the goal, and
+every input is an equation of this event-list form appearing among large
+symbolic-execution assumption lists.
+
+\ENDDOC

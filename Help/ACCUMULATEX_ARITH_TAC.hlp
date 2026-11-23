@@ -1,0 +1,37 @@
+\DOC ACCUMULATEX_ARITH_TAC
+
+\TYPE {ACCUMULATEX_ARITH_TAC : term list -> string -> tactic}
+
+\SYNOPSIS
+Rewrites the assumptions about a named machine state so that a raw
+word-arithmetic expression for a just-computed register/flag value is replaced
+by a fresh abbreviated result variable together with an arithmetic equation
+characterising it.
+
+\DESCRIBE
+{ACCUMULATEX_ARITH_TAC excls s} takes {excls : term list}, a list of terms
+excluded from the rewriting/abbreviation (in the observed traces either empty
+or a supplied list), and {s : string}, the name of the state whose assumptions
+are processed; {s} also fixes the suffix of the newly introduced variables. On
+success it leaves exactly one goal with the same conclusion. It deletes one or
+two assumptions of the form {read ... s = t} (and/or a flag assumption
+expressed as a comparison on {val}-terms), where {t} is a composite
+word/arithmetic expression, and puts in their place assumptions equating the
+same locations to fresh variables named after {s}, together with a new
+assumption giving the exact arithmetic identity defining those variables (an
+equation over the reals of the {2 pow 64 * bitval ... + val ... = ...} style).
+All other assumptions are left untouched.
+
+\FAILURE
+In the observed traces it fails with a {tryfind} error when no assumption about
+the named state matches the pattern the tactic looks for, i.e. the state's
+assumptions contain no composite word-arithmetic result expression that it can
+abbreviate; this happens both with an empty and with a non-empty exclusion
+list.
+
+\COMMENTS
+The observed traces show only this single kind of rewriting, on goals whose
+conclusion is an {eventually}-style machine-semantics statement and whose
+assumption list contains an assumption naming the state {s}.
+
+\ENDDOC

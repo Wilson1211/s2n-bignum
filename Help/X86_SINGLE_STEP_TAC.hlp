@@ -1,0 +1,40 @@
+\DOC X86_SINGLE_STEP_TAC
+
+\TYPE {X86_SINGLE_STEP_TAC : thm * (thm option array) -> string -> tactic}
+
+\SYNOPSIS
+Symbolically executes one x86 instruction of the program described by the
+supplied execution theorem, advancing the goal's {eventually} state from the
+current state variable to a new one named by the string argument.
+
+\DESCRIBE
+The first argument {th : thm * (thm option array)} is an execution record
+pairing a theorem giving the length of the code list with a decoding cache; the
+instructions stepped are those of that theorem's code list. The second argument
+{s : string} names the state variable to introduce for the post-instruction
+state. Applied to a goal whose conclusion is {eventually x86 (\s'. ...) t},
+with {t} the current state variable, the tactic leaves one subgoal with the
+same conclusion except that {t} is replaced by a fresh state variable {u} named
+by {s}; the body {P} of the {eventually} predicate is untouched. Every
+assumption mentioning the old state ({bytes_loaded}, component reads, and the
+{MAYCHANGE} frame relating the initial state to the current one) is discharged
+and replaced by the corresponding assumption about the new state: components
+the instruction does not affect keep their values, components it writes get new
+reads (program counter advanced, destination registers, memory cells, flags,
+event traces), and the {MAYCHANGE} term grows by the components touched.
+Assumptions that are pure arithmetic or side conditions not mentioning a state
+are generally carried over unchanged, though their order may change; new
+arithmetic assumptions describing the instruction's result may be added, for
+example carry/sum relations, or {x1 ... xn} with n possibly zero.
+{
+      A ?- eventually x86 P t
+   ========================== X86_SINGLE_STEP_TAC th s
+      A' ?- eventually x86 P u
+}
+\noindent where {A'} is the restated assumption list, about {u}.
+
+\COMMENTS
+The observed traces show only this single-goal, single-step behaviour, always
+on goals of this {eventually} shape.
+
+\ENDDOC

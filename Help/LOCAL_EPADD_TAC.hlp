@@ -1,0 +1,36 @@
+\DOC LOCAL_EPADD_TAC
+
+\TYPE {LOCAL_EPADD_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually} machine-state goal across a called subroutine block,
+replacing the current state variable by its successor and adding an assumption
+specifying the subroutine's effect.
+
+\DESCRIBE
+The single argument is an {int} giving the index {n} of the current state, i.e.
+the numeric suffix of the state variable {sn} occurring in the goal's
+assumptions and conclusion; the tactic forms the next state by incrementing
+that index to {n+1}. The conclusion retains the same {eventually} postcondition
+but is asserted of {s(n+1)} rather than {sn}. Assumptions mentioning the old
+state are discarded and re-asserted about the new state, with these exceptions:
+the flag-reading assumptions are dropped; the program-counter assumption is
+replaced by one giving a new code address; and the accumulated "may change"
+frame assumption is re-stated for the new state with extra components appended.
+One further assumption is introduced, universally quantified, relating the
+inputs of the called block to the memory contents it writes in the new state.
+Assumptions not mentioning the state variable are left in place.
+{
+   A ?- t
+   =============================  LOCAL_EPADD_TAC n
+   A' ?- t'
+}
+\noindent where {A'} and {t'} are {A} and {t} with the state variable advanced
+as described, and {A'} additionally contains the new universally quantified
+subroutine-effect assumption {!z1 ... zp. ...}.
+
+\COMMENTS
+All observed traces show this same single-subgoal transformation on goals of
+this {eventually} shape.
+
+\ENDDOC

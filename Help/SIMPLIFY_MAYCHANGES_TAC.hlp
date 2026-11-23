@@ -1,0 +1,29 @@
+\DOC SIMPLIFY_MAYCHANGES_TAC
+
+\TYPE {SIMPLIFY_MAYCHANGES_TAC : tactic}
+
+\SYNOPSIS
+Rewrites a {MAYCHANGE ... s0 sN} assumption into a compacted, normalised form,
+leaving the conclusion untouched.
+
+\DESCRIBE
+Takes no arguments. The tactic finds the assumption stating a {,,}-composition
+of many singleton {MAYCHANGE} components relating an initial and a current
+state, and replaces it by a single equivalent assumption in which components of
+the same kind are merged: separate register/flag components become one
+{MAYCHANGE} over a list of components, and adjacent small memory components are
+coalesced into larger contiguous byte-range components (absorbing an
+already-coalesced range if one is present).
+{
+   A, (MAYCHANGE c1 ,, ... ,, MAYCHANGE cn) s t ?- u
+   ================================================== SIMPLIFY_MAYCHANGES_TAC
+   A, (MAYCHANGE d1 ,, ... ,, MAYCHANGE dm) s t ?- u
+}
+\noindent Here the {d} components are the merged groups; the memory ones may be
+absent when the original has no memory components.
+
+\COMMENTS
+The observed traces show only this single kind of assumption rewriting, always
+on goals whose conclusion is an {eventually} statement about machine execution.
+
+\ENDDOC

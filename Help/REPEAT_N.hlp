@@ -1,0 +1,32 @@
+\DOC REPEAT_N
+
+\TYPE {REPEAT_N : int -> tactic -> tactic}
+
+\SYNOPSIS
+{REPEAT_N n t} applies the tactic {t} exactly {n} times in sequence to the
+goal.
+
+\DESCRIBE
+{n : int} is the number of applications and {t : tactic} is the tactic to be
+iterated; the result is the goal obtained by running {t} on the goal {n} times
+in succession, and in all observed traces a single subgoal comes out,
+equivalent to {t THEN t THEN ... THEN t} with {n} copies. The cumulative effect
+on conclusion and assumptions is just that of the {n} successive applications:
+{
+         A ?- t
+   =============== REPEAT_N n t
+         A' ?- t'
+}
+\noindent Here the conclusion may have {n} leading universal quantifiers
+stripped, {n} disjuncts or antecedent layers removed, or be left unchanged
+while the assumption list is rewritten; and the assumption list may gain
+assumptions (for example implication antecedents moved in, or conjunctions
+replaced by their components), lose assumptions ({n} of them discarded), or be
+wholly replaced by an updated set. The iteration count appears both as a
+literal integer and as a variable.
+
+\COMMENTS
+Since {t} is an arbitrary tactic, the observed traces show only that {t}'s
+effect is iterated {n} times with one resulting goal each time.
+
+\ENDDOC

@@ -1,0 +1,35 @@
+\DOC LOCAL_JADD_SAFETY_TAC
+
+\TYPE {LOCAL_JADD_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal across a subroutine call by applying a named
+assumption that is a universally quantified {ensures} specification, replacing
+the current state's facts with those of the post-call state.
+
+\DESCRIBE
+{LOCAL_JADD_SAFETY_TAC assump_name n} takes a string {assump_name}, naming the
+labelled assumption of the goal that holds the callee's {ensures} specification
+to be applied, and an integer {n}, the index of the state produced by the step,
+which is used to form the new state variable of the resulting goal. It applies
+to a goal whose conclusion is an {eventually} claim about a state {xk} and
+whose assumptions describe the registers, loaded program, memory footprint and
+event trace of {xk}, along with labelled callee specifications. It yields
+exactly one subgoal, whose conclusion is the same {eventually} claim about a
+fresh state {x(n)}. The register-value, {bytes_loaded}, {read events},
+stack-pointer and {MAYCHANGE} assumptions about the old state are dropped and
+replaced by corresponding assumptions about the new state: an updated program
+counter and stack pointer, a {read events} equation whose trace is extended by
+a fresh trace variable {e1 ... en} for the call, two further assumptions
+characterising that trace variable (its value in terms of the callee's event
+function, and a memory-access-in-bounds fact about it), a widened {MAYCHANGE}
+relation covering the callee's writes, and the surviving facts about the loaded
+program and the unchanged memory cells. Pre-existing side conditions
+(non-overlapping facts, earlier trace equations) and both labelled callee
+specifications are kept, although their order in the assumption list changes.
+
+\COMMENTS
+In all observed traces this is the only outcome shown, and it always occurs on
+goals of this {eventually} form carrying a named callee {ensures} assumption.
+
+\ENDDOC

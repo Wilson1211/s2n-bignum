@@ -1,0 +1,26 @@
+\DOC MEMSAFE_BITVAL_TAC
+
+\TYPE {MEMSAFE_BITVAL_TAC : tactic}
+
+\SYNOPSIS
+Prefixes the goal's conclusion with implication antecedents bounding by 1 each
+distinct {bitval}-headed subterm of the conclusion, leaving the conclusion
+unchanged when there are none.
+
+\DESCRIBE
+Takes no arguments. The conclusion is scanned for subterms of the form
+{bitval u}, and one antecedent is added per distinct such subterm, in an
+unspecified order (not the order of occurrence); when n is zero the goal is
+returned unchanged.
+{
+          A ?- t
+   ================================  MEMSAFE_BITVAL_TAC
+     A ?- bitval u1 <= 1 ==> ... ==> bitval un <= 1 ==> t
+}
+
+\COMMENTS
+The observed traces show only this single kind of transformation, on goals
+whose conclusions are arithmetic inequalities over natural numbers, either
+containing several {bitval} applications or none at all.
+
+\ENDDOC

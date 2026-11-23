@@ -1,0 +1,26 @@
+\DOC SUBSUMED_MAYCHANGE_TAC
+
+\TYPE {SUBSUMED_MAYCHANGE_TAC : tactic}
+
+\SYNOPSIS
+Proves a goal of the form {t subsumed u}, where both sides are {MAYCHANGE}
+state-relation expressions, closing it outright.
+
+\DESCRIBE
+The tactic takes no arguments. Applied to a goal whose conclusion is a
+{subsumed} statement between two {MAYCHANGE} components (possibly {,,}-composed
+and nested), it discharges the goal completely; the assumptions {A} are left
+untouched and play no role in the outcome.
+{
+   A ?- t subsumed u
+   ==================  SUBSUMED_MAYCHANGE_TAC
+   (no goals)
+}
+
+\COMMENTS
+The observed traces show only this single behaviour — always a {subsumed}
+conclusion between {MAYCHANGE} terms, with assumption lists ranging from a few
+side conditions to large symbolic-execution states — and never any surviving
+subgoal.
+
+\ENDDOC

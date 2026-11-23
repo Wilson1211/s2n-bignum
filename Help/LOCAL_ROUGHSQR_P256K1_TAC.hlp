@@ -1,0 +1,37 @@
+\DOC LOCAL_ROUGHSQR_P256K1_TAC
+
+\TYPE {LOCAL_ROUGHSQR_P256K1_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Discharges one inlined "rough squaring" subroutine block in an x86 {eventually}
+symbolic-execution goal, advancing the state variable past the block and
+recording the mathematical specification of its result.
+
+\DESCRIBE
+The first argument is an {int} ({0} in every observed trace) selecting an
+offset/instance of the block being handled; the second is a {string list}
+naming the block's output and input variables — the first name becomes the
+newly introduced result variable, the second is the operand already present in
+the assumptions. Applied to a goal whose conclusion is
+{eventually x86 (\s'. ...) s_n}, the tactic yields a single subgoal with the
+same postcondition {P} applied to a fresh successor state variable {s_{n+1}}:
+{
+   A ?- eventually x86 P s_n
+   =============================================  LOCAL_ROUGHSQR_P256K1_TAC 0 [out; in]
+   A' ?- eventually x86 P s_{n+1}
+}
+\noindent Here {A'} is {A} with all assumptions about the old state —
+program-counter value, {bytes_loaded}, register and memory contents, and the
+accumulated {MAYCHANGE} relation — removed and re-added rephrased for the new
+state, the program counter advanced past the block and the {MAYCHANGE} relation
+extended by the destination memory region; purely arithmetic side conditions on
+the old variables are kept unchanged. Appended to {A'} are new assumptions
+giving the value stored in the destination region and the specification of the
+named result variable: a bound on its size and a modular congruence relating it
+to the square of the named input.
+
+\COMMENTS
+All observed traces show this single-subgoal, state-advancing behaviour on
+goals of this one form.
+
+\ENDDOC

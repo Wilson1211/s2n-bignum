@@ -1,0 +1,40 @@
+\DOC LOCAL_MUL_SAFETY_TAC
+
+\TYPE {LOCAL_MUL_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Discharges a subroutine call in an {eventually} symbolic-execution goal by
+applying a named assumed specification theorem, advancing the goal's state
+variable past the call and replacing the pre-call state facts with post-call
+ones.
+
+\DESCRIBE
+The first argument {assump_name : string} is the label of a universally
+quantified {ensures} specification occurring among the goal's assumptions; it
+justifies the call. The second argument {n : int} is the index of the current
+symbolic state, fixing the state variable used in the conclusion and in the new
+assumptions.
+
+Applied to a goal {A ?- eventually ... s_n} where {A} contains the labelled
+specification together with facts about state {s_n} (register and memory reads,
+flag values, the event trace, and the accumulated {MAYCHANGE} relation from the
+initial state):
+{
+   A ?- eventually ... s_n
+   =========================================  LOCAL_MUL_SAFETY_TAC assump_name n
+   A' ?- eventually ... s_(n+1)
+}
+\noindent Here {A'} drops the pre-call facts about {s_n} and instead contains
+corresponding facts about {s_(n+1)}: a new program-counter equation, an
+extended {MAYCHANGE} relation, the preserved register/memory reads, and a new
+event-trace equation prefixing a freshly introduced trace variable {z}, plus
+two further assumptions characterising {z} — its defining equation and an
+in-bounds memory-access property. The labelled specification assumption and the
+unrelated assumptions of {A} are kept, with the labelled one moved to the end.
+
+\COMMENTS
+In all observed traces the behaviour is this single-goal state advance, on
+goals whose assumptions include both a labelled specification and a full set of
+facts about the current symbolic state.
+
+\ENDDOC

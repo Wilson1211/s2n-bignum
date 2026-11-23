@@ -1,0 +1,45 @@
+\DOC LOCAL_SUB_4_TAC
+
+\TYPE {LOCAL_SUB_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic {eventually} execution goal across one inlined
+modular-subtraction subroutine, replacing the current symbolic state with a
+successor state and recording the subroutine's result as a new assumption.
+
+\DESCRIBE
+The tactic takes an {int} selecting which occurrence/instance of the subroutine
+block to step over, and a {string list} of variable names: the first is the
+fresh variable standing for the computed result, and the remaining two identify
+the input operands. The conclusion's {eventually} postcondition is left
+unchanged, but its state argument is replaced by a fresh successor state
+variable. Every assumption mentioning the old state — the program-counter
+value, {bytes_loaded}, register reads, memory-content reads, and the
+accumulated {MAYCHANGE} frame relating the initial state to the current one —
+is discharged and re-added for the new state, with the program-counter
+assumption updated to the new code offset and the {MAYCHANGE} frame extended by
+the components written by the stepped-over block; assumptions not mentioning
+the state (nonoverlapping facts, previously established result
+characterisations) are kept as they are. Two assumptions are added: one stating
+that a read of the destination memory block in the new state equals the newly
+introduced result variable, and one implication stating that if the two input
+operands are below the modulus then the result is below twice the modulus and
+congruent to their difference modulo it.
+{
+   A ?- eventually step (\s. P s) s_old
+   =================================================  LOCAL_SUB_4_TAC n ["res"; "op1"; "op2"]
+   A' , read dest s_new = res ,
+        (op1 < m /\ op2 < m
+         ==> res < 2 * m /\ (res == op1 - op2) (mod m))
+     ?- eventually step (\s. P s) s_new
+}
+\noindent where {A'} is {A} with the state-dependent assumptions (program
+counter, {bytes_loaded}, register and memory reads, {MAYCHANGE} frame) restated
+for {s_new}, the program-counter offset updated and the {MAYCHANGE} frame
+extended.
+
+\COMMENTS
+In all observed traces, only this single kind of transformation occurs, on
+goals of this symbolic-execution form.
+
+\ENDDOC

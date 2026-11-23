@@ -1,0 +1,41 @@
+\DOC LOCAL_SUB5_4_TAC
+
+\TYPE {LOCAL_SUB5_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal {A ?- eventually x86 P sN} past an inlined
+modular-subtraction subroutine, swapping the assumptions about the current
+state for ones about its successor and adding the arithmetic specification of
+the computed result.
+
+\DESCRIBE
+The tactic takes an {int} (the same value in every observed trace) and a
+{string list} of three names: the first names the variable introduced for the
+subroutine's result, the remaining two name existing variables denoting the
+operands whose difference is computed.
+{
+             A ?- eventually x86 P sN
+      ====================================  LOCAL_SUB5_4_TAC n ["res"; "op1"; "op2"]
+             A' ?- eventually x86 P sN'
+}
+\noindent Exactly one subgoal results, and in the conclusion only the state
+term changes, to a fresh successor state {sN'}. All assumptions mentioning the
+old state — the program-counter equation, the {bytes_loaded} assumption, the
+register and memory {read} equations, and the accumulated {MAYCHANGE} frame
+relating the initial state to the current one — are discharged and replaced by
+corresponding assumptions about the new state: the memory location written by
+the subroutine now reads as the newly introduced result variable rather than
+its previous contents, and the {MAYCHANGE} frame may be extended with further
+components. The stale program-counter assumption is dropped and a new one for
+the new state appears. Two new arithmetic assumptions about the result are
+added: a bound on it, and a congruence equating it modulo the prime with the
+difference of the two named operands. The pure arithmetic assumptions about the
+other variables are carried over unchanged, although their order in the
+assumption list may shift.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of the above shape, with the same integer argument and a three-name
+string list.
+
+\ENDDOC

@@ -1,0 +1,33 @@
+\DOC CONTAINED_ASM_TAC
+
+\TYPE {CONTAINED_ASM_TAC : tactic}
+
+\SYNOPSIS
+Proves a goal asserting that one address range is contained, modulo a power of
+two, within another, by arithmetic reasoning from the goal's assumptions.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion {t} is a
+containment-modulo statement between two (base, length) pairs, it closes the
+goal:
+{
+   A ?- t
+   =============  CONTAINED_ASM_TAC
+      (no goals)
+}
+\noindent Since nothing remains, the assumption list is untouched.
+
+\FAILURE
+Fails when the containment in the conclusion does not follow by linear
+arithmetic from the available numeric assumptions: the internal arithmetic
+decision step finds no contradiction and raises a failure. In the observed
+traces this occurs for conclusions relating ranges whose relative placement the
+assumptions do not constrain, including ones whose length involves a non-linear
+operator.
+
+\COMMENTS
+The observed traces show only this one kind of success, always on goals of that
+single conclusion form carrying a large assumption list of machine-state, size
+and bound facts.
+
+\ENDDOC

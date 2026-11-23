@@ -1,0 +1,38 @@
+\DOC X86_ADD_RETURN_NOSTACK_TAC
+
+\TYPE {X86_ADD_RETURN_NOSTACK_TAC : thm * (thm option array) -> thm -> tactic}
+
+\SYNOPSIS
+Given machine-code execution data and a core correctness theorem for a
+subroutine body, discharges a top-level {ensures} specification that
+additionally reads the stack pointer and return address and ends at the return
+address, usually closing the goal outright.
+
+\DESCRIBE
+{execth : thm * (thm option array)} is the machine-code execution data for the
+program (a length theorem together with the per-instruction decoding array),
+used to step the final return instruction; {coreth : thm} is the correctness
+theorem for the core (body) of the routine, whose postcondition ends at the
+last instruction of the code rather than at the return address. The goal is a
+universally quantified implication (possibly under an outer existential) whose
+conclusion is an {ensures} statement with precondition mentioning the stack
+pointer and the stacked return address and postcondition asserting the return
+address and the incremented stack pointer. The tactic strips the quantifiers
+and hypotheses, matches the body specification against {coreth}, and executes
+the return. In almost all cases no subgoals remain:
+{
+           A ?- t
+   ======================================  X86_ADD_RETURN_NOSTACK_TAC execth coreth
+}
+\noindent In one observed case it instead leaves a single residual subgoal
+about the event trace, with the quantifiers stripped and the assumption list
+extended with the instantiated side conditions of the hypotheses, the
+loaded-code and memory/register reads for the post-return state, a {MAYCHANGE}
+relation between states, and the computed event list, the conclusion being the
+remaining existential obligation.
+
+\COMMENTS
+The observed traces show only these two outcomes, and the inputs are uniformly
+s2n-bignum style {ensures} goals of the shape described above.
+
+\ENDDOC

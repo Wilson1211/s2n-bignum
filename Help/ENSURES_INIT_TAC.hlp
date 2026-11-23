@@ -1,0 +1,35 @@
+\DOC ENSURES_INIT_TAC
+
+\TYPE {ENSURES_INIT_TAC : string -> tactic}
+
+\SYNOPSIS
+Converts an {ensures}-style Hoare-triple goal into an {eventually} goal about a
+named initial state, moving the precondition into the assumptions.
+
+\DESCRIBE
+The argument {sname : string} names the universally quantified initial state
+variable (call it {s}), which becomes the state appearing in the new
+assumptions and in the resulting {eventually} goal. Applied to a goal whose
+conclusion is an {ensures} triple, the tactic instantiates the precondition {P}
+at {s}, splits the instantiated precondition along its conjunctions —
+descending through nested parenthesised conjuncts — and adds each resulting
+conjunct as a separate assumption; the component terms are otherwise unchanged,
+so a conjunct that is not itself a conjunction, such as an implication or an
+existential, is added whole. It also adds a reflexivity-style assumption saying
+that the empty frame relates {s} to itself. The pre-existing assumptions {A}
+are all retained, in order, ahead of the new ones. In the conclusion, the
+postcondition body and the frame {C} are conjoined under a fresh bound state
+variable.
+{
+       A ?- ensures step P Q C
+   =========================================================  ENSURES_INIT_TAC sname
+       A, p1, ..., pn, (empty frame relates s to s)
+         ?- eventually step (\s'. Q s' /\ C s s') s
+}
+\noindent where {p1 ... pn} are the conjuncts of {P s}.
+
+\COMMENTS
+Every observed trace shows this single kind of transformation, applied to goals
+whose conclusion is an {ensures} triple.
+
+\ENDDOC

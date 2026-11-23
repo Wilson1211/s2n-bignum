@@ -1,0 +1,33 @@
+\DOC ENSURES_FINAL_STATE_TAC
+
+\TYPE {ENSURES_FINAL_STATE_TAC : tactic}
+
+\SYNOPSIS
+Reduces a goal whose conclusion is an {eventually} statement with a
+postcondition that conjoins a state predicate and a frame relation to the state
+predicate alone, instantiated at the given final state.
+
+\DESCRIBE
+Takes no arguments. It applies to a goal whose conclusion is an {eventually}
+statement about a concrete final state {s}, where the postcondition is a
+lambda-abstraction of a conjunction of a state predicate and a
+{MAYCHANGE}-style frame relation. It discards the {eventually} wrapper and the
+frame conjunct, leaving the state predicate beta-reduced at {s}, i.e. with the
+bound state variable replaced by {s} throughout.
+{
+      A ?- eventually step (\s'. P s' /\ frame s0 s') s
+   ================================================== ENSURES_FINAL_STATE_TAC
+      A ?- P s
+}
+\noindent Extra parenthesisation around the state predicate is flattened, so a
+conclusion grouped as a single conjunct {(p1 /\ ... /\ pn)} becomes a flat
+conjunction at {s}; conjuncts that are themselves implications, disjunctions or
+quantified statements are carried over unchanged apart from the state
+substitution. The assumption list is untouched: nothing is added, removed, or
+rewritten.
+
+\COMMENTS
+All observed traces show only this single transformation, on goals whose
+conclusion has this {eventually}/postcondition-plus-frame shape.
+
+\ENDDOC

@@ -1,0 +1,47 @@
+\DOC LOCAL_MONTMUL_P384_TAC
+
+\TYPE {LOCAL_MONTMUL_P384_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Steps an {eventually}-style machine-code goal across one inlined
+Montgomery-multiplication subroutine call, advancing the symbolic state
+variable and replacing the state-dependent assumptions with ones about the new
+state, including a conditional characterisation of the newly written result.
+
+\DESCRIBE
+The first argument, an {int}, selects which of the subroutine's
+operand/pointer-setup variants is being traversed; it governs how many extra
+register-setup assumptions (such as an argument pointer register read) appear
+in the resulting goal. The second argument is a {string list} of three names
+identifying the destination and the two source buffers of the multiplication:
+the first supplies the fresh variable standing for the computed result, the
+other two the terms it is said to be built from. Applied to a goal whose
+conclusion is {eventually ... s} for a current state variable {s}, the tactic
+produces the same predicate applied to a later state variable {s'}. Assumptions
+not mentioning the state (address disjointness, bounds and modular facts about
+earlier intermediate values) are kept unchanged. Every assumption mentioning
+{s} — the program-counter read, the code-loaded fact, the register and
+memory-content reads, and the accumulated {MAYCHANGE} relation — is discharged
+and re-asserted for {s'}, with the program counter advanced and the {MAYCHANGE}
+relation extended by the memory region just written. Two assumptions are new:
+one recording that this region of {s'} holds the fresh result variable, and an
+implication bounding the product and equating the result to the Montgomery
+product of the two source values modulo the prime. Some applications
+additionally add a register read assumption not present before.
+{
+   A, (assumptions mentioning s) ?- eventually ... s
+   ================================================  LOCAL_MONTMUL_P384_TAC n ["dest"; "src1"; "src2"]
+   A, (same assumptions re-asserted for s', pc advanced, MAYCHANGE extended),
+      (region of s' holds fresh result variable),
+      (implication bounding the product and equating the result to the
+       Montgomery product of the two source values modulo the prime),
+      (possibly an extra register read assumption)
+    ?- eventually ... s'
+}
+
+\COMMENTS
+In all observed traces, only this kind of forward-stepping transformation
+appears, always on goals of this {eventually} machine-state form, and each
+produces exactly one subgoal.
+
+\ENDDOC

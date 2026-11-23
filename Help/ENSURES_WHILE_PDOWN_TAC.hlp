@@ -1,0 +1,44 @@
+\DOC ENSURES_WHILE_PDOWN_TAC
+
+\TYPE {ENSURES_WHILE_PDOWN_TAC : term -> term -> term -> term -> tactic}
+
+\SYNOPSIS
+Reduces an {ensures} goal describing a countdown loop to a single conjunctive
+goal containing a nonzero-trip-count condition, a loop-entry step, two
+per-iteration body/back-edge steps, and a final exit step.
+
+\DESCRIBE
+The tactic takes four terms: a trip-count term {t} giving the initial loop
+counter value; two code-location terms {u1} and {u2} denoting the loop head and
+the loop back-edge/test point; and a loop invariant of the form {\x1 x2. ...},
+a predicate on the counter value and the machine state. Applied to an {ensures}
+goal {A ?- ...}, it leaves {A} untouched and produces exactly one goal whose
+conclusion is a four-part conjunction:
+
+- {~(t = 0)}; - an {ensures} from the original precondition to the state
+satisfying the invariant at {t} at the loop head {u1}; - for each iteration, a
+universally quantified {ensures} over a fresh counter variable constrained by
+hypotheses such as being below {t}, unequal to {t}, nonzero, and with {t}
+nonzero — one going from the invariant at the successor counter at the loop
+head {u1} to the invariant at the counter at the test point {u2}, the other
+going back from {u2} to {u1}; - an {ensures} from the invariant instantiated at
+zero at the test point {u2} to the original postcondition.
+
+The frame (the {MAYCHANGE} component) of the original goal is reused unchanged
+in every conjunct, and the program-loaded hypothesis of the original
+precondition is propagated into the intermediate pre/postconditions.
+{
+   A ?- ensures ...
+   ========================================  ENSURES_WHILE_PDOWN_TAC t u1 u2 (\x1 x2. ...)
+   A ?- ~(t = 0) /\
+        ensures ... /\
+        (!z1. ... ==> ensures ...) /\
+        (!z2. ... ==> ensures ...) /\
+        ensures ...
+}
+
+\COMMENTS
+The observed traces show only this single transformation of {ensures} goals for
+machine-code loops, always leaving one subgoal.
+
+\ENDDOC

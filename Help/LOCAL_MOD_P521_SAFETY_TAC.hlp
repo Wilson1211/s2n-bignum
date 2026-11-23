@@ -1,0 +1,36 @@
+\DOC LOCAL_MOD_P521_SAFETY_TAC
+
+\TYPE {LOCAL_MOD_P521_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Discharges a subroutine call inside an {eventually} goal by applying a named
+assumed safety specification, advancing the symbolic state from the call site
+to the state just after the call returns.
+
+\DESCRIBE
+{assump_name : string} names the assumption in the goal's assumption list that
+holds the callee's {ensures} safety specification to be used; {n : int} is the
+index of the current symbolic state, from which the name of the successor state
+introduced for the post-call state is formed.
+{
+   A ?- eventually ... s_n
+   ========================================  LOCAL_MOD_P521_SAFETY_TAC assump_name n
+   A' ?- eventually ... s_{n+1}
+}
+\noindent Here {A'} is {A} with the assumptions describing the state at the
+call site — program-counter, stack-pointer, argument-register and
+return-address reads, the accumulated event trace, and the {MAYCHANGE} relation
+from the initial state — removed and replaced by the corresponding facts about
+the successor state: the restored program counter and stack pointer, an
+extended event trace built from the callee's trace function, a fresh event-list
+variable together with its defining equation and a {memaccess_inbounds} fact
+about it, the surviving register/memory reads, and a {MAYCHANGE} relation
+extended with the memory regions the callee may write. The named specification
+assumption is retained, though it may be reordered within the assumption list.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of this {eventually} shape with the callee specification present among
+the assumptions.
+
+\ENDDOC

@@ -1,0 +1,26 @@
+\DOC BIGNUM_TERMRANGE_TAC
+
+\TYPE {BIGNUM_TERMRANGE_TAC : term -> term -> tactic}
+
+\SYNOPSIS
+Adds a size bound assumption {m < 2 EXP (64 * k)} for a numeric term read as a
+{k}-digit bignum in the goal, leaving the conclusion unchanged.
+
+\DESCRIBE
+{k} is the digit count used in the bound (a variable or a numeral) and {m} is
+the natural-number term to be bounded. The tactic produces one subgoal whose
+conclusion and existing assumptions are untouched, with the new assumption
+appended at the end of the assumption list; no existing assumption is removed
+or modified.
+{
+           A ?- t
+   ======================  BIGNUM_TERMRANGE_TAC k m
+   A, m < 2 EXP (64 * k) ?- t
+}
+
+\COMMENTS
+All observed traces show this single kind of outcome, and in each the
+conclusion is an {ensures} specification in which the bounded term appears as
+the value of a bignum of {k} digits read from memory.
+
+\ENDDOC

@@ -1,0 +1,28 @@
+\DOC ASSEMBLER_SIMPLIFY_TAC
+
+\TYPE {ASSEMBLER_SIMPLIFY_TAC : tactic}
+
+\SYNOPSIS
+Simplifies the conclusion of the goal in place, rewriting with the assumptions
+and evaluating arithmetic/word subterms, leaving the assumption list untouched.
+
+\DESCRIBE
+Takes no arguments.
+{
+   A ?- t
+   =========================  ASSEMBLER_SIMPLIFY_TAC
+   A ?- u
+}
+\noindent Here {u} is {t} with subterms simplified: component reads mentioned
+in {A} are replaced by the values those assumptions give them, nested address
+and offset arithmetic is folded, numeric literals are normalised, boolean
+equivalences with a constant truth value are collapsed into plain or negated
+atoms, and other arithmetic/word subexpressions are reduced. No assumption is
+added or removed.
+
+\COMMENTS
+In all observed traces the conclusion was an implication whose antecedent
+(describing one machine step) is what gets simplified, while the rest of the
+conclusion is largely unchanged; no trace shows the goal being closed or split.
+
+\ENDDOC

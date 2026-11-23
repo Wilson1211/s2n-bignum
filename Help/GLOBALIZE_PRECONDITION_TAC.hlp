@@ -1,0 +1,28 @@
+\DOC GLOBALIZE_PRECONDITION_TAC
+
+\TYPE {GLOBALIZE_PRECONDITION_TAC : tactic}
+
+\SYNOPSIS
+On a goal whose conclusion is an {ensures} triple, moves state-independent
+conjuncts of the precondition out into the goal's assumption list.
+
+\DESCRIBE
+Takes no arguments. The conclusion must be an {ensures} statement whose
+precondition is a lambda over a state variable. Every top-level conjunct of
+that precondition that does not depend on the state variable — including
+implications, existentials, inequalities and equations between program
+variables — is deleted from the precondition and added as a new assumption at
+the end of {A}; parenthesised groupings of conjuncts that are touched are
+flattened. The postcondition and frame are unchanged. More than one conjunct
+may be lifted at once, each becoming a separate assumption.
+{
+       A ?- ensures ... (\s. t /\ u) post frame
+     ========================================== GLOBALIZE_PRECONDITION_TAC
+       A, t ?- ensures ... (\s. u) post frame
+}
+
+\COMMENTS
+In all observed traces the inputs are {ensures} goals that already carry a list
+of assumptions, and the tactic always produces this single transformed goal.
+
+\ENDDOC

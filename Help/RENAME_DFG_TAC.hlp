@@ -1,0 +1,37 @@
+\DOC RENAME_DFG_TAC
+
+\TYPE {RENAME_DFG_TAC : term -> term -> term -> tactic}
+
+\SYNOPSIS
+Renames three designated variables of the goal to three supplied new names,
+folds the three compound values that now occur in the assumptions and
+conclusion back to the old names, and adds three equations linking them.
+
+\DESCRIBE
+The arguments {d0 : term}, {f0 : term}, {g0 : term} are the three new variable
+names (of integer type) replacing the goal's three existing variables, in that
+order: {d0} for the first renamed variable, {f0} for the second, {g0} for the
+third. Writing {x1,x2,x3} for the old variables, every occurrence of them in
+the assumptions and in the conclusion becomes the corresponding argument term;
+at the same time three specific compound expressions built from the renamed
+variables, one for each of the three roles, are folded back to {x1,x2,x3}
+wherever they occur in the assumptions, which makes several assumptions much
+shorter. Three assumptions are appended, each equating one of those compound
+expressions with the corresponding old variable name. Assumptions mentioning
+none of the affected terms are unchanged in content, although the whole
+assumption list is rebuilt, so all touched assumptions are removed and
+re-added.
+{
+             A ?- t
+   ===================================================  RENAME_DFG_TAC d0 f0 g0
+   A[x1,x2,x3 := d0,f0,g0], with the three defining
+   expressions folded back to x1,x2,x3, plus the three
+   equations ?- t[x1,x2,x3 := d0,f0,g0]
+}
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of the same shape: a machine-state {eventually} conclusion with a large
+assumption list of register-read and bound facts.
+
+\ENDDOC

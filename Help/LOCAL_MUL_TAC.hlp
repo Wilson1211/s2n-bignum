@@ -1,0 +1,38 @@
+\DOC LOCAL_MUL_TAC
+
+\TYPE {LOCAL_MUL_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal over one inlined subroutine
+call, replacing the current state variable by the next one and rewriting the
+assumptions to describe the post-call state.
+
+\DESCRIBE
+The single {int} argument is the index of the new state variable to introduce:
+a conclusion about state {s}*n-1* becomes a conclusion about state {s}*n*, and
+the surviving assumptions are restated about {s}*n*. The conclusion's body is
+unchanged; only its trailing state argument is replaced by the freshly numbered
+state. Assumptions describing the old state — program counter, stack pointer,
+register contents, memory contents, loaded code, and the accumulated
+{MAYCHANGE} frame relating the initial state to the old one — are discharged
+and replaced by corresponding assumptions about the new state, while general
+side conditions not mentioning a state (non-overlapping facts, arithmetic
+hypotheses, abbreviation equations) are kept untouched. Among the new
+assumptions, the program-counter assumption records a new code address, one
+memory-region assumption records the computed result value in place of its
+earlier contents, the {MAYCHANGE} frame may gain extra components for newly
+written locations, and some assumptions about registers used only to pass
+arguments are dropped rather than restated.
+{
+      A, B(s_k) ?- P(s_k)
+   =================================   LOCAL_MUL_TAC n
+      A, B'(s_{k+1}) ?- P(s_{k+1})
+}
+\noindent where {B'} is the rewritten state description.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals whose conclusion is an {eventually} statement about a machine state with
+a substantial state description among the assumptions.
+
+\ENDDOC

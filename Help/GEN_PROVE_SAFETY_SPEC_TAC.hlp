@@ -1,0 +1,32 @@
+\DOC GEN_PROVE_SAFETY_SPEC_TAC
+
+\TYPE {GEN_PROVE_SAFETY_SPEC_TAC : term list -> tactic -> thm * (thm option array) -> thm list -> ((thm * (thm option array)) -> string -> tactic) -> tactic}
+
+\SYNOPSIS
+Fully discharges an existentially quantified constant-time/safety specification
+goal, leaving no subgoals.
+
+\DESCRIBE
+The tactic takes five arguments: a {term list} naming the variables treated as
+public; a {tactic} performing preparatory/expansion work on the goal (here
+expanding register-set {MAYCHANGE} components); a pair
+{thm * (thm option array)} packaging the program's length theorem with a
+per-instruction decoding table; a {thm list} of extra rewrite theorems applied
+to the loaded-bytes hypothesis; and a function {(thm * (thm option array)) ->
+string -> tactic} that builds the single-stepping tactic from that pair. It
+applies to an assumption-free goal of the form {?- ?f. !x1 ... xn. t ==>
+ensures ...}, whose postcondition asserts the existence of an event trace equal
+to {f x1 ... xn} and constrained by a memory-access bound, and proves it
+outright:
+{
+   ?- ?f. !x1 ... xn. t ==> ensures ...
+   =====================================  GEN_PROVE_SAFETY_SPEC_TAC pubvars prep (lenth, decode) rewrites mkstep
+                                          (no subgoals)
+}
+
+\COMMENTS
+In all observed traces there is only this single outcome: goals with no
+assumptions, all of the above existential {ensures} shape, always closed
+completely.
+
+\ENDDOC

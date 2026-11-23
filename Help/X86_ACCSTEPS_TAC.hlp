@@ -1,0 +1,44 @@
+\DOC X86_ACCSTEPS_TAC
+
+\TYPE {X86_ACCSTEPS_TAC : thm * (thm option array) -> int list -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a block of x86 instruction steps on a goal
+{A ?- eventually x86 P s<i>}, advancing the state variable, replacing the old
+state's register/flag/memory assumptions with ones about the new state, and
+recording selected arithmetic steps as accumulated carry/sum equations.
+
+\DESCRIBE
+{X86_ACCSTEPS_TAC th anums snums} takes {th : thm * (thm option array)}, the
+execution/decoding data for the program being stepped (a length theorem paired
+with a cache of per-instruction theorems), which fixes the code being
+symbolically run; {anums : int list}, the step numbers to be treated as
+accumulation steps, for which an explicit arithmetic equation relating the
+carry bit and the sum word to the operands is added as an assumption; and
+{snums : int list}, the full list of step numbers to execute (usually an
+enumeration/range), determining how far the state is advanced.
+{
+       A, B(s<i>) ?- eventually x86 P s<i>
+    ======================================= X86_ACCSTEPS_TAC th anums snums
+    A, E1 ... En, B(s<j>) ?- eventually x86 P s<j>
+}
+\noindent Here {s<j>} is the state after the last requested step, and {P}
+itself is unchanged up to simplification of its body. {B(s<i>)} is the set of
+assumptions describing the starting state — the {bytes_loaded},
+{read}-component and {MAYCHANGE} assumptions mentioning the old state variable;
+these are discharged and replaced by the corresponding assumptions {B(s<j>)}
+about the new state, including fresh {read} equations for every component
+touched, flag assumptions, the updated program counter, and a combined
+{MAYCHANGE} relation from the original state to the new one. {E1 ... En} are
+the added accumulation equations (n may be zero), one for each step named in
+{anums}, each expressing the word result and carry bit in terms of the inputs
+(over {&}/{--(&2 pow 64)} arithmetic); multiplication steps may likewise add
+high/low product equations, and fresh variables such as the per-step sums and
+carries appear in these. Assumptions {A} not referring to the state variable
+are generally preserved, though they may be reordered or re-added.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals about {eventually x86} with a state-describing assumption set.
+
+\ENDDOC

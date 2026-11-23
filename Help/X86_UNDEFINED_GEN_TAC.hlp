@@ -1,0 +1,30 @@
+\DOC X86_UNDEFINED_GEN_TAC
+
+\TYPE {X86_UNDEFINED_GEN_TAC : tactic}
+
+\SYNOPSIS
+Strips the outermost universal quantifier of the goal, instantiating the bound
+variable with a freshly generated variable named {undefined_<n>}, where {n} is
+a counter that advances past the numbers already occurring in the goal.
+
+\DESCRIBE
+The tactic takes no arguments. Applied to a goal whose conclusion is
+{!x1. t[x1]}, it removes that single quantifier and replaces {x1} throughout
+the body by a new variable of the same type:
+{
+   A ?- !x1. t[x1]
+   ================== X86_UNDEFINED_GEN_TAC
+   A ?- t[undefined_n]
+}
+\noindent Only the outermost universal quantifier is consumed; any further
+universal quantifiers remain in place, as does any inner existential
+quantification ({?y1 ... yn.}) under which the fresh variable may land. In the
+observed traces the quantified body is an implication whose antecedent equates
+a state-update term with a state variable, and the fresh variable appears
+inside that term.
+
+\COMMENTS
+The observed traces show only this one kind of transformation, always on goals
+whose conclusion begins with a universal quantifier.
+
+\ENDDOC

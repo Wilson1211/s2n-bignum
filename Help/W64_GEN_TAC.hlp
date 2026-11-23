@@ -1,0 +1,31 @@
+\DOC W64_GEN_TAC
+
+\TYPE {W64_GEN_TAC : term -> tactic}
+
+\SYNOPSIS
+Strips the outermost universal quantifier of a goal, when it ranges over a
+64-bit word, instantiating it as {word w} for a fresh numeric variable {w}
+supplied by the caller, and adds range assumptions about {w}.
+
+\DESCRIBE
+The argument {w : term} is the numeric variable name to use for the newly
+introduced quantified value. Applied to a goal whose conclusion is
+{!x1 ... xn. t} with {x1} of word type, the leading quantified word variable
+{x1} is replaced throughout by {word w}, and every resulting occurrence of
+{val (word w)} is collapsed to {w}; other occurrences of {word w} (e.g. as a
+register value or inside an equation between words) are left as {word w}. The
+remaining quantifiers {x2 ... xn} may be absent.
+{
+      A ?- !x1 x2 ... xn. t
+    ================================================================  W64_GEN_TAC w
+      A, val (word w) = w, w < 2 EXP 64 ?- !x2 ... xn. t'
+}
+\noindent where {t'} is {t} after the substitution and simplification described
+above.
+
+\COMMENTS
+The observed traces show only this one kind of transformation, applied to goals
+whose leading quantifier is over a 64-bit word in machine-code {ensures}
+specifications.
+
+\ENDDOC

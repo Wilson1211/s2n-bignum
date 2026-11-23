@@ -1,0 +1,35 @@
+\DOC WHILE_TAC
+
+\TYPE {WHILE_TAC : bool ref -> tactic -> tactic}
+
+\SYNOPSIS
+Repeatedly applies a tactic for as long as a boolean reference flag remains
+set, leaving a single transformed goal.
+
+\DESCRIBE
+{flag : bool ref} is a mutable boolean tested between iterations; the supplied
+tactic may clear it to terminate the loop. {tac : tactic} is the tactic run on
+each iteration. The combinator runs {tac} on the current goal over and over
+while {flag} holds, yielding exactly one goal.
+{
+       A ?- t
+     ==================  WHILE_TAC flag tac
+       A' ?- t'
+}
+\noindent In the observed traces, the conclusion {t'} is {t} structurally
+unchanged except that its final argument is replaced by a later term introduced
+during the iterations. The assumption list is extensively rewritten:
+assumptions phrased in terms of the original argument are discharged and
+replaced by corresponding ones about the new term, together with further
+derived assumptions — extra equations about state components, a combined
+accumulated-change assumption relating the original and new terms, and a side
+condition about an abbreviated term. Assumptions unrelated to the changing term
+are re-asserted unchanged, so {A'} contains both the preserved part of {A} and
+the new assumptions.
+
+\COMMENTS
+The observed traces show only this single-goal, assumption-rewriting outcome,
+always on goals of the same shape and with a loop body that performs
+incremental stepping.
+
+\ENDDOC

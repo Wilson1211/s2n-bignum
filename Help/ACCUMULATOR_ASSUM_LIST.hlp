@@ -1,0 +1,33 @@
+\DOC ACCUMULATOR_ASSUM_LIST
+
+\TYPE {ACCUMULATOR_ASSUM_LIST : ((thm list) -> tactic) -> tactic}
+
+\SYNOPSIS
+{ACCUMULATOR_ASSUM_LIST ttac} applies the tactic-producing function {ttac} to a
+selected sublist of the goal's assumptions, supplied as theorems, leaving the
+assumption list itself untouched.
+
+\DESCRIBE
+The argument {ttac : (thm list) -> tactic} receives the chosen assumptions as
+theorems, and the tactic it returns is what acts on the goal. The assumptions
+handed to {ttac} are not all of {A} but a subset of them (in the observed
+traces, equations relating word values, carries and sums), and they remain in
+the assumption list afterwards. Every observed trace yields a single subgoal
+with {A} unchanged, only the conclusion being altered, in whatever way the
+tactic built by {ttac} dictates. Typically {ttac} was a function that conjoins
+the supplied theorems (after transforming them with a derived rule) and
+discharges the result with {MP_TAC}:
+{
+       A ?- t
+   ============== ACCUMULATOR_ASSUM_LIST ttac
+    A ?- u ==> t
+}
+\noindent where {u} is a conjunction derived from the selected assumptions. One
+trace instead used a {ttac} that rewrites, so the conclusion {t} was replaced
+by a rewritten {t}.
+
+\COMMENTS
+The observed traces show only this single-subgoal, conclusion-only behaviour,
+always with the chosen assumptions still present.
+
+\ENDDOC

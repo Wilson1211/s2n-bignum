@@ -1,0 +1,32 @@
+\DOC ASSIGNS_SWAP_TAC
+
+\TYPE {ASSIGNS_SWAP_TAC : tactic}
+
+\SYNOPSIS
+Proves goals asserting that the sequential composition of two {ASSIGNS}
+relations commutes, closing them outright.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion equates
+{ASSIGNS t ,, ASSIGNS u} with {ASSIGNS u ,, ASSIGNS t}, it discharges the goal:
+{
+   ?- ASSIGNS t ,, ASSIGNS u = ASSIGNS u ,, ASSIGNS t
+   =============================================  ASSIGNS_SWAP_TAC
+}
+\noindent Success depends on establishing that the two state components
+involved are non-interfering, which it decides by a component-orthogonality
+computation on {t} and {u}. The components may be plain state components or
+ones built by composition with subcomponent selectors, including memory regions
+over computed addresses.
+
+\FAILURE
+Fails when the orthogonality computation cannot classify the pair of components
+supplied in the conclusion — for example when they are nested or overlapping
+views of the same underlying state — raising a failure from that internal
+component analysis rather than returning a proof state.
+
+\COMMENTS
+In all observed traces, the goals have this commuted-composition shape with no
+assumptions, and the only successful outcome is the goal being closed.
+
+\ENDDOC

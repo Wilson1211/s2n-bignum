@@ -1,0 +1,40 @@
+\DOC LOCAL_SQR_TAC
+
+\TYPE {LOCAL_SQR_TAC : int -> tactic}
+
+\SYNOPSIS
+Discharges one call to a modular-squaring subroutine inside an {eventually}
+machine-execution goal, advancing the symbolic state to a fresh successor state
+and restating the state-dependent assumptions for it, including a conditional
+specification of the squared result written to the destination buffer.
+
+\DESCRIBE
+{LOCAL_SQR_TAC} takes one {int} argument (displayed as a small numeral): the
+index of the new symbolic state it produces, so that the goal's state variable
+and the rewritten assumptions are all phrased in terms of state number n+...
+corresponding to that index. The {eventually} postcondition of the goal is
+preserved, but its final state argument becomes the newly indexed state. Every
+assumption mentioning the previous state — program-counter, stack-pointer,
+register, flag, memory-content, {bytes_loaded} and the accumulated {MAYCHANGE}
+relation — is removed and re-added in the new state, with the following
+differences: flag assumptions and the subroutine's argument-pointer register
+assumptions are dropped rather than carried over; the program counter and stack
+pointer are updated to the return address and caller stack frame; the
+{MAYCHANGE} relation is extended with the registers and memory regions
+clobbered by the call; and a new implicational assumption is added stating
+that, under a bound on the input, the destination buffer holds the Montgomery
+square of the input modulo the field prime. Purely mathematical and
+non-overlapping assumptions are left untouched.
+{
+   A ?- eventually ... (previous state)
+   ================================================  LOCAL_SQR_TAC n
+   A' ?- eventually ... (state n+...)
+}
+\noindent where {A'} is {A} with the state-dependent assumptions replaced as
+described and the new implicational assumption added.
+
+\COMMENTS
+In all observed traces only this single kind of transformation occurs, on goals
+of this {eventually} machine-execution form.
+
+\ENDDOC

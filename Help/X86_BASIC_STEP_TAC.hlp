@@ -1,0 +1,32 @@
+\DOC X86_BASIC_STEP_TAC
+
+\TYPE {X86_BASIC_STEP_TAC : thm option array -> string -> term ref option -> tactic}
+
+\SYNOPSIS
+Turns an {eventually x86 P s} goal into an implication whose antecedent equates
+an explicit state-update expression (the symbolic effect of the single next
+instruction) with a fresh state variable, and whose conclusion is the original
+{eventually} goal at that new state.
+
+\DESCRIBE
+The tactic takes {decode_ths : thm option array}, the array of pre-decoded
+instruction theorems from which the next instruction's effect is obtained;
+{sname : string}, the base name used for the fresh successor state variable in
+the resulting implication; and {store_inst_term_to : term ref option}, an
+optional reference cell in which the instruction term can be stored.
+{
+   A ?- eventually x86 P s
+   ========================================  X86_BASIC_STEP_TAC decode_ths sname store_inst_term_to
+   A ?- u = s' ==> eventually x86 P s'
+}
+\noindent Here {s'} is a new state variable named from {sname}, and {u} is a
+nested {write}-expression over the current state {s} describing the register,
+flag, memory and event-trace updates of the one instruction at the current
+program point, with reads of {s} left symbolic. The body {P} of the
+{eventually} is carried over unaltered.
+
+\COMMENTS
+Every observed trace shows this single transformation, applied to goals whose
+conclusion is an {eventually x86} statement about an x86 machine state.
+
+\ENDDOC

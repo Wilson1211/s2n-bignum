@@ -1,0 +1,35 @@
+\DOC LOCAL_EPADD_SAFETY_TAC
+
+\TYPE {LOCAL_EPADD_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Applies a named subroutine specification assumption to discharge one call in an
+{eventually} goal, advancing the symbolic state from step {n} to step {n+1} and
+replacing the pre-call state facts with post-call ones.
+
+\DESCRIBE
+{LOCAL_EPADD_SAFETY_TAC assump_name n} takes a string {assump_name}, the label
+of the assumption in the goal that holds the universally quantified {ensures}
+specification of the called subroutine, and an integer {n}, the index of the
+current symbolic state, used to name the successor state introduced in the
+resulting goal. It produces exactly one subgoal, whose conclusion keeps its
+{eventually} form and property but takes the next state (index {n+1}) as its
+state argument. Among the assumptions, the facts describing the state at index
+{n} — program/code loading, register and memory reads, flag conditions, the
+event-trace equation and the accumulated {MAYCHANGE} relation — are discharged
+and replaced by the corresponding facts about the new state, with the
+{MAYCHANGE} relation extended by the frame of the called subroutine and the
+event trace extended by a fresh existentially-named event-list variable
+{x1 ... xn} (a primed variant of the previous one); two new assumptions
+characterising that variable are added, namely its definition in terms of the
+subroutine's event function and a memory-access-inbounds property. The named
+specification assumption is retained but moved to the end of the assumption
+list; all other assumptions, including previously derived event-list facts and
+nonoverlapping hypotheses, are untouched.
+
+\COMMENTS
+All observed traces show this single pattern, on goals whose conclusion is an
+{eventually} statement about a machine state and whose assumptions include the
+named subroutine specification.
+
+\ENDDOC

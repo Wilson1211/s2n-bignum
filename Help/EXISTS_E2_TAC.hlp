@@ -1,0 +1,30 @@
+\DOC EXISTS_E2_TAC
+
+\TYPE {EXISTS_E2_TAC : term list ref -> tactic}
+
+\SYNOPSIS
+Closes a goal equating an explicit event-list expression with {APPEND u e},
+where {u} is an undetermined list variable, by choosing a witness for it and
+discharging the equation.
+
+\DESCRIBE
+The argument {allowed_vars_e : term list ref} is a mutable reference holding
+the list of terms — typically program-level variables such as pointers, program
+counters and loop indices — that are permitted to occur in the witness chosen
+for the unknown list variable {u}. The tactic applies to a goal whose
+conclusion is {t = APPEND u e}, where {t} is a concrete list expression built
+from {CONS}, list literals and {APPEND} over a trailing tail {e}, and {u} is
+the yet-undetermined list variable; in all observed traces the right-hand side
+is an {APPEND} of a single variable onto the same trailing tail {e} that occurs
+at the end of {t}. The assumptions {A} are left unused and unchanged, and vary
+widely across the traces without playing any visible role.
+{
+   A ?- t = APPEND u e
+   ========================  EXISTS_E2_TAC allowed_vars_e
+}
+
+\COMMENTS
+The observed traces show only this closing behaviour, and only conclusions of
+exactly this shape.
+
+\ENDDOC

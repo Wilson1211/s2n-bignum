@@ -1,0 +1,28 @@
+\DOC MAYCHANGE_IDEMPOT_TAC
+
+\TYPE {MAYCHANGE_IDEMPOT_TAC : tactic}
+
+\SYNOPSIS
+Proves goals stating that a state-relation built from {,,}-composed
+{MAYCHANGE}/{ASSIGNS} components (or a trivial relation) composed with itself
+equals itself, closing the goal.
+
+\DESCRIBE
+The tactic takes no arguments. It applies to a goal whose conclusion is an
+equation {t ,, u = u}, where {u} is a (possibly nested and parenthesised)
+{,,}-composition of relation components and {t} is that same composition
+bracketed as a single unit. The assumptions are left untouched and play no
+role: the same closure is observed with any assumption list, including long
+lists of arithmetic, memory-disjointness, register-read and {ensures}
+hypotheses.
+{
+      A ?- t ,, u = u
+      ===============  MAYCHANGE_IDEMPOT_TAC
+      (no goals)
+}
+
+\COMMENTS
+In all observed traces the tactic closes the goal, always on conclusions of
+this self-composition-equals-itself shape; no other kind of outcome appears.
+
+\ENDDOC

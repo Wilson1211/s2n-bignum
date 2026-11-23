@@ -1,0 +1,36 @@
+\DOC LOCAL_ADD_4_TAC
+
+\TYPE {LOCAL_ADD_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic {eventually} execution goal across one inlined
+modular-addition subroutine, replacing the current state variable with a
+successor and adding a characterisation of the result written to memory.
+
+\DESCRIBE
+The first argument is an {int} offset/index selecting which call site or
+variant of the addition block to step over; the second is a {string list}
+naming the result and the two operands, used both to name the new result
+variable and to phrase the arithmetic consequence derived about it. The
+conclusion is rewritten to the same {eventually} statement applied to a fresh
+successor state variable. In the assumptions, every fact about the old state —
+program counter, register and memory reads, {bytes_loaded}, and the accumulated
+{MAYCHANGE ... s0 s} — is removed and replaced by the corresponding fact about
+the new state, with the program counter advanced and the {MAYCHANGE} relation
+extended by one further component for the memory block written. Two further
+assumptions are added: a read assumption giving the contents of that block as a
+fresh variable {t}, and a conditional arithmetic assumption of the form {u1 <
+... /\ u2 < ... ==> t = u1 + u2}.
+{
+   A ?- eventually x86 (\s'. P s') s
+   =================================================  LOCAL_ADD_4_TAC n ["res"; "op1"; "op2"]
+   A' ?- eventually x86 (\s'. P s') s_new
+   ```
+   where `A'` is `A` with the old-state facts replaced by their new-state counterparts (program counter advanced, `MAYCHANGE` extended) together with the new read and conditional arithmetic assumptions.
+}
+
+\COMMENTS
+The observed traces show only this single kind of step, always on goals that
+are symbolic-execution states of this form with assumptions already present.
+
+\ENDDOC

@@ -1,0 +1,34 @@
+\DOC LOCAL_EPDOUBLE_SAFETY_TAC
+
+\TYPE {LOCAL_EPDOUBLE_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Applies a named subroutine-specification assumption to the current {eventually}
+goal, advancing the symbolic state from step {n-1} to step {n} and replacing
+the old state's assumptions with ones describing the state after the call.
+
+\DESCRIBE
+{assump_name : string} is the label of an assumption in the goal that holds the
+universally quantified {ensures} specification of the called subroutine;
+{n : int} is the index of the new symbolic state, i.e. the name of the state
+variable referred to by the resulting goal's {eventually} conclusion and by the
+new assumptions. The goal is an {eventually} statement about the state at step
+{n-1}, and the tactic rewrites its conclusion into the same statement about the
+state at step {n}, leaving a single subgoal. Every assumption mentioning the
+old state — the program-counter, stack-pointer, register and flag readings, the
+memory/events readings, the accumulated {MAYCHANGE} relation and the
+loaded-bytes fact — is discharged and replaced by the corresponding assumption
+about the new state, the {MAYCHANGE} relation being extended with the regions
+the callee may write. Further assumptions characterising the event trace of the
+call are added: the new {events} reading as an {APPEND} of a freshly introduced
+trace variable {x1} onto the previous trace, an equation defining {x1} by the
+callee's trace function applied to the call's concrete arguments, and a
+memory-access-inbounds fact about {x1}. The assumption labelled {assump_name}
+is removed from its position and re-added unchanged at the end of the
+assumption list.
+
+\COMMENTS
+The observed traces show only this one kind of transformation, on goals of this
+{eventually} form with a rich assumption context.
+
+\ENDDOC

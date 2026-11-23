@@ -1,0 +1,34 @@
+\DOC BOUNDER_TAC
+
+\TYPE {BOUNDER_TAC : thm list -> tactic}
+
+\SYNOPSIS
+{BOUNDER_TAC} closes an arithmetic goal asserting numeric bounds by automatic
+interval reasoning.
+
+\DESCRIBE
+The single argument has type {thm list}: theorems supplied alongside the goal,
+in the observed successful traces either empty or a collection of facts drawn
+from the surrounding context; the goal's own assumptions are left untouched.
+The goal's conclusion {t} must be a bound assertion — a single {<=}/{<}/{>}
+comparison, or a conjunction of such comparisons, between arithmetic
+expressions over naturals, integers and reals built from word/bit operations,
+sums, products, divisions and literals.
+{
+           A ?- t
+      ==================  BOUNDER_TAC thl
+}
+\noindent It never splits the goal or rewrites it in place; every successful
+trace closes it outright, with assumption lists ranging from none to large
+machine-state contexts that play no visible role.
+
+\FAILURE
+Fails when the conclusion is not of the bound form it can handle — for instance
+an equation between non-arithmetic terms — where the internal normalisation of
+the conclusion raises an error; and when the conclusion is a bound assertion
+whose truth it cannot establish from the available information, where it
+reports that no tactic applied. Both failures arise from the tactic itself
+rather than from the supplied theorem list, which in the failing traces
+includes both an empty list and a long list of context facts.
+
+\ENDDOC

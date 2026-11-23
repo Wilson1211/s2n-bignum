@@ -1,0 +1,32 @@
+\DOC LOCAL_MOD_P521_TAC
+
+\TYPE {LOCAL_MOD_P521_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal across a called
+modular-reduction subroutine, moving the goal and its state-dependent
+assumptions from the current state variable to the next-numbered one.
+
+\DESCRIBE
+The single {int} argument is the index of the new state variable in which the
+goal and assumptions are expressed after the step; it is the successor of the
+index of the state the goal mentions beforehand. Applied to a goal whose
+conclusion is an {eventually} assertion about a postcondition predicate,
+together with a full set of state assumptions, the tactic yields exactly one
+subgoal. The conclusion keeps its shape, with the state argument replaced by
+the freshly indexed state. Every assumption mentioning the old state is
+discharged and replaced by the corresponding assumption about the new state:
+the program-image assumption, the preserved memory and register contents, a
+program counter and stack pointer restored from the saved return address, and a
+{MAYCHANGE} frame relating the initial state to the new state, extended with
+the components written by the step. One further assumption is added, stating
+that the destination buffer in memory now holds the reduced value corresponding
+to the subroutine's input operand. Assumptions mentioning no machine state —
+the size/nonoverlap side conditions and the arithmetic facts about the inputs —
+are left untouched and keep their positions.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, on goals of
+this one {eventually} form carrying a full set of state assumptions.
+
+\ENDDOC

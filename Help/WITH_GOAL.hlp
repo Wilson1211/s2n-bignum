@@ -1,0 +1,29 @@
+\DOC WITH_GOAL
+
+\TYPE {WITH_GOAL : (term -> tactic) -> tactic}
+
+\SYNOPSIS
+{WITH_GOAL tac} runs the tactic that {tac} computes from the current goal's
+conclusion, so the tactic applied is selected by the conclusion itself.
+
+\DESCRIBE
+The argument {tac : term -> tactic} maps the goal's conclusion to a tactic.
+Given a goal with conclusion {t}, the conclusion is passed to {tac} and the
+resulting tactic is applied to that same goal, yielding whatever that tactic
+yields. In the observed traces the outcome is one of: the goal is closed (zero
+subgoals); the conclusion is replaced by a rewritten or beta-reduced one, i.e.
+{
+   ?- t
+   ========================  WITH_GOAL tac
+   ?- u
+}
+\noindent or the goal is split into two subgoals whose conclusions are branches
+extracted from {t}. No observed trace has any assumptions present, so only the
+conclusion is seen to change.
+
+\COMMENTS
+The observed inputs are all goals with no assumptions whose conclusions have
+one similar shape, and the argument functions dispatch on the syntactic form of
+the conclusion.
+
+\ENDDOC

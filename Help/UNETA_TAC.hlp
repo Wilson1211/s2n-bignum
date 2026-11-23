@@ -1,0 +1,28 @@
+\DOC UNETA_TAC
+
+\TYPE {UNETA_TAC : term -> tactic}
+
+\SYNOPSIS
+Given an application term {u x}, rewrites the goal's conclusion so that the
+partially applied function {u} appears in explicit eta-expanded form {\x. u x}.
+
+\DESCRIBE
+The single {term} argument is an application of a function to a final argument;
+its function part identifies the subterm to be eta-expanded, and its final
+argument supplies the name of the bound variable used in the resulting
+abstraction. The occurrence of the function part {u} in the conclusion is
+replaced by {\x. u x}, under the goal's leading universal quantifiers
+{x1 ... xn} (where {n} may be zero), which are preserved.
+{
+      A ?- t
+      =============================  UNETA_TAC `u x`
+      A ?- t'
+}
+\noindent where {t'} is {t} with the subterm {u} replaced by {\x. u x}.
+
+\COMMENTS
+The observed traces show only this one kind of rewriting, on goals with no
+assumptions whose conclusions are universally quantified predicate applications
+of partially applied functions.
+
+\ENDDOC

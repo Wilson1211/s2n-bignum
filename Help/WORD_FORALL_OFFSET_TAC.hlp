@@ -1,0 +1,29 @@
+\DOC WORD_FORALL_OFFSET_TAC
+
+\TYPE {WORD_FORALL_OFFSET_TAC : int -> tactic}
+
+\SYNOPSIS
+Rewrites a universally quantified goal so that a quantified pointer variable is
+shifted by a fixed offset: occurrences of the variable minus the offset become
+the bare variable, and bare occurrences gain the offset.
+
+\DESCRIBE
+The argument {n : int} is the byte offset by which the quantified pointer is
+shifted; it may be supplied as a literal or as a bound integer expression. The
+goal must have a universally quantified word-valued variable occurring in the
+body both bare and offset downwards by {n}. The conclusion {t} is re-expressed
+relative to the shifted pointer: downward-offset occurrences become bare, bare
+occurrences become offset upwards by {n}, and further additive offsets
+accumulate accordingly.
+{
+      A ?- !x1 ... xn. t
+      ==================  WORD_FORALL_OFFSET_TAC n
+      A ?- !x1 ... xn. u
+}
+
+\COMMENTS
+The observed traces show only this one kind of transformation, applied to goals
+whose conclusion is a universally quantified implication about a machine-level
+specification.
+
+\ENDDOC

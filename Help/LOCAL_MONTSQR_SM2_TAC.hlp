@@ -1,0 +1,37 @@
+\DOC LOCAL_MONTSQR_SM2_TAC
+
+\TYPE {LOCAL_MONTSQR_SM2_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style x86 machine-state goal across one inlined
+Montgomery-squaring subroutine call, replacing the current symbolic state by a
+successor state and recording the squaring's specification as a new assumption.
+
+\DESCRIBE
+The first argument is an {int} offset/index used to locate the code block to be
+executed; the second is a {string list} naming the output and input variables
+of the squaring step (the result name and the operand name), which fix the
+names appearing in the newly introduced assumptions. The {eventually}
+postcondition is unchanged, but its state argument becomes a fresh successor
+state variable. Every assumption mentioning the old state — program counter,
+loaded bytes, register and memory reads, and the accumulated {MAYCHANGE}
+relation from the initial state — is discharged and re-added as the
+corresponding fact about the new state, with the {MAYCHANGE} component possibly
+extended by one further memory region. The old value stored in the overwritten
+destination region is dropped and replaced by a read assumption giving it the
+new result variable, and one new conditional arithmetic assumption is added
+saying that, under a bound hypothesis on the operand, the result equals the
+Montgomery square of the operand modulo the prime. Writing {A'} for this
+re-stated and extended assumption list:
+{
+   A ?- eventually x86 P s
+   ========================  LOCAL_MONTSQR_SM2_TAC n ["result"; "operand"]
+   A' ?- eventually x86 P s'
+}
+
+\COMMENTS
+All observed traces show this single kind of step, on goals of this
+machine-state form carrying the assumption set of an in-progress symbolic
+execution.
+
+\ENDDOC

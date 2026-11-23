@@ -1,0 +1,44 @@
+\DOC GEN_X86_ADD_RETURN_STACK_TAC
+
+\TYPE {GEN_X86_ADD_RETURN_STACK_TAC : thm * (thm option array) -> thm -> term -> int -> int * int -> tactic}
+
+\SYNOPSIS
+Proves an {ensures} specification for a subroutine that saves callee-saved
+registers and allocates stack space, deriving it from a given core
+specification about the subroutine body.
+
+\DESCRIBE
+{GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)} takes
+{execth : thm * (thm option array)}, the execution/decoding data for the
+program, including a theorem giving the length of the byte list;
+{coreth : thm}, the correctness theorem for the subroutine's core, stated for
+the inner entry/exit addresses; {reglist : term}, a term list of the
+callee-saved registers the wrapper preserves; {stackoff : int}, the size of the
+stack frame subtracted from the stack pointer; and {(n,m) : int * int},
+instruction counts for the wrapper's prologue and epilogue. It applies to a
+universally quantified (and sometimes outermost existentially quantified) goal
+of the form {A ?- ... ensures x86 ...} relating entry at the program's start
+with a stack-allocating wrapper and the return address. The goal is either
+closed outright or reduced to a single subgoal in which all the outer
+quantifiers have been stripped, the non-overlapping side conditions and the
+derived facts about the final machine state (register and flag reads, memory
+reads at the saved-register slots, the frame condition, and the accumulated
+event trace) have been added as assumptions, and the conclusion is the
+remaining existential claim about the event trace.
+{
+           A ?- t
+      ==============================  GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)
+           (no subgoals)
+}
+\noindent         A ?- t    ==============================
+GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)       A, h1
+... hn ?- u ```
+
+where {h1 ... hn} are the added hypotheses and {u} is the residual part of the
+specification's postcondition.
+
+\COMMENTS
+The observed traces show only these two outcomes, on goals stating x86
+subroutine {ensures} specifications of this shape.
+
+\ENDDOC

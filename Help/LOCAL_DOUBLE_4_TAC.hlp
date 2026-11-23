@@ -1,0 +1,40 @@
+\DOC LOCAL_DOUBLE_4_TAC
+
+\TYPE {LOCAL_DOUBLE_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-execution goal across an inlined
+modular-doubling code block, replacing the current state variable by a
+successor one and recording the doubling result as a new assumption.
+
+\DESCRIBE
+The first argument, an {int}, selects which register/offset convention (code
+variant) of the doubling block is stepped over; the second, a {string list},
+names the output and input quantities of the doubling (the result name and the
+name of the value being doubled), and thereby fixes the names used in the
+generated correctness assumption. The conclusion keeps its shape — an
+{eventually} claim about a postcondition — but its final state argument becomes
+a fresh later state variable. All state-dependent assumptions (program-counter
+value, code-loaded fact, register contents, memory-contents equations, and the
+accumulated {MAYCHANGE} relation from the initial state) are discharged and
+re-added with the new state variable: the program-counter value is advanced,
+the {MAYCHANGE} relation is extended by the components the block writes, and
+extra register and memory-contents assumptions are added for the newly written
+buffer. A new assumption of the form {t < u ==> ...}, stating that the computed
+result equals twice the input under a bound hypothesis on the input, is also
+introduced. Purely state-independent assumptions (nonoverlapping and arithmetic
+facts) are left untouched.
+{
+   A ?- t
+   =============================  LOCAL_DOUBLE_4_TAC n ["result"; "input"]
+   A' ?- t'
+}
+\noindent where the state variable in {t} and in the state-dependent part of
+{A} is advanced, giving {t'} and {A'}, and {A'} additionally contains the
+doubling fact and the new buffer-contents assumption.
+
+\COMMENTS
+The observed traces show only this single kind of forward step, on goals of
+this one assembly-verification form.
+
+\ENDDOC

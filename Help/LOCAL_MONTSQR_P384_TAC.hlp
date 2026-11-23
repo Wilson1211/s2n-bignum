@@ -1,0 +1,40 @@
+\DOC LOCAL_MONTSQR_P384_TAC
+
+\TYPE {LOCAL_MONTSQR_P384_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style symbolic execution goal across an inlined P-384
+Montgomery squaring block, replacing the current-state assumptions with ones
+about a later state and adding a conditional specification of the squaring
+result.
+
+\DESCRIBE
+The first argument, an {int}, selects a variant of the block being stepped
+over; both values occur in the observed traces, with no visible difference in
+the shape of the outcome. The second argument, a {string list}, names the
+result variable and the input variable of the squaring step; these names appear
+in the newly introduced specification assumption and in the memory-read
+assumption recording where the result is stored.
+{
+   A ?- eventually ... s
+   ================================  LOCAL_MONTSQR_P384_TAC n [res; inp]
+   A' ?- eventually ... s'
+}
+\noindent Here {s'} is a fresh later state variable and the {eventually} body
+is otherwise unchanged. In {A'}, every assumption of {A} mentioning the old
+state — the program-counter read, {bytes_loaded}, register and memory reads,
+and the accumulated {MAYCHANGE} frame relating the initial state to the current
+one — is discharged and re-added with the new state variable, the program
+counter advanced and the {MAYCHANGE} frame extended by the component written
+to; the remaining mathematical assumptions are retained, possibly reordered.
+{A'} also gains an implication whose hypothesis bounds the square of the input
+and whose conclusion equates the named result variable with the
+Montgomery-reduced square modulo {p_384}, together with a memory-read
+assumption giving that result at the destination address.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals of this {eventually} form carrying a full set of machine-state
+assumptions.
+
+\ENDDOC

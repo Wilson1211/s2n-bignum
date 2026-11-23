@@ -1,0 +1,29 @@
+\DOC DISCHARGE_MEMACCESS_INBOUNDS_TAC
+
+\TYPE {DISCHARGE_MEMACCESS_INBOUNDS_TAC : tactic}
+
+\SYNOPSIS
+Closes a goal whose conclusion asserts that a memory-access event trace lies
+within given readable and writable address ranges.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal {A ?- t} whose conclusion is a
+{memaccess_inbounds} claim relating an event list to a list of readable regions
+and a list of writable regions, it solves the goal outright:
+{
+   A ?- t
+   ========================  DISCHARGE_MEMACCESS_INBOUNDS_TAC
+}
+\noindent The event list may be built from {APPEND}/{CONS} of concrete load,
+store and jump events, from abstract trace functions, or from {ENUMERATEL}
+bodies. In the observed traces it succeeds both when the facts it needs
+(nonoverlapping conditions, {memaccess_inbounds} claims about sub-traces,
+symbolic machine state) occur among {A} and when the conclusion itself is
+already an assumption.
+
+\COMMENTS
+All observed traces show only this outcome — the goal closed — and the inputs
+are always {memaccess_inbounds} conclusions arising from symbolic-execution
+states.
+
+\ENDDOC

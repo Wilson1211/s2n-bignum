@@ -1,0 +1,44 @@
+\DOC ACCUMULATE_ARITH_TAC
+
+\TYPE {ACCUMULATE_ARITH_TAC : string -> tactic}
+
+\SYNOPSIS
+Given a state-name string, rewrites one assumption describing a machine-word
+arithmetic result for that state into a named abstract summand/carry form,
+adding the corresponding arithmetic equation as a new assumption and leaving
+the conclusion unchanged.
+
+\DESCRIBE
+The single unnamed argument is a {string} naming the state whose assumptions
+are to be processed; in the observed traces it is supplied either as a plain
+identifier or as an expression computing the name. The tactic selects one
+assumption of {A} that expresses a register/flag/location value as a composite
+word-arithmetic term for the named state and deletes it, and in some
+applications also deletes a second assumption mentioning the same composite
+term (typically a flag equivalence). It then appends new assumptions: an
+arithmetic equation over {&}-injected values relating a fresh summand and carry
+constant to the operands, together with reformulated readings of the affected
+locations and flag in terms of those fresh constants. So, writing {z1 ... zp}
+for the appended assumptions:
+{
+            A ?- t
+   =============================  ACCUMULATE_ARITH_TAC s
+           A' ?- t
+}
+\noindent where {A'} is {A} with one or two assumptions removed and one to
+three replacement assumptions {z1 ... zp} appended; the conclusion {t} is
+untouched and no case split occurs.
+
+\FAILURE
+Fails with a search exception, arising inside the tactic's own search over
+candidate assumptions, when no assumption of the goal matches the pattern it
+looks for under the supplied state name — e.g. when the assumptions for that
+state contain no as-yet-unprocessed composite word-arithmetic result, or when
+the state named by the argument is not the one described by the assumptions.
+
+\COMMENTS
+All observed traces show this single kind of transformation, always on goals
+whose assumptions mention the supplied state name and whose conclusion is an
+{eventually} machine-semantics statement.
+
+\ENDDOC

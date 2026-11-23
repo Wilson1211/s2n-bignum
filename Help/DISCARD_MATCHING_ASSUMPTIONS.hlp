@@ -1,0 +1,29 @@
+\DOC DISCARD_MATCHING_ASSUMPTIONS
+
+\TYPE {DISCARD_MATCHING_ASSUMPTIONS : term list -> tactic}
+
+\SYNOPSIS
+{DISCARD_MATCHING_ASSUMPTIONS pats} removes from the assumption list every
+assumption matching any of the given term patterns, leaving the conclusion
+unchanged.
+
+\DESCRIBE
+The argument {pats : term list} is a list of patterns whose free variables act
+as wildcards, instantiable when matched against an assumption; any assumption
+matching at least one pattern is discarded.
+{
+          A ?- t
+     ==================  DISCARD_MATCHING_ASSUMPTIONS pats
+          A' ?- t
+}
+\noindent where {A'} is {A} minus the assumptions matching {pats}, the
+surviving assumptions keeping their original relative order (so later
+assumptions are renumbered). A single call may remove any number of
+assumptions: several matches of one pattern, matches of different patterns, or
+none at all, in which case the goal is returned unchanged.
+
+\COMMENTS
+The observed traces show only this one kind of outcome, always a single
+resulting goal with an unchanged conclusion.
+
+\ENDDOC

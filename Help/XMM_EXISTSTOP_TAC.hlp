@@ -1,0 +1,29 @@
+\DOC XMM_EXISTSTOP_TAC
+
+\TYPE {XMM_EXISTSTOP_TAC : string -> term -> tactic}
+
+\SYNOPSIS
+Replaces an assumption giving the value of the lower half of a vector register
+by an assumption giving the value of the whole register as that value joined
+with a freshly named variable for the upper half.
+
+\DESCRIBE
+{top : string} names the new free variable standing for the upper half, and
+{y : term} is the full-width register component whose read assumption is
+introduced. The tactic deletes from the assumptions the equation that reads the
+narrow (lower-half) component of the register in the current state and equates
+it to some term {u}, and appends a new equation reading the component named by
+{y} in that same state, equating it to the join of a new variable named by
+{top} with {u}. The conclusion and all other assumptions are unchanged.
+{
+   A, (narrow read of register in state = u) ?- t
+   =========================================  XMM_EXISTSTOP_TAC top y
+   A, (read of y in state = join top u) ?- t
+}
+
+\COMMENTS
+In all observed traces only this one kind of transformation occurs, always on a
+goal whose conclusion is an {eventually} statement about a state that already
+carries such a narrow-register read assumption.
+
+\ENDDOC

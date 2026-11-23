@@ -1,0 +1,30 @@
+\DOC EXPAND_MAYCHANGE_YMM_REGS_TAC
+
+\TYPE {EXPAND_MAYCHANGE_YMM_REGS_TAC : tactic}
+
+\SYNOPSIS
+Rewrites the goal's single {MAYCHANGE}-composition assumption into a normalised
+form in which every state component appears in its own one-element {MAYCHANGE},
+leaving the conclusion untouched.
+
+\DESCRIBE
+The tactic takes no arguments. It acts on a goal whose assumption list contains
+exactly one assumption of the form {(MAYCHANGE l1 ,, ... ,, MAYCHANGE ln) s s'}
+and replaces it by an equivalent composition in which each {MAYCHANGE} carries
+a singleton component list; the register and flag components are reordered
+(sorted), duplicated components are merged, and the memory components are
+placed last. The conclusion and all other assumptions are unchanged, except
+that the rewritten assumption is removed and re-added at the end of the
+assumption list, so earlier assumptions shift position.
+{
+   A, (MAYCHANGE l1 ,, ... ,, MAYCHANGE ln) s s' ?- t
+   ==================================================  EXPAND_MAYCHANGE_YMM_REGS_TAC
+   A, (MAYCHANGE [c1] ,, ... ,, MAYCHANGE [cm]) s s' ?- t
+}
+
+\COMMENTS
+The observed traces show only this one kind of transformation, always on goals
+whose conclusion is an {eventually}-style machine-state property and whose
+assumptions include exactly one such {MAYCHANGE} term.
+
+\ENDDOC

@@ -1,0 +1,40 @@
+\DOC LOCAL_CMADD_4_TAC
+
+\TYPE {LOCAL_CMADD_4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Symbolically executes an inlined scaled-add-and-multiply (constant-multiple
+plus addend) subroutine block in an {eventually} goal, advancing the symbolic
+state variable by one step, re-expressing the state-dependent assumptions in
+terms of the new state, and adding bounds and congruence facts for the freshly
+computed result.
+
+\DESCRIBE
+{LOCAL_CMADD_4_TAC n [x1; x2; x3]} takes an {int} (in all observed traces the
+same value) and a {string list} of three names identifying the result variable
+and the two input operand variables of the block; the first name, {x1}, becomes
+the newly introduced result variable appearing in the added assumptions. The
+conclusion keeps its shape — an {eventually} postcondition applied to a state —
+with the state argument replaced by the next-numbered state variable. Every
+assumption mentioning the old state (program-counter, {bytes_loaded},
+memory/register reads, and the accumulated {MAYCHANGE} frame) is discharged and
+re-added in terms of the new state, with the frame extended by the memory
+region written by the block, the program-counter assumption updated to a later
+offset, and one memory-read assumption for the destination region added
+equating it to {x1}. Two purely arithmetic assumptions about {x1} are also
+added: an upper bound, and a modular congruence relating it to a fixed multiple
+of one operand plus the other. Assumptions not referring to the state are
+retained unchanged, though reordered.
+{
+   A ?- eventually ... (P s)
+   =============================  LOCAL_CMADD_4_TAC n [x1; x2; x3]
+   A' ?- eventually ... (P s')
+}
+\noindent where {s'} is the next-numbered state variable and {A'} is {A}
+restated as described above, with the new assumptions about {x1}.
+
+\COMMENTS
+All observed traces show this same single-goal state-advancing behaviour on
+{eventually} goals with large assumption lists.
+
+\ENDDOC

@@ -1,0 +1,33 @@
+\DOC ASSUME_CALLEE_SAFETY_TAILED_TAC
+
+\TYPE {ASSUME_CALLEE_SAFETY_TAILED_TAC : thm -> string -> tactic}
+
+\SYNOPSIS
+Adds to the goal's assumptions a labelled instance of a callee safety theorem,
+with its existentially quantified event function replaced by a fresh named
+function and its event trace generalised by an extra universally quantified
+tail variable.
+
+\DESCRIBE
+The first argument {safety_th : thm} is the callee's safety specification, an
+existentially quantified {ensures} statement about the event trace; the second,
+{name : string}, is the label under which the derived assumption is placed in
+the assumption list. The conclusion is unchanged, and the added assumption
+{th'} is the body of {safety_th} with its leading existential witness
+instantiated to a freshly generated event-function constant and with an extra
+trailing universally quantified trace variable appended to the quantifier
+prefix, so that the pre- and post-condition trace equalities are stated
+relative to that trace being appended to the original one. Existing
+assumptions, including ones added by earlier applications, are retained.
+{
+           A ?- t
+   ======================  ASSUME_CALLEE_SAFETY_TAILED_TAC safety_th name
+        A, th' ?- t
+}
+
+\COMMENTS
+In all observed traces this single kind of outcome occurs, always on goals
+whose conclusion is an existentially quantified {ensures}-style safety
+statement.
+
+\ENDDOC

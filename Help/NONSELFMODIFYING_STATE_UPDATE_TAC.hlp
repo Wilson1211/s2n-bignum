@@ -1,0 +1,34 @@
+\DOC NONSELFMODIFYING_STATE_UPDATE_TAC
+
+\TYPE {NONSELFMODIFYING_STATE_UPDATE_TAC : thm -> tactic}
+
+\SYNOPSIS
+Replaces an assumption about one machine state with the corresponding
+assumption about a successor state, using a supplied theorem and the
+state-update equation occurring in the goal's conclusion.
+
+\DESCRIBE
+The argument {bth : thm} is a theorem of the form "if a property holds of a
+state at some address, then it holds of any state whose relevant memory region
+reads the same"; its conclusion determines which assumption is transferred and
+to which state. The tactic locates the assumption matching the premise of {th}
+for a state {t}, discharges it, and adds in its place the same assumption with
+{t} replaced by the successor state {u} named in the goal's conclusion — the
+state given by an equation of the form "a nest of state updates applied to {t}
+equals {u}". The conclusion of the goal is left unchanged, and exactly one
+assumption is modified. The replacement assumption is appended at the end of
+the assumption list, so the remaining assumptions keep their relative order but
+shift index.
+{
+       A, P t ?- s
+     ================  NONSELFMODIFYING_STATE_UPDATE_TAC bth
+       A, P u ?- s
+}
+
+\COMMENTS
+In all observed traces the behaviour is this same single-goal,
+one-assumption-rewritten transformation, on goals whose conclusion is either an
+implication from a state-update equation or such an implication with a further
+{eventually} consequent.
+
+\ENDDOC

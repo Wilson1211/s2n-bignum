@@ -1,0 +1,39 @@
+\DOC SIMPLE_ARITH_TAC
+
+\TYPE {SIMPLE_ARITH_TAC : tactic}
+
+\SYNOPSIS
+{SIMPLE_ARITH_TAC} attempts to prove a goal's conclusion by linear arithmetic
+reasoning over the natural-number facts available in the goal, discharging the
+assumptions into the problem.
+
+\DESCRIBE
+It takes no arguments. Applied to a goal, it either closes it outright or
+fails:
+{
+   A ?- t
+   ======================  SIMPLE_ARITH_TAC
+}
+\noindent The assumptions {A} are used as extra hypotheses; they may number in
+the dozens and include non-arithmetic facts such as machine-state readings, and
+assumptions irrelevant to the arithmetic are harmless. It succeeds on
+conclusions built from arithmetic comparisons, equations and
+conjunctions/disjunctions of them over naturals, including goals whose
+conclusion is a word term or conditional whose equality follows from arithmetic
+facts, and it also closes goals with no assumptions at all when the conclusion
+is a valid arithmetic statement.
+
+\FAILURE
+Fails when the conclusion, taken together with whatever arithmetic content the
+assumptions supply, is not derivable by the linear decision procedure it
+invokes: for instance when the conclusion is plainly false as a numeric
+inequality, when it depends on nonlinear facts or on non-arithmetic subterms
+treated as opaque atoms, or when the assumptions needed to justify it are not
+expressible in the linear fragment. The failure is reported by the arithmetic
+rule the tactic calls, signalling that no contradiction could be found.
+
+\COMMENTS
+The observed traces show only the two outcomes of closing the goal or failing;
+none shows it transforming a goal into new subgoals or altering assumptions.
+
+\ENDDOC

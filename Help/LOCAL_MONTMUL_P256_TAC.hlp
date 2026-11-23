@@ -1,0 +1,41 @@
+\DOC LOCAL_MONTMUL_P256_TAC
+
+\TYPE {LOCAL_MONTMUL_P256_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a machine-state symbolic-execution goal across one inlined
+Montgomery-multiplication subroutine, replacing the current state variable by
+its successor and adding an assumption characterising the product written to
+the destination buffer.
+
+\DESCRIBE
+The first argument is an {int}, the offset/index locating the call site in the
+program being stepped; the second is a {string list} naming the destination and
+the two source operands of the multiplication, these names selecting which
+stored values the new assumption relates. The goal it is applied to has an
+{eventually} conclusion whose assumptions describe the contents of registers
+and memory blocks in the current state {s}, together with a program-counter
+assumption, a {bytes_loaded} assumption and a {MAYCHANGE} frame relating the
+initial state to {s}. A fresh successor state {s'} is introduced, and every
+assumption mentioning {s} is discharged and re-added with {s'} in its place:
+the program-counter assumption now records the address after the subroutine,
+and the {MAYCHANGE} frame now relates the initial state to {s'} and may gain a
+component for the destination buffer. Two assumptions are new: one stating that
+the destination buffer in {s'} holds the named result value, and one giving the
+conditional Montgomery-product specification of that value in terms of the two
+named operands. Purely arithmetic and non-overlapping assumptions are retained
+unchanged, though reordered.
+{
+             A ?- eventually ... s
+    ===================================== LOCAL_MONTMUL_P256_TAC i ["dest"; "src1"; "src2"]
+             A' ?- eventually ... s'
+}
+\noindent where {A'} consists of the re-stated assumptions about {s'} plus the
+two new assumptions, as described above.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals of the same form: an {eventually} conclusion with a full set of
+machine-state assumptions for the current state.
+
+\ENDDOC

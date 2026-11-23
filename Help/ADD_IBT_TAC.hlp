@@ -1,0 +1,27 @@
+\DOC ADD_IBT_TAC
+
+\TYPE {ADD_IBT_TAC : thm -> thm -> thm -> tactic}
+
+\SYNOPSIS
+Closes a correctness goal about a full machine-code program by deriving it from
+a theorem stated for the corresponding trimmed program.
+
+\DESCRIBE
+{fullmc} is a theorem giving the byte-list definition of the full machine code,
+{trimc} the analogous definition of the trimmed machine code, and {th} an
+already-proved specification theorem whose statement coincides with the goal
+except that it mentions the trimmed code in place of the full code. Applied to
+a goal whose conclusion is a universally quantified (sometimes existentially
+prefixed) {ensures} specification mentioning the full machine-code constant, it
+discharges the goal completely:
+{
+       A ?- t
+   ======================  ADD_IBT_TAC fullmc trimc th
+}
+
+\COMMENTS
+In all observed traces, only this closing behaviour appears, on goals with no
+assumptions whose conclusions are machine-code correctness statements paired
+with a matching specification theorem for the trimmed code.
+
+\ENDDOC

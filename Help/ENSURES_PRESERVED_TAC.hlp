@@ -1,0 +1,32 @@
+\DOC ENSURES_PRESERVED_TAC
+
+\TYPE {ENSURES_PRESERVED_TAC : string -> term -> tactic}
+
+\SYNOPSIS
+Strengthens an {ensures} goal by conjoining to both pre- and postcondition the
+claim that the state component {ctm} reads as a fresh variable {pname}, and
+adding a {MAYCHANGE} clause for {ctm} to the frame.
+
+\DESCRIBE
+{pname : string} names the new variable standing for the component's initial
+value, which appears in the added conjuncts; {ctm : term} is the state
+component (a readable state field, or a composition of such) whose preservation
+is asserted and which is appended to the {MAYCHANGE} frame. Applied to an
+{ensures} goal it yields one subgoal, with assumptions unchanged:
+{
+   A ?- ensures ... P Q R
+   =============================== ENSURES_PRESERVED_TAC pname ctm
+   A ?- ensures ... P' Q' R'
+}
+\noindent where {P'} is {P} with {read ctm s = pname} conjoined at the end,
+{Q'} is {Q} with the same conjunct added at the end, and {R'} is {R} with
+{MAYCHANGE [ctm]} appended as a further {,,} component. In the process the
+{,,}-composed frame and the pre/postcondition conjunctions are
+re-associated/flattened, so bracketed subgroups of {MAYCHANGE} clauses and of
+precondition conjuncts come out as a flat right-nested chain.
+
+\COMMENTS
+In all observed traces only this single kind of transformation occurs, always
+on {ensures} goals for machine-code programs.
+
+\ENDDOC

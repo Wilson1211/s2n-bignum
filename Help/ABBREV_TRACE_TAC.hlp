@@ -1,0 +1,34 @@
+\DOC ABBREV_TRACE_TAC
+
+\TYPE {ABBREV_TRACE_TAC : thm list ref -> tactic}
+
+\SYNOPSIS
+Replaces the assumption describing a state's current event trace by one stating
+that the trace equals a freshly abbreviated trace term applied to the goal's
+parameters, swaps in the corresponding bounds assumption for the new
+abbreviation, and leaves the conclusion unchanged.
+
+\DESCRIBE
+The single argument {stored_abbrevs : thm list ref} is a mutable reference cell
+in which the tactic records the abbreviation theorems it creates; it is not
+part of the goal and nothing of it appears in the resulting goals. Applied to
+{A ?- t}, the tactic locates in {A} the assumption equating a state's event
+list {u} with an explicit prefix of concrete event constructors applied to an
+older abbreviated trace (or to the trailing trace variable), removes it, and
+adds instead an assumption equating {u} with a new trace constant applied to
+the goal's address/pc/stackpointer parameters. The bounds assumption for the
+old trace abbreviation is likewise removed, and the analogous bounds assumption
+for the new abbreviation is added at the end of the assumption list, so the
+remaining assumptions are merely renumbered.
+{
+       A, u = oldprefix, bounds oldtrace ?- t
+       ====================================== ABBREV_TRACE_TAC stored_abbrevs
+       A, u = newtrace..., bounds newtrace ?- t
+}
+
+\COMMENTS
+The observed traces show only this single-subgoal rewriting of trace
+assumptions in machine-state goals about eventual execution, always with such a
+pair of trace assumptions present.
+
+\ENDDOC

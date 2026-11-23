@@ -1,0 +1,33 @@
+\DOC WITNESS_F_EVENTS_TAC
+
+\TYPE {WITNESS_F_EVENTS_TAC : thm -> tactic}
+
+\SYNOPSIS
+Instantiates the leading existential of the goal with a witness function built
+from a supplied theorem, leaving one subgoal in which the existential variable
+is replaced by an explicit lambda-abstraction applied to the original
+arguments.
+
+\DESCRIBE
+The argument {th_noexists : thm} is the theorem from which the witness term for
+the existentially quantified function is constructed. Applied to a goal whose
+conclusion is {?f. t}, the tactic strips the outer existential and returns a
+single subgoal whose conclusion is {t} with {f} replaced by a beta-unreduced
+lambda term {\x1 ... xn. ...} derived from {th_noexists}; consequently the
+applications of {f} in the body appear as that abstraction applied to the
+original argument terms, with one argument position adjusted by an offset.
+Everything else in the conclusion — the surrounding universal quantifiers,
+implications and other structure — is unchanged, and the assumptions are
+untouched.
+{
+   A ?- ?f. t
+   ================================  WITNESS_F_EVENTS_TAC th_noexists
+   A ?- t[(\x1 ... xn. ...) / f]
+}
+
+\COMMENTS
+In all observed traces only this one kind of outcome occurs, always on goals
+with no assumptions whose conclusion is a single existential over a function
+used in event-list equations.
+
+\ENDDOC

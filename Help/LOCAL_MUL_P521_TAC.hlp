@@ -1,0 +1,41 @@
+\DOC LOCAL_MUL_P521_TAC
+
+\TYPE {LOCAL_MUL_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal across one inlined
+modular-multiplication subroutine, replacing the current symbolic state with a
+later one and adding an assumption characterising the computed product modulo
+{p_521}.
+
+\DESCRIBE
+The first argument is an {int} offset/index used in locating the call site,
+which affects the instruction-count/state advance; the second is a
+{string list} naming the output buffer and the two input buffers of the
+multiplication, which determines the names appearing in the new result
+assumption. The conclusion retains the same {eventually} postcondition, but its
+final state variable is replaced by a fresh, later state variable. Every
+assumption mentioning the old state — the program-counter value,
+{bytes_loaded}, register reads, memory-content reads, and the accumulated
+{MAYCHANGE} relation — is discharged and re-added for the new state:
+{MAYCHANGE} is extended with the newly written memory region, and the
+register/memory reads are updated to the new state, with the destination and
+source pointer registers now holding the addresses given by the name arguments.
+A new assumption {t < p_521 /\ u < p_521 ==> v = (t * u) MOD p_521} relates the
+named output to the product of the named inputs. Assumptions that do not refer
+to the state, such as nonoverlapping conditions and earlier arithmetic
+characterisations, are kept, though their order may change.
+{
+          A ?- t
+   ========================  LOCAL_MUL_P521_TAC n ["v"; "t"; "u"]
+          A' ?- t'
+}
+\noindent where {A'} is {A} with the state-dependent assumptions restated for
+the new state plus the new product assumption, and {t'} is {t} with the state
+variable advanced.
+
+\COMMENTS
+In all observed traces this is the only outcome, always on goals of this
+{eventually}-with-machine-state shape.
+
+\ENDDOC

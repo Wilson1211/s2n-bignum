@@ -1,0 +1,39 @@
+\DOC LOCAL_SUB_TWICE4_TAC
+
+\TYPE {LOCAL_SUB_TWICE4_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a machine-state program-logic goal across one inlined
+modular-subtraction subroutine, replacing the current state variable by a
+successor state and adding the arithmetic specification of the computed result.
+
+\DESCRIBE
+The first argument is an {int} offset/index selecting which call site (block)
+within the code is stepped over; the second is a {string list} naming the
+result and the two operand variables of the subtraction, which fixes the names
+used in the newly introduced assumptions. The tactic takes one goal to one
+goal: the conclusion's final state argument changes from the previous state
+variable to a fresh successor state variable, the {eventually} body being
+otherwise unchanged. Every assumption mentioning the old state — the
+program-counter reading, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} relation — is discharged and re-added at the new state,
+with the program counter advanced and the {MAYCHANGE} relation extended by the
+memory component written by the subroutine. A new memory-read assumption gives
+the destination buffer's contents as the result variable, and one or two purely
+arithmetic assumptions are added, bounding the result and stating that it is
+congruent to the difference of the two operands modulo the relevant prime,
+sometimes as an implication conditional on a bound on an operand.
+{
+           A ?- t
+   ======================================  LOCAL_SUB_TWICE4_TAC n [res; op1; op2]
+           A' ?- t'
+}
+\noindent Here {A'} is {A} with the state-dependent assumptions restated at the
+new state, plus the new memory-read assumption and the new arithmetic
+assumptions, and {t'} is {t} at the new state.
+
+\COMMENTS
+In all observed traces only this single kind of transformation occurs, on goals
+of this program-logic shape.
+
+\ENDDOC

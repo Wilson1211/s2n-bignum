@@ -1,0 +1,36 @@
+\DOC DISCHARGE_MEMACCESS_INBOUNDS_USING_ASM_TAC
+
+\TYPE {DISCHARGE_MEMACCESS_INBOUNDS_USING_ASM_TAC : tactic}
+
+\SYNOPSIS
+Closes a {memaccess_inbounds} goal by deriving it from a matching
+{memaccess_inbounds} assumption in the goal's assumption list.
+
+\DESCRIBE
+Takes no arguments. It applies to goals whose conclusion is a
+{memaccess_inbounds} claim about an event trace together with a list of
+readable regions and a list of writable regions, and discharges such a goal
+outright:
+{
+   A ?- memaccess_inbounds t u1 u2
+   ================================  DISCHARGE_MEMACCESS_INBOUNDS_USING_ASM_TAC
+}
+\noindent In the successful observed traces, A always contains a
+{memaccess_inbounds} fact whose trace is the same as, or a sub-trace of, the
+trace in the conclusion, and whose region lists are covered by those in the
+conclusion.
+
+\FAILURE
+Fails with a no-match error from an internal {MATCH_MP_TAC} step when the
+conclusion's trace cannot be aligned with the available {memaccess_inbounds}
+assumption — for instance when the conclusion's trace is an append or cons
+wrapping of the assumption's trace in a shape the tactic cannot reduce, or when
+the conclusion's region lists do not correspond in the required way to those of
+any such assumption. The failure arises inside the tactic itself rather than
+from any supplied argument.
+
+\COMMENTS
+The observed traces show only this one behaviour — closing such goals — and no
+case where the goal is transformed or split.
+
+\ENDDOC

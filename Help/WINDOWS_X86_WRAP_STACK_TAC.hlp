@@ -1,0 +1,40 @@
+\DOC WINDOWS_X86_WRAP_STACK_TAC
+
+\TYPE {WINDOWS_X86_WRAP_STACK_TAC : thm -> thm -> thm -> term -> int -> tactic}
+
+\SYNOPSIS
+Proves a Windows-ABI {ensures} specification for a stack-using wrapper routine
+from the corresponding standard-ABI core specification, either closing the goal
+outright or reducing it to a residual event-trace obligation.
+
+\DESCRIBE
+The arguments are {winmc : thm}, the definition of the Windows wrapper's
+machine code, matching the code loaded in the goal; {stdmc : thm}, the
+definition of the standard-ABI core machine code; {coreth : thm}, the
+already-proved specification of the core routine (a correctness {ensures}
+statement, or an existentially quantified event-trace/safety statement);
+{reglist : term}, a HOL list of the callee-saved registers the wrapper spills
+(possibly empty); and {stdstackoff : int}, the stack offset used by the
+standard-ABI core. It applies to a goal with no assumptions whose conclusion is
+a universally quantified Windows-ABI {ensures} statement, optionally preceded
+by an existential quantifier over an event-trace function. The tactic either
+closes the goal or leaves one subgoal, whose conclusion {?x1 ... xn. u} is a
+purely event-trace statement relating a concrete explicit trace (stores of
+saved registers, the core routine's trace, loads and a final jump) to the
+required trace function, and whose assumption list {A} is created from nothing,
+containing: the nonoverlapping side conditions in unfolded
+{nonoverlapping_modulo} form, the core routine's trace and {memaccess_inbounds}
+facts, and facts about a final concrete state — code loaded, register and flag
+values, saved values in stack slots, program counter and stack pointer, and a
+{MAYCHANGE} frame relating the initial and final states.
+{
+            ?- t
+   =================================  WINDOWS_X86_WRAP_STACK_TAC winmc stdmc coreth reglist stdstackoff
+      (no goals)   or   A ?- ?x1 ... xn. u
+}
+
+\COMMENTS
+The observed traces show only these two outcomes, always starting from goals
+with no assumptions.
+
+\ENDDOC

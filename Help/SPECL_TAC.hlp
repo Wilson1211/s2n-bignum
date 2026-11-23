@@ -1,0 +1,25 @@
+\DOC SPECL_TAC
+
+\TYPE {SPECL_TAC : term list -> tactic}
+
+\SYNOPSIS
+Generalises the goal's conclusion by universally quantifying over the given
+list of variables, in the order supplied.
+
+\DESCRIBE
+The single argument is a {term list} of variables {x1 ... xn}, which become new
+leading universal quantifiers on the goal's conclusion; the assumptions are
+unchanged, the conclusion is otherwise untouched, and other free variables are
+left free.
+{
+   A ?- t
+   ========================  SPECL_TAC [x1; ...; xn]
+   A ?- !x1 ... xn. t
+}
+
+\COMMENTS
+In all observed traces only this generalising behaviour appears, always on
+goals with no assumptions and with argument lists of variables already
+occurring free in the conclusion.
+
+\ENDDOC

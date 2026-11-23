@@ -1,0 +1,23 @@
+\DOC SPEC1_TAC
+
+\TYPE {SPEC1_TAC : term -> tactic}
+
+\SYNOPSIS
+Generalises a free variable of the goal's conclusion, adding it as a new
+outermost universal quantifier.
+
+\DESCRIBE
+The single argument is a {term}: a variable {t} occurring free in the goal's
+conclusion, which becomes the new outermost bound variable.
+{
+   A ?- u
+   ================  SPEC1_TAC `t`
+   A ?- !t. u
+}
+\noindent If {u} already begins with universal quantifiers {!x1 ... xn.} (with
+n possibly zero), the new binder is placed outermost, before them.
+
+\COMMENTS
+In all observed traces, only this one transformation occurs.
+
+\ENDDOC

@@ -1,0 +1,32 @@
+\DOC PROVE_SAFETY_SPEC_TAC
+
+\TYPE {PROVE_SAFETY_SPEC_TAC : ?public_vars:term list -> thm * (thm option array) -> tactic}
+
+\SYNOPSIS
+A complete decision procedure for constant-time/safety specification goals: it
+discharges an existentially quantified event-trace specification goal outright.
+
+\DESCRIBE
+The optional argument {public_vars : term list} lists the terms naming the
+variables treated as public, i.e. those the event function may depend on; {exec
+: thm * (thm option array)} is the execution record for the program under
+analysis, consisting of a theorem giving the length of the machine-code list
+together with an array of per-instruction decoding theorems. It applies to a
+goal whose postcondition asserts that the emitted event trace equals {f_events}
+applied to some of the quantified variables and satisfies a
+memory-access-inbounds condition:
+{
+   ?- ?f_events. !x1 ... xn. t ==> ensures ...
+   =============================================  PROVE_SAFETY_SPEC_TAC public_vars exec
+}
+{
+   
+}
+\noindent so the goal is proved completely, leaving nothing behind and
+introducing no new assumptions.
+
+\COMMENTS
+The observed traces show only this single outcome, on assumption-free goals of
+exactly this existential/universal {ensures} safety-specification shape.
+
+\ENDDOC

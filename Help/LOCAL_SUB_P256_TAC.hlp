@@ -1,0 +1,39 @@
+\DOC LOCAL_SUB_P256_TAC
+
+\TYPE {LOCAL_SUB_P256_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a machine-state {eventually} goal past an inlined modular-subtraction
+subroutine, moving to a fresh successor state and adding an assumption
+describing the subtraction's result.
+
+\DESCRIBE
+The first argument is an {int} (constant {0} in all observed traces); the
+second is a {string list} naming the destination and the two operand buffers of
+the subtraction step being discharged. On a goal {A ?- t} whose conclusion
+asserts {eventually} at some machine state, the tactic produces one subgoal in
+which that state variable is replaced throughout the conclusion by a fresh
+successor state. Every hypothesis mentioning the old state — the
+program-counter equation, the code-loaded assertion, the register and
+memory-contents equations, and the accumulated {MAYCHANGE} relation from the
+initial state — is removed and re-asserted about the new state, with the
+program counter advanced, the {MAYCHANGE} relation possibly extended by a
+further memory component, and the memory equation for the destination buffer
+now giving the newly computed value. All other assumptions are carried over
+unchanged. One new assumption is added, stating that provided both operands are
+below the modulus (named by the first string argument), the destination value
+equals the difference of the operands reduced modulo that modulus.
+{
+   A ?- t
+   ========================================  LOCAL_SUB_P256_TAC n [dest; op1; op2]
+   A' ?- t'
+}
+\noindent where {A'} is {A} with the state-dependent hypotheses relocated to
+the new state, plus the new subtraction hypothesis, and {t'} is {t} at the new
+state.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour, on
+goals of this one {eventually}-with-machine-state shape.
+
+\ENDDOC

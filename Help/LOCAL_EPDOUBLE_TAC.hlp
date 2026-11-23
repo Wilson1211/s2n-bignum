@@ -1,0 +1,35 @@
+\DOC LOCAL_EPDOUBLE_TAC
+
+\TYPE {LOCAL_EPDOUBLE_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually} machine-execution goal across a called point-doubling
+subroutine, replacing the assumptions about the current machine state {sn} by
+corresponding ones for a successor state, plus a summary theorem about the
+subroutine's result.
+
+\DESCRIBE
+The single {int} argument {n} fixes the index of the current state in the
+assumptions: the state variable {sn} is matched and a new state {s(n+1)} is
+introduced, with the goal's conclusion restated about it. Exactly one subgoal
+results. Invariant-style assumptions (size/nonoverlap conditions, numeric
+bounds, previously derived {forall}-facts about earlier results) are kept
+unchanged. All assumptions mentioning the old state — register and memory
+reads, flag equations, and the accumulated {MAYCHANGE} frame relating the
+initial state to the old one — are removed and re-added with the new state
+substituted, except that the flag assumptions about the old state are dropped,
+the program-counter assumption is replaced by one for a new address, and the
+{MAYCHANGE} frame gains additional components covering the memory region
+written by the subroutine. A new universally quantified assumption is added
+stating the doubling specification for the output buffer read in the new state.
+{
+   A[sn] ?- eventually ... sn
+   ========================================  LOCAL_EPDOUBLE_TAC n
+   A'[s(n+1)], (!z1 ... zp. doubling spec for output buffer read in s(n+1)) ?- eventually ... s(n+1)
+}
+
+\COMMENTS
+All observed traces show this single kind of transformation, on goals of this
+one shape.
+
+\ENDDOC

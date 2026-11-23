@@ -1,0 +1,27 @@
+\DOC PURE_BOUNDER_TAC
+
+\TYPE {PURE_BOUNDER_TAC : thm list -> tactic}
+
+\SYNOPSIS
+Proves a real-arithmetic inequality goal outright from bounding facts supplied
+as theorems, closing the goal.
+
+\DESCRIBE
+Takes one argument of type {thm list}: theorems giving ranges and defining
+equations for the real-valued subterms appearing in the goal's conclusion,
+which supply the bounds used to discharge the goal. Applied to a goal whose
+conclusion is an inequality between real-valued arithmetic expressions, or a
+conjunction of such inequalities, it closes the goal:
+{
+   A ?- t
+   ======================  PURE_BOUNDER_TAC thl
+}
+
+\COMMENTS
+In all observed traces only this single outcome occurs — goals closed — and
+only with conclusions that are strict or non-strict real inequalities built
+from arithmetic over terms constrained by the supplied theorems; the goals
+carry large assumption lists {A}, which are left untouched, with nothing added
+to them.
+
+\ENDDOC

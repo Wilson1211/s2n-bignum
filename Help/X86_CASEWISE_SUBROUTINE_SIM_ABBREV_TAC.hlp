@@ -1,0 +1,38 @@
+\DOC X86_CASEWISE_SUBROUTINE_SIM_ABBREV_TAC
+
+\TYPE {X86_CASEWISE_SUBROUTINE_SIM_ABBREV_TAC : thm * (thm * (thm option array)) * int * thm * thm -> term list -> term -> string -> int -> tactic}
+
+\SYNOPSIS
+Simulates a call to an inlined subroutine in an {eventually}-style x86 goal,
+advancing the symbolic state variable past the call and abbreviating the
+subroutine's output as a fresh variable constrained by a new assumption.
+
+\DESCRIBE
+{X86_CASEWISE_SUBROUTINE_SIM_ABBREV_TAC} takes a tuple {(mc,ex,d,smc,cth)}
+consisting of the caller's machine-code theorem, its execution/length theorem,
+an integer offset of the callee's entry point inside the caller, the callee's
+machine-code theorem and the callee's correctness theorem; a list {ins} of
+terms describing the subroutine's inputs as read from the pre-state (registers,
+memory contents, return address, stack pointer); a term {outs} describing the
+subroutine's output as read from the post-state {s'}; a string {s} used as
+prefix for the name of the new state variable; and an integer {n} appended to
+that prefix to form the new state name.
+
+It yields a single subgoal whose conclusion has the same {eventually} body,
+with the state argument replaced by the freshly named successor state. Every
+assumption mentioning the old state is discharged and replaced by the
+corresponding assumption about the new state: program-counter and stack-pointer
+readings at the return site, the loaded-code fact, saved stack slots, unchanged
+memory contents, and an updated accumulated {MAYCHANGE} relation from the
+initial state to the new state, extended with the components the subroutine may
+write. Flag assumptions about the old state are simply dropped, and assumptions
+not mentioning the state are left untouched. Two assumptions are added: an
+equation defining a fresh variable for the subroutine's result, as given by the
+correctness theorem and possibly guarded by a side condition, and an equation
+stating that the output location in the new state reads as that fresh variable.
+
+\COMMENTS
+All observed traces show this single-subgoal state-advancing behaviour on goals
+of the same {eventually} shape.
+
+\ENDDOC

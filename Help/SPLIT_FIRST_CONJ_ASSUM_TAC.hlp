@@ -1,0 +1,33 @@
+\DOC SPLIT_FIRST_CONJ_ASSUM_TAC
+
+\TYPE {SPLIT_FIRST_CONJ_ASSUM_TAC : tactic}
+
+\SYNOPSIS
+Finds an assumption that is a conjunction and replaces it by its two halves,
+leaving the conclusion unchanged.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal {A ?- t}, it selects one assumption of
+the form {u1 /\ u2}, discards it and adds {u1} and {u2} as separate
+assumptions:
+{
+   A, u1 /\ u2 ?- t
+   ========================  SPLIT_FIRST_CONJ_ASSUM_TAC
+   A, u1, u2 ?- t
+}
+\noindent Thus a right-nested conjunction loses only its outermost conjunct,
+the remaining conjunction staying as a single assumption, so repeated
+applications peel conjuncts one at a time. The new assumption list is reordered
+as HOL Light's assumption insertion dictates, so the two new assumptions need
+not sit where the original did.
+
+\FAILURE
+Fails, reporting a search failure, when none of the goal's assumptions is a
+conjunction — including goals whose assumptions are all atomic and goals with
+no assumptions at all; a conjunctive or disjunctive conclusion does not help.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always
+leaving one subgoal and never closing a goal.
+
+\ENDDOC

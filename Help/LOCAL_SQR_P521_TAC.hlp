@@ -1,0 +1,41 @@
+\DOC LOCAL_SQR_P521_TAC
+
+\TYPE {LOCAL_SQR_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-code goal across one inlined
+modular-squaring subroutine call, replacing the current symbolic state with a
+later one and recording the mathematical result of the squaring as a new
+assumption.
+
+\DESCRIBE
+The first argument is an {int} giving an offset/count used in locating the call
+site, namely how many extra setup instructions before the squaring body are
+consumed. The second is a {string list} naming the result and input variables
+of the squaring step: the first name becomes the output value stored in memory,
+the second identifies the operand read. The goal retains its {eventually}
+shape, with only the trailing state advanced:
+{
+   A ?- eventually ... s_i
+   ================================================  LOCAL_SQR_P521_TAC n ["u"; "t"]
+   A' ?- eventually ... s_j
+}
+\noindent Here {A'} is obtained from {A} as follows. All assumptions mentioning
+the old state — program-counter and stack-pointer readings, {bytes_loaded},
+register and memory-content equations, and the accumulated {MAYCHANGE} relation
+from the initial state — are discharged and re-added for the new state, with
+the {MAYCHANGE} relation extended by the components the step may have modified,
+and new assumptions are added for the pointer/return-address values set up by
+the call; an initial trivial {MAYCHANGE} assumption from the start state is
+dropped. Two further assumptions about the new state are introduced: a
+memory-content equation saying that a particular buffer holds the named result
+value, and an implication {t < p_521 ==> u = t EXP 2 MOD p_521} relating the
+named result to the square of the named operand modulo the prime. Arithmetic
+implications accumulated for earlier steps are retained, sometimes reordered.
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+goals of this {eventually} shape carrying a full set of machine-state
+assumptions.
+
+\ENDDOC

@@ -1,0 +1,27 @@
+\DOC VAL_INT64_TAC
+
+\TYPE {VAL_INT64_TAC : term -> tactic}
+
+\SYNOPSIS
+Given a numeral-valued term {t}, adds the assumption {val (word t) = t} to the
+goal, leaving the conclusion unchanged.
+
+\DESCRIBE
+The argument {t : term} is the natural-number term whose 64-bit word encoding
+is asserted to round-trip through {val}; the new assumption is built from
+exactly this term. The conclusion is untouched and all existing assumptions are
+kept, with the new assumption appended at the end of the assumption list:
+{
+           A ?- u
+   =============================  VAL_INT64_TAC t
+      A, val (word t) = t ?- u
+}
+\noindent The tactic discharges the justification of the new assumption itself,
+so no extra subgoal is produced for it. The term {t} may be a variable or a
+compound arithmetic expression.
+
+\COMMENTS
+The observed traces show only this single kind of outcome, always on goals that
+already carry assumptions bounding the relevant quantities.
+
+\ENDDOC

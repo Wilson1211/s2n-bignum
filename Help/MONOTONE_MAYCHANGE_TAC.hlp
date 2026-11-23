@@ -1,0 +1,29 @@
+\DOC MONOTONE_MAYCHANGE_TAC
+
+\TYPE {MONOTONE_MAYCHANGE_TAC : tactic}
+
+\SYNOPSIS
+Closes a goal asserting that a pair of states satisfies a {,,}-composed
+{MAYCHANGE} relation, given an assumption asserting a smaller such relation for
+the same two states.
+
+\DESCRIBE
+Takes no arguments. It applies to a goal {A ?- t} where {t} is a composition
+via {,,} of {MAYCHANGE} components applied to two state terms, and {A} contains
+an assumption of the same shape on the same two states. The assumption and the
+conclusion may differ in the grouping, ordering and granularity of the
+{MAYCHANGE} components (for instance individual components versus components
+bundled into one list, or several narrow memory/register components versus one
+wider one), with the conclusion covering at least as much as the assumption.
+Other assumptions in {A} may be arbitrary and are neither used nor altered.
+{
+   A ?- t
+   =================  MONOTONE_MAYCHANGE_TAC
+                      (no subgoals)
+}
+
+\COMMENTS
+In all observed traces, only this closing behaviour on goals of this
+{MAYCHANGE} form appears.
+
+\ENDDOC

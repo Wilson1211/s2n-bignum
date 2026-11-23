@@ -1,0 +1,37 @@
+\DOC LOCAL_INV_TAC
+
+\TYPE {LOCAL_INV_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances a machine-state symbolic-execution goal of the form
+{eventually ... s_k} through one called subroutine, replacing the current state
+variable by a fresh successor state and rewriting the state-dependent
+assumptions accordingly.
+
+\DESCRIBE
+The single {int} argument is the index of the new state variable to introduce:
+both the subject of the {eventually} conclusion and the state component of the
+rewritten assumptions are renamed to that numbered state. The conclusion
+changes only in its trailing state argument — the old state variable becomes
+the new indexed one — while the postcondition body is untouched. All
+assumptions mentioning the old state are discharged and replaced by
+corresponding assumptions about the new state: the program-image assumption,
+the register and memory-content equalities that persist, a new equality giving
+the result of the subroutine call at its destination buffer, updated
+program-counter and stack-pointer readings, and the frame/{MAYCHANGE}
+assumption, reattached to the new state with an extra component added to it.
+Purely mathematical and non-overlapping assumptions are kept unchanged and stay
+in position, whereas the state-dependent ones are re-added at the end, so the
+assumption list is reordered.
+{
+       A, z1(s_old) ... zp(s_old) ?- eventually ... s_old
+       ============================================  LOCAL_INV_TAC n
+       A, z1'(s_n) ... zq'(s_n) ?- eventually ... s_n
+}
+
+\COMMENTS
+The observed traces show only this single kind of transformation, on goals
+whose conclusion is an {eventually} statement with a rich set of state
+assumptions already present.
+
+\ENDDOC

@@ -1,0 +1,24 @@
+\DOC ASSERT_CONCL_TAC
+
+\TYPE {ASSERT_CONCL_TAC : term -> tactic}
+
+\SYNOPSIS
+Checks that the goal's conclusion is the supplied term, leaving the goal
+unchanged.
+
+\DESCRIBE
+Takes one argument {t : term}, which is compared against the goal's conclusion.
+Applied to a goal {A ?- t}, it yields a single subgoal identical to the input,
+with the conclusion unaltered and no assumptions added or removed.
+{
+        A ?- t
+     ============  ASSERT_CONCL_TAC t
+        A ?- t
+}
+
+\COMMENTS
+The observed traces show only this identity behaviour, on goals with no
+assumptions whose conclusions are existentially quantified specification
+statements matching the supplied term.
+
+\ENDDOC

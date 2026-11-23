@@ -1,0 +1,39 @@
+\DOC LOCAL_SQR_P256K1_TAC
+
+\TYPE {LOCAL_SQR_P256K1_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic execution goal of the form {A ?- eventually x86 P s} past
+an inlined modular-squaring subroutine call, replacing the current state
+variable by a fresh later one and recording the mathematical result of the
+squaring in the assumptions.
+
+\DESCRIBE
+The first argument is an {int} selecting which code block/offset of the
+enclosing program the call occupies; the second is a {string list} naming the
+squaring's variables, the first string naming the fresh output value and the
+second the existing input value. The conclusion predicate is kept, but the
+final state argument becomes a fresh state variable at a later program point.
+The invariant-style assumptions about the old state — program counter, loaded
+bytes, register contents, memory contents, and the accumulated {MAYCHANGE}
+relation from the initial state — are deleted and reinstated for the new state,
+with the program counter updated to the instruction after the call and the
+{MAYCHANGE} relation extended by the memory region written. Two new assumptions
+are added: one equating the freshly named output variable with the modular
+square of the named input, and one reading that value out of the destination
+memory region in the new state. Purely side-condition assumptions
+(nonoverlapping facts and earlier arithmetic facts) are retained unchanged.
+{
+          A ?- eventually x86 P s
+     ======================================  LOCAL_SQR_P256K1_TAC n [out; inp]
+          A' ?- eventually x86 P s'
+}
+\noindent where {s'} is the fresh later state and {A'} is {A} with the
+state-dependent assumptions re-expressed at {s'} and the new equation for the
+squaring result added.
+
+\COMMENTS
+In all observed traces, only this single kind of transformation occurs, always
+on goals of this symbolic-execution shape.
+
+\ENDDOC

@@ -1,0 +1,44 @@
+\DOC BIGNUM_LDIGITIZE_TAC
+
+\TYPE {BIGNUM_LDIGITIZE_TAC : string -> term -> tactic}
+
+\SYNOPSIS
+Given a string prefix and a term denoting a multi-word memory read of a bignum,
+it splits that bignum into individual 64-bit digit variables, replacing
+occurrences of the whole-bignum read in the assumptions with a
+{bignum_of_wordlist} of fresh digit variables and adding one assumption per
+digit.
+
+\DESCRIBE
+{s : string} is the name prefix from which the fresh digit variables are
+generated, by appending the index numbers {0 ... n-1} to it. {tm : term} is the
+term designating the bignum read from memory — a read of a byte range of a
+given word length, in one observed trace written via {bignum_from_memory} —
+that is to be digitized. Writing {t} for this read term and {n} for the word
+length appearing in it, every assumption containing {t} is rewritten with {t}
+replaced by {bignum_of_wordlist [x1; ...; xn]} over the fresh variables
+{x1 ... xn}, and {n} new assumptions are appended, each equating a single-word
+read at the corresponding byte offset from the base address with the matching
+digit variable:
+{
+   A ?- u
+   ================================================  BIGNUM_LDIGITIZE_TAC s t
+   A[bignum_of_wordlist [x1;...;xn]/t], <n digit-read equations> ?- u
+}
+\noindent Several applications in sequence accumulate digit assumptions for
+different bignums.
+
+\FAILURE
+Fails when {tm} is not of the expected shape of a memory read of a byte range
+with an explicit numeral word count; observed failures are for {tm} a read of a
+single 64-bit word, a bare state variable, or a {bignum_of_wordlist}
+application. These failures arise inside the tactic's own decomposition of {tm}
+(destructing its applications and reading off a numeral length), not from
+anything supplied as a tactic.
+
+\COMMENTS
+The observed traces show only this transformation, always on goals whose
+conclusion is an {eventually} machine-step goal and whose assumptions mention
+the read term.
+
+\ENDDOC

@@ -1,0 +1,35 @@
+\DOC READ_OVER_WRITE_ORTHOGONAL_TAC
+
+\TYPE {READ_OVER_WRITE_ORTHOGONAL_TAC : tactic}
+
+\SYNOPSIS
+{READ_OVER_WRITE_ORTHOGONAL_TAC} proves, and thereby closes, a goal asserting
+that reading a state component after a stack of {write}s to components
+orthogonal to it equals reading that component in the unwritten state.
+
+\DESCRIBE
+The tactic takes no arguments. It applies to a goal {A ?- t = u} where both
+sides are a {read} of some component: on the left the component is read from a
+term built by nesting one or more {write}s (possibly many, of registers, flags,
+event lists or memory components) around a state, and on the right from that
+same bare state. The tactic discharges the equality outright:
+{
+   A ?- read c (write ... (write ... s)) = read c s
+   ================================================  READ_OVER_WRITE_ORTHOGONAL_TAC
+}
+\noindent The assumptions {A} are left untouched and are not used; in the
+observed traces the assumption lists range from a handful to over a hundred
+hypotheses, and the goal is closed regardless.
+
+\FAILURE
+Fails when the state underneath the {write} stack is not a plain state variable
+but an application of a function to several arguments, i.e. when the inner
+state term has a shape the tactic cannot decompose; the failure is raised
+inside the tactic itself as a term-destructuring error, and no goal is
+returned.
+
+\COMMENTS
+Every successful observed trace shows only this behaviour — closing a
+read-over-write equation — so nothing can be said about transformed goals.
+
+\ENDDOC

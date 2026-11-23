@@ -1,0 +1,37 @@
+\DOC LOCAL_NSQR_SAFETY_TAC
+
+\TYPE {LOCAL_NSQR_SAFETY_TAC : string -> int -> tactic}
+
+\SYNOPSIS
+Discharges a subroutine call in an {eventually} symbolic-execution goal by
+applying a named specification assumption, advancing the goal from the state
+before the call to the state after it.
+
+\DESCRIBE
+{assump_name : string} names the assumption of the goal that holds the callee's
+{ensures} specification to be used, and {n : int} is the index of the symbolic
+state at the call site, from which the successor state name is formed. The goal
+is an {eventually} statement about state {sn}, and the result is a single
+subgoal of the same shape about {s(n+1)}, the conclusion being otherwise
+unchanged. The assumptions are rewritten: facts about the pre-call state {sn} —
+its program counter, stack pointer, argument registers, event trace, memory
+reads, accumulated {MAYCHANGE} relation and any flag assumptions — are removed,
+and facts about {s(n+1)} are added: a new program counter, the extended event
+trace written as an {APPEND} of a fresh event variable onto the old trace, two
+new assumptions about that fresh event variable (one equating it to the
+callee's event function applied to the actual arguments, one asserting its
+memory accesses are in bounds), the surviving memory and register reads, and an
+enlarged {MAYCHANGE} relation. The named specification assumption survives,
+moved to the end of the list.
+{
+   A ?- eventually ... sn
+   ================================================  LOCAL_NSQR_SAFETY_TAC assump_name n
+   A' ?- eventually ... s(n+1)
+}
+\noindent where {A'} replaces the state-{sn} facts by the state-{s(n+1)} facts
+and adds the two new assumptions about the fresh event variable.
+
+\COMMENTS
+All observed traces show this single-subgoal behaviour on goals of this form.
+
+\ENDDOC

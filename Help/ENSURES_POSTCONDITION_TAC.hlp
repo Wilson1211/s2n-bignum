@@ -1,0 +1,27 @@
+\DOC ENSURES_POSTCONDITION_TAC
+
+\TYPE {ENSURES_POSTCONDITION_TAC : term -> tactic}
+
+\SYNOPSIS
+Replaces the postcondition of an {ensures} goal by a supplied alternative,
+leaving a conjunction of a strengthening implication and the {ensures}
+statement for the new postcondition.
+
+\DESCRIBE
+The argument {q'} is a {term}: the replacement postcondition, a predicate on
+states, used both in the strengthening side condition and in the rewritten
+{ensures} conclusion. The precondition and frame are unchanged, the assumptions
+{A} are left untouched, and the two postcondition predicates appear unexpanded
+as applied lambda terms under the new universally quantified state variable.
+{
+          A ?- ensures step pre post frame
+   ==================================================  ENSURES_POSTCONDITION_TAC q'
+    A ?- (forall x1. q' x1 ==> post x1) /\ ensures step pre q' frame
+}
+
+\COMMENTS
+The observed traces show only this single-goal transformation, applied to
+{ensures} goals whose conclusion is left in conjunctive form for later
+splitting.
+
+\ENDDOC

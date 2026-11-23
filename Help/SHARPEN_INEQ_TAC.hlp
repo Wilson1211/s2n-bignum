@@ -1,0 +1,23 @@
+\DOC SHARPEN_INEQ_TAC
+
+\TYPE {SHARPEN_INEQ_TAC : tactic}
+
+\SYNOPSIS
+Rewrites a real non-strict inequality goal {t <= u} into the strict form
+{t < u + &1}.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion is a real-valued {<=}
+comparison, it adds {&1} to the right-hand side and strictens the relation,
+leaving the left-hand side and the assumptions untouched:
+{
+       A ?- t <= u
+   ========================  SHARPEN_INEQ_TAC
+      A ?- t < u + &1
+}
+
+\COMMENTS
+In all observed traces only this single transformation occurs, always on goals
+of this {<=} shape over the reals with a large unchanged assumption list.
+
+\ENDDOC

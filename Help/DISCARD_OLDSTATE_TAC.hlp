@@ -1,0 +1,32 @@
+\DOC DISCARD_OLDSTATE_TAC
+
+\TYPE {DISCARD_OLDSTATE_TAC : string -> tactic}
+
+\SYNOPSIS
+Deletes from the assumption list every hypothesis that mentions a state
+variable other than the one named, leaving the conclusion untouched.
+
+\DESCRIBE
+The argument {s : string} names the state variable whose assumptions are to be
+kept. Applied to a goal {A ?- t}, the tactic discards those assumptions whose
+statement involves some state variable other than the named one — typically
+register/flag/memory reads, event-trace equations, and other state-indexed
+facts about earlier states, including facts about the named state whose
+right-hand side still refers to another state. Retained, in their original
+relative order, are assumptions mentioning no state variable at all (arithmetic
+side conditions, non-overlapping hypotheses, pure implications), those about
+the named state only, and the accumulated {MAYCHANGE} assumption. Possibly
+nothing is discarded.
+{
+          A ?- t
+     ================  DISCARD_OLDSTATE_TAC s
+          A' ?- t
+}
+\noindent where {A'} is {A} minus the discarded state-dependent assumptions.
+
+\COMMENTS
+The observed traces show only this single kind of outcome, always on goals of
+the same shape: an {eventually}-style conclusion about one state together with
+a mixture of state-indexed and state-free assumptions.
+
+\ENDDOC

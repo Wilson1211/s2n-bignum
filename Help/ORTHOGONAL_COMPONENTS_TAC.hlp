@@ -1,0 +1,30 @@
+\DOC ORTHOGONAL_COMPONENTS_TAC
+
+\TYPE {ORTHOGONAL_COMPONENTS_TAC : tactic}
+
+\SYNOPSIS
+Proves that two state components are orthogonal, closing the goal.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion asserts orthogonality of
+two state-component expressions {t} and {u} (registers, flags, or memory
+components built with {:>}, byte/bytelist/sized-word views at computed
+addresses), it closes the goal:
+{
+   A ?- orthogonal_components t u
+   ========================================  ORTHOGONAL_COMPONENTS_TAC
+}
+\noindent The assumptions {A} play no visible role and are not altered.
+
+\FAILURE
+Observed to fail on an orthogonality goal whose two components are a
+sized-memory view and a byte-sized memory view at addresses not in the shapes
+the tactic can decompose; the failure is a term-destruction error raised inside
+the tactic while taking apart the component terms, not an argument error.
+
+\COMMENTS
+In all observed traces only this behaviour appears: either the orthogonality
+goal is closed or an exception is raised; no trace shows the tactic returning a
+transformed goal.
+
+\ENDDOC

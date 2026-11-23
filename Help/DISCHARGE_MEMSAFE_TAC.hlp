@@ -1,0 +1,23 @@
+\DOC DISCHARGE_MEMSAFE_TAC
+
+\TYPE {DISCHARGE_MEMSAFE_TAC : tactic}
+
+\SYNOPSIS
+Closes an existentially quantified goal asserting that the current event list
+splits as a prefix appended to an earlier event list, with that prefix
+satisfying a memory-access-inbounds condition.
+
+\DESCRIBE
+Takes no arguments. The assumptions {A} describe the machine state, the loaded
+bytes, the event trace and the nonoverlapping/bounds side conditions, possibly
+including an earlier {memaccess_inbounds} assumption for a prefix.
+{
+   A ?- ?x1. t = APPEND x1 u /\ memaccess_inbounds x1 ...
+   =============================================================  DISCHARGE_MEMSAFE_TAC
+}
+
+\COMMENTS
+In all observed traces, this is the only outcome, and it occurs only on goals
+of this existential event-splitting and memory-safety form.
+
+\ENDDOC

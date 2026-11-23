@@ -1,0 +1,37 @@
+\DOC LOCAL_SQR_P25519_TAC
+
+\TYPE {LOCAL_SQR_P25519_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal past an inlined
+modular-squaring subroutine, replacing the current state variable by a
+successor state and recording the squaring result as a new named value.
+
+\DESCRIBE
+The first argument is an {int} selecting a variant of the step (one and the
+same value throughout the observed traces). The second is a {string list} of
+two names: the first is the base name for the fresh variable denoting the
+squaring result (a primed form may be used if that name is already taken), and
+the second names the existing input value whose square modulo the prime is
+taken.
+{
+   A ?- eventually ... t
+   =====================================  LOCAL_SQR_P25519_TAC n ["x1"; "x2"]
+   A' ?- eventually ... u
+}
+\noindent Here the assumptions in {A} describe one state variable, and {u} is a
+fresh successor state variable. In {A'}, all state-indexed assumptions
+(program-counter value, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} frame relation) are discharged and re-added for {u},
+with an updated program-counter offset and with the memory read at the
+destination location now giving the fresh result variable; a new purely
+arithmetic assumption equating that fresh variable with the square of the named
+input reduced modulo the prime is added; the non-state arithmetic and
+non-overlapping assumptions of {A} are retained, possibly reordered.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals of this assembly-verification shape, with the same integer
+argument and a two-name list.
+
+\ENDDOC

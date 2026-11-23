@@ -1,0 +1,27 @@
+\DOC NONOVERLAPPING_TAC
+
+\TYPE {NONOVERLAPPING_TAC : tactic}
+
+\SYNOPSIS
+Proves a goal whose conclusion asserts that two address ranges do not overlap,
+closing it outright.
+
+\DESCRIBE
+Takes no arguments. The conclusion {t} may be a non-overlap claim about two
+memory regions stated either in the {nonoverlapping} form or in the explicit
+modulo form, with region bases built from program counters, stack pointers,
+word offsets and symbolic pointers, and with sizes that may be arithmetic
+expressions in free variables. The assumptions {A} are left untouched and serve
+as the source of the non-overlap and size facts from which the conclusion is
+derived.
+{
+   A ?- t
+   =============  NONOVERLAPPING_TAC
+   (no goals)
+}
+
+\COMMENTS
+In all observed traces the goal conclusion is a non-overlap assertion and the
+goal is always closed, so no other behaviour is demonstrated.
+
+\ENDDOC

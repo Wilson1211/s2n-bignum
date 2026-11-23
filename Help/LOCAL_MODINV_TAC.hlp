@@ -1,0 +1,31 @@
+\DOC LOCAL_MODINV_TAC
+
+\TYPE {LOCAL_MODINV_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-execution goal across a
+modular-inversion subroutine call, replacing the current state variable by the
+next one and installing the post-call state assumptions.
+
+\DESCRIBE
+The single {int} argument is the index of the new state: the goal's state
+variable is replaced by the state with that number, and the assumptions
+describing the pre-call state (indexed by the previous number) are discharged
+and replaced by assumptions about the new state. The conclusion keeps its
+shape, only the state term it is applied to being advanced to the newly
+numbered state. Among the assumptions, those mentioning the old state —
+register and memory reads, flag conditions, the program-image assumption and
+the accumulated {MAYCHANGE} frame — are removed, and corresponding assumptions
+about the new state are added: a new program counter value, an assumption
+giving the memory contents at the output buffer as the modular inverse
+(conditionalised on divisibility), re-stated reads of the memory and registers
+that survive the call, and an extended {MAYCHANGE} frame covering the registers
+and stack region clobbered by the subroutine. Purely mathematical and
+nonoverlapping hypotheses are left untouched, and exactly one goal results.
+
+\COMMENTS
+In all observed traces, only this one kind of transformation occurs, always on
+goals of this {eventually} machine-execution form with a full set of state
+assumptions.
+
+\ENDDOC

@@ -1,0 +1,32 @@
+\DOC CASES_FIRST_DISJ_ASSUM_TAC
+
+\TYPE {CASES_FIRST_DISJ_ASSUM_TAC : tactic}
+
+\SYNOPSIS
+Finds the first assumption whose conclusion is a disjunction and splits the
+goal on it.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal {A ?- t} having an assumption of the form
+{u \/ v}, it removes that assumption and leaves the conclusion {t} unchanged,
+whatever its shape, producing two subgoals in which {u} and respectively {v}
+are appended at the end of the remaining assumption list:
+{
+        A, u \/ v ?- t
+    ========================  CASES_FIRST_DISJ_ASSUM_TAC
+     A, u ?- t    A, v ?- t
+}
+\noindent Thus a right-nested disjunction gives the left disjunct in one branch
+and the remaining disjunction in the other, so repeated use peels off cases one
+at a time.
+
+\FAILURE
+In the observed traces it fails, with a search-style failure, on goals none of
+whose assumptions is a disjunction, even when the conclusion itself is a
+disjunction; all successful cases had at least one disjunctive assumption.
+
+\COMMENTS
+The observed traces show only this two-way split, never a closed or single
+goal.
+
+\ENDDOC

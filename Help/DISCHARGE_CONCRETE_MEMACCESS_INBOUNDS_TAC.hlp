@@ -1,0 +1,38 @@
+\DOC DISCHARGE_CONCRETE_MEMACCESS_INBOUNDS_TAC
+
+\TYPE {DISCHARGE_CONCRETE_MEMACCESS_INBOUNDS_TAC : tactic}
+
+\SYNOPSIS
+Discharges a memory-access-in-bounds goal about a concrete event trace, either
+proving it outright or reducing it to a residual {ALL}-over-events condition.
+
+\DESCRIBE
+Takes no arguments. It acts on the conclusion only, leaving the assumptions {A}
+untouched. In most applications it closes the goal outright, producing no
+subgoals; this happens both for conclusions of the form
+{memaccess_inbounds t u1 u2} whose trace argument is a fully concrete list of
+load/store/jump events, and for conclusions already stated as a conjunction of
+{ALL}/{EX} containment conditions over read and write region lists. In the
+remaining applications, where the trace contains opaque sub-traces (named trace
+functions, {APPEND}s of them, or {ENUMERATEL} bodies) that cannot be fully
+enumerated, it rewrites the goal in place into a single residual subgoal: an
+explicit per-event containment predicate applied to the same (possibly slightly
+normalised, e.g. {CONS}/{APPEND}-expanded) trace, with the region bounds from
+the original goal inlined as {contained_modulo} disjuncts.
+{
+       A ?- memaccess_inbounds t u1 u2
+     ==================================  DISCHARGE_CONCRETE_MEMACCESS_INBOUNDS_TAC
+       (no goals)
+}
+\noindent or
+{
+       A ?- memaccess_inbounds t u1 u2
+     =============================================================================  DISCHARGE_CONCRETE_MEMACCESS_INBOUNDS_TAC
+       A ?- ALL (\e. match e with EventLoad ... | EventStore ... | _ -> true) t
+}
+
+\COMMENTS
+The observed traces show only these two outcomes, and all inputs are goals
+about memory-access-in-bounds properties of x86 event traces.
+
+\ENDDOC

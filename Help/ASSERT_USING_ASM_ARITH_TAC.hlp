@@ -1,0 +1,26 @@
+\DOC ASSERT_USING_ASM_ARITH_TAC
+
+\TYPE {ASSERT_USING_ASM_ARITH_TAC : term -> tactic}
+
+\SYNOPSIS
+Adds a supplied arithmetic term to the goal's assumptions as a new assumption,
+leaving a single subgoal.
+
+\DESCRIBE
+The argument {t : term} is the proposition to be asserted; it is a
+(linear/numeric) arithmetic statement over terms available in the goal. The
+conclusion is untouched, the new assumption is appended at the end of the
+assumption list (with any type annotations in {t} dropped from the printed
+assumption), and no proof obligation for {t} is left to the user.
+{
+        A ?- u
+   ================ ASSERT_USING_ASM_ARITH_TAC t
+      A, t ?- u
+}
+
+\COMMENTS
+In all observed traces only this one kind of outcome occurs, on goals that
+already carry a sizeable list of arithmetic and separation assumptions, with
+asserted terms that follow arithmetically from them.
+
+\ENDDOC

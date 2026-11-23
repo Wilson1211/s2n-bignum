@@ -1,0 +1,34 @@
+\DOC ACCUMULATOR_POP_ASSUM_LIST
+
+\TYPE {ACCUMULATOR_POP_ASSUM_LIST : ((thm list) -> tactic) -> tactic}
+
+\SYNOPSIS
+Removes from the assumption list every "accumulator" assumption — those stating
+a word-level carry/sum or multiply-high/low relation as a real-number equation
+— and applies a supplied theorem-list tactic to the removed assumptions.
+
+\DESCRIBE
+The argument {ttac : (thm list) -> tactic} is run on the list of discharged
+accumulator assumptions, taken as theorems; in the observed traces it is used
+to drop them ({K ALL_TAC}), to re-add them to the conclusion as a conjoined
+antecedent ({MP_TAC o end_itlist CONJ}, optionally after a normalising rule),
+or to re-assume them in processed form ({STRIP_ASSUME_TAC o ...}). Applied to
+{A ?- t}, the accumulator assumptions are deleted from {A}, the remaining
+assumptions keeping their original order, and {ttac} is then run on the deleted
+ones. Exactly one subgoal results. Depending on {ttac}, the conclusion is
+either left unchanged, or becomes {u ==> t} where {u} is built from the
+discharged assumptions (possibly rewritten into a normalised form before being
+conjoined); in one case the processed assumptions {z1 ... zp} are put back into
+the assumption list in place of the originals while the conclusion stays {t}.
+Writing {A'} for the non-accumulator assumptions, this last case is
+{
+           A ?- t
+     ======================  ACCUMULATOR_POP_ASSUM_LIST ttac
+        A', z1, ..., zp ?- t
+}
+
+\COMMENTS
+The observed traces show only this one-subgoal transformation, always on goals
+carrying a large set of such accumulator assumptions.
+
+\ENDDOC

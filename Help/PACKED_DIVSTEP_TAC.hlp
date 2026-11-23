@@ -1,0 +1,41 @@
+\DOC PACKED_DIVSTEP_TAC
+
+\TYPE {PACKED_DIVSTEP_TAC : int -> int list -> int -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal about an {eventually} property by one block
+of machine steps, replacing the state-describing assumptions for the current
+state with the corresponding assumptions for a new, later state.
+
+\DESCRIBE
+The arguments are {n : int}, {shf : int list} and {s : int}. In the observed
+traces {n} is an unbound index appearing in the expression supplied for {s};
+{shf} is a one-element list of integers; {s} is an arithmetic expression in {n}
+giving the step/state numbering used for the new state. Together they determine
+which block of execution is taken, and hence the new state name and
+program-counter offset. The conclusion of the goal has the form
+{eventually ... P s_old}, the {eventually} property applied to a current state
+variable; the tactic produces exactly one subgoal whose conclusion is the same
+property applied to a fresh later state variable {s_new}. All assumptions
+mentioning the old state — the {bytes_loaded} assumption, every
+{read <component> s_old = ...} equation, the flag assumptions, and the
+accumulated {MAYCHANGE ... s0 s_old} assumption — are discharged and replaced
+by analogous assumptions about {s_new}, with the register/flag right-hand sides
+advanced (for example the step index inside the symbolic {divstep_*} terms
+incremented and the program-counter offset increased); the {MAYCHANGE}
+assumption may also gain further components. Assumptions not mentioning the
+state (the arithmetic side conditions, the nonoverlapping hypothesis, and the
+definitional equations) are kept unchanged, although the order in which
+assumptions are listed can change.
+{
+   A_nostate, A_state(s_old) ?- eventually ... P s_old
+   =============================================  PACKED_DIVSTEP_TAC n shf s
+   A_nostate, A_state'(s_new) ?- eventually ... P s_new
+}
+
+\COMMENTS
+The observed traces show only this single kind of outcome, always on goals
+whose conclusion is an {eventually} statement about a state with a large set of
+such state-describing assumptions.
+
+\ENDDOC

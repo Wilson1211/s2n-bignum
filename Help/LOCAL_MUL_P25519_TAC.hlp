@@ -1,0 +1,37 @@
+\DOC LOCAL_MUL_P25519_TAC
+
+\TYPE {LOCAL_MUL_P25519_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style x86 machine-code goal past an inlined
+modular-multiplication subroutine, moving the goal to a successor state
+variable and recording the new result value in the assumptions.
+
+\DESCRIBE
+The first argument is an {int} selecting which of the subroutine's possible
+entry/variant offsets to use; the second is a {string list} giving the name of
+the fresh result variable followed by the names of the two input operands whose
+product is computed. The conclusion retains its {eventually} form and
+postcondition, but is restated for a new, later state variable; symmetrically,
+each assumption about the old state (program counter, loaded bytes, register
+and memory contents, and the accumulated {MAYCHANGE} frame) is discharged and
+re-added for the new state, with the {MAYCHANGE} frame extended by the
+components written by the executed code. Two further assumptions are added: one
+defining the named result variable as the product of the two named operand
+values reduced modulo the field prime, and a memory-read fact stating that the
+destination buffer holds that result. Pre-existing arithmetic/bound assumptions
+are kept, sometimes in a different order.
+{
+   A ?- eventually x86 P s
+   ========================================  LOCAL_MUL_P25519_TAC n ["u"; "t1"; "t2"]
+   A' ?- eventually x86 P s'
+}
+\noindent where {A'} is {A} with the state-dependent assumptions re-indexed to
+{s'} and augmented by {u = (t1 * t2) MOD p} together with the corresponding
+memory-read fact.
+
+\COMMENTS
+In all observed traces, the tactic performs exactly this single-subgoal step on
+goals of this machine-code form.
+
+\ENDDOC

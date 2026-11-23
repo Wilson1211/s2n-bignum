@@ -1,0 +1,33 @@
+\DOC SIMD_SIMPLIFY_ABBREV_TAC
+
+\TYPE {SIMD_SIMPLIFY_ABBREV_TAC : thm list -> thm list -> tactic}
+
+\SYNOPSIS
+Simplifies the most recently introduced assumption of the goal, typically an
+equation giving the value of a vector register, rewriting SIMD word operations
+into a reduced form and leaving the conclusion unchanged.
+
+\DESCRIBE
+Takes two theorem-list arguments: {unfold_defs}, equational theorems whose
+left-hand sides are unfolded during simplification, and {unfold_aux}, further
+equational theorems serving as auxiliary rewrites for combinations of those
+definitions with the surrounding word operations. The tactic acts on one
+assumption, replacing it by a simplified version and moving it to the end of
+the assumption list (so the preceding assumption shifts up by one); all other
+assumptions and the conclusion are untouched. The simplification collapses
+nested extraction/packing of lanes (subword-of-join style terms) so that the
+right-hand side of the assumption is stated directly in terms of the individual
+lane values. In many applications the term is already reduced, so the only
+visible effect is the positional change, and {t'} may be identical to {t}.
+{
+   A, t ?- u
+   =========================================  SIMD_SIMPLIFY_ABBREV_TAC unfold_defs unfold_aux
+   A, t' ?- u
+}
+
+\COMMENTS
+In all observed traces the goal has the same shape — a machine-state
+{eventually} conclusion with a long list of state-reading assumptions — and the
+same pair of theorem-list arguments is supplied.
+
+\ENDDOC

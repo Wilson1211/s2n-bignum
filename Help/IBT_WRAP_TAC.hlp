@@ -1,0 +1,32 @@
+\DOC IBT_WRAP_TAC
+
+\TYPE {IBT_WRAP_TAC : tactic -> tactic}
+
+\SYNOPSIS
+Proves an {ensures} goal about a program whose byte list is an {APPEND} of a
+fixed four-byte prefix with an inner program, by reducing it to the
+corresponding {ensures} property of the inner program starting four bytes later
+and discharging the residual side conditions with a supplied tactic.
+
+\DESCRIBE
+The argument {discharge_inner : tactic} finishes off the leftover subgoals of
+the reduction, typically by matching them against an available assumption about
+the inner program; in the observed traces this sometimes proceeds by
+instantiating a previously obtained inner {ensures} theorem and settling the
+remaining non-overlapping/offset conditions. Applied to a goal {A ?- t} whose
+conclusion is an {ensures} specification for code of the form
+prefix-appended-to-inner-program at a program counter, it closes the goal
+outright, consuming the assumptions {A}, which in the observed traces are
+either an {ensures} statement for the inner program at the shifted program
+counter, or separation/bounds facts about the code, stack and output buffers.
+{
+         A ?- t
+   =============== IBT_WRAP_TAC discharge_inner
+}
+
+\COMMENTS
+In every observed trace the inputs are {ensures} goals of this appended-prefix
+shape and the tactic closes the goal outright, so no other kind of outcome is
+exercised.
+
+\ENDDOC

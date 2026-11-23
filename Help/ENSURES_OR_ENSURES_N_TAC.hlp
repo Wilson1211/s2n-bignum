@@ -1,0 +1,33 @@
+\DOC ENSURES_OR_ENSURES_N_TAC
+
+\TYPE {ENSURES_OR_ENSURES_N_TAC : (goal -> goalstate) -> (goal -> goalstate) -> tactic}
+
+\SYNOPSIS
+A dispatcher that applies one of two supplied tactics to the current goal
+according to the form of the goal's conclusion, leaving the assumptions
+untouched.
+
+\DESCRIBE
+The arguments {tac_for_ensures : goal -> goalstate} and {tac_for_ensures_n :
+goal -> goalstate} are two alternative tactics, one of which is selected and
+run on the goal. The assumption list {A} is left exactly as it was; only the
+conclusion changes, in whatever way the selected tactic changes it. In the
+observed traces this yields either one subgoal
+{
+          A ?- t
+   ================= ENSURES_OR_ENSURES_N_TAC tac_for_ensures tac_for_ensures_n
+          A ?- u
+}
+\noindent where {u} is an equivalent reassociated or unfolded form of {t}, or
+an existentially quantified or implicational restatement: {u} may begin with
+new quantifiers {x1 ... xn} (n possibly zero), or with a new antecedent
+discharged from {t}. Alternatively it yields zero subgoals, the goal being
+closed outright. No assumptions are added or removed in any observed trace.
+
+\COMMENTS
+The observed traces only show goals whose conclusion is a Hoare-triple-style
+predicate or an {eventually}-style predicate about machine execution, and in
+each case the first of the two argument tactics appears to be the one taking
+effect.
+
+\ENDDOC

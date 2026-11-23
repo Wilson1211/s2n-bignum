@@ -1,0 +1,26 @@
+\DOC VPERMD_FACTOR_STRIP_TAC
+
+\TYPE {VPERMD_FACTOR_STRIP_TAC : tactic}
+
+\SYNOPSIS
+Closes arithmetic goals stating that a weighted sum of word values modulo a
+power of two equals the truncation of that sum to its low-order terms, using
+the bounding assumptions in the goal.
+
+\DESCRIBE
+The tactic takes no arguments. It applies to a goal {A ?- t = u} in which {t}
+is a {MOD} of a sum of scaled {val}-terms by a power of two and {u} is the
+corresponding initial segment of that sum, with {A} containing numeric bounds
+on each of the word values occurring; these assumptions are used but left
+untouched as the goal is discharged.
+{
+       A ?- t = u
+       ==========   VPERMD_FACTOR_STRIP_TAC
+}
+
+\COMMENTS
+The observed traces show only this single kind of outcome, on goals of this
+modulus-of-a-weighted-sum shape accompanied by bound assumptions on the values
+involved.
+
+\ENDDOC

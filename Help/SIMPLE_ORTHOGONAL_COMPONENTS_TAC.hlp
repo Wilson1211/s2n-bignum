@@ -1,0 +1,31 @@
+\DOC SIMPLE_ORTHOGONAL_COMPONENTS_TAC
+
+\TYPE {SIMPLE_ORTHOGONAL_COMPONENTS_TAC : tactic}
+
+\SYNOPSIS
+Proves goals asserting that two state components are orthogonal, closing them
+outright or reducing them to an unfolded orthogonality claim.
+
+\DESCRIBE
+Takes no arguments. Applied to an assumption-free goal
+{orthogonal_components t u}, it usually solves it outright:
+{
+   ?- orthogonal_components t u
+   ==========================  SIMPLE_ORTHOGONAL_COMPONENTS_TAC
+}
+\noindent This covers pairings of registers, vector-register subfields, flags,
+memory byte/bytelist components and {rvalue} terms. In some cases it instead
+leaves one goal in which the component names have been expanded into their
+underlying definitional form:
+{
+   ?- orthogonal_components t u
+   ==========================  SIMPLE_ORTHOGONAL_COMPONENTS_TAC
+   ?- orthogonal_components t' u'
+}
+\noindent where {t'} and {u'} are the expanded components.
+
+\COMMENTS
+The observed traces show only goals of this orthogonality shape with no
+assumptions.
+
+\ENDDOC

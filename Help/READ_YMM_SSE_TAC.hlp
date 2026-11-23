@@ -1,0 +1,27 @@
+\DOC READ_YMM_SSE_TAC
+
+\TYPE {READ_YMM_SSE_TAC : thm -> thm -> tactic}
+
+\SYNOPSIS
+Given two component-definition theorems, proves outright a universally
+quantified goal equating the reads of two register components over all states.
+
+\DESCRIBE
+{SSE_fn : thm} is the defining equation for the first (SSE-style) component,
+which appears on the left of the read equation, and {fn : thm} is the defining
+equation for the second component, appearing on the right; both equations
+define their component in terms of a common underlying component composed with
+different sub-component selectors. With {t} and {u} the components defined by
+these two theorems:
+{
+   A ?- !x1. read t x1 = read u x1
+   =============================== READ_YMM_SSE_TAC SSE_fn fn
+}
+\noindent The assumptions are left untouched.
+
+\COMMENTS
+In all observed traces only this closing behaviour appears, on goals with no
+assumptions whose conclusion is a state-quantified equality between two reads
+of components defined from the same underlying component.
+
+\ENDDOC

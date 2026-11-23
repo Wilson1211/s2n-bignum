@@ -1,0 +1,33 @@
+\DOC X86_UNDEFINED_CHOOSE_TAC
+
+\TYPE {X86_UNDEFINED_CHOOSE_TAC : tactic}
+
+\SYNOPSIS
+Strips one leading existential quantifier from the antecedent of an implication
+goal, replacing the bound variable by a freshly generated constant-like name.
+
+\DESCRIBE
+The tactic takes no arguments. The goal's conclusion must be an implication
+whose antecedent is an existentially quantified equation between a state
+expression and a state variable. The outermost existential binder is removed
+and its variable instantiated by a new freshly named term inside the body; the
+rest of the conclusion and all assumptions are unchanged.
+{
+       A ?- (?x1 ... xn. t) ==> u
+     ============================  X86_UNDEFINED_CHOOSE_TAC
+       A ?- (?x2 ... xn. t') ==> u
+}
+\noindent Here {t'} is {t} with {x1} replaced by the new name; when only one
+binder was present (n = 1) the antecedent is left quantifier-free as a plain
+equation.
+
+\FAILURE
+Fails when the implication's antecedent is a plain equation with no leading
+existential quantifier, so that there is no existential binder available to
+strip; the failure arises inside the tactic's own rewriting step.
+
+\COMMENTS
+The observed traces show only this single-binder-stripping behaviour, always on
+goals whose antecedent begins with an existential quantifier.
+
+\ENDDOC

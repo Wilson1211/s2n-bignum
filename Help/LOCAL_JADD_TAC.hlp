@@ -1,0 +1,35 @@
+\DOC LOCAL_JADD_TAC
+
+\TYPE {LOCAL_JADD_TAC : int -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal across a called
+point-addition subroutine, replacing the pre-call state assumptions by
+post-call ones together with a specification of the subroutine's result.
+
+\DESCRIBE
+The tactic takes one integer argument {n+1}, the index of the new state
+variable; the resulting goal and all its new assumptions are phrased in terms
+of that numbered state, i.e. the previous state's index plus one.
+{
+   A ?- eventually <machine> P s<n>
+   ================================================  LOCAL_JADD_TAC (n+1)
+   A' ?- eventually <machine> P s<n+1>
+}
+\noindent Here {A'} is obtained from {A} as follows. The assumptions about the
+pre-call state — the register and memory reads, the loaded-program fact, and
+the accumulated {MAYCHANGE} frame relating the initial state to {s<n>} — are
+discharged, and corresponding assumptions about the new state are added: the
+same memory/register contents re-expressed at {s<n+1>}, program-counter and
+stack-pointer readings reflecting the return from the call, a {MAYCHANGE} fact
+extended with the regions written by the call, and one new assumption of the
+form {!z1 ... zp. <hypotheses on the inputs> ==> <memory triple at the
+subroutine's output address represents the group sum of the two input points>}.
+Assumptions not mentioning a state (arithmetic side conditions, non-overlap
+facts, previously derived specifications) are left untouched.
+
+\COMMENTS
+All observed traces show this single kind of transformation, on goals whose
+conclusion is an {eventually} statement about a concrete state variable.
+
+\ENDDOC

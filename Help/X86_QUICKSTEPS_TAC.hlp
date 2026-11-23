@@ -1,0 +1,37 @@
+\DOC X86_QUICKSTEPS_TAC
+
+\TYPE {X86_QUICKSTEPS_TAC : thm * (thm option array) -> term list -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a block of x86 instructions in an {eventually} goal,
+advancing the state from the current state variable to a freshly named later
+state and replacing the state-describing assumptions accordingly.
+
+\DESCRIBE
+{th : thm * (thm option array)} is the execution data for the program being
+stepped: a code-length theorem paired with an array of per-instruction decoding
+theorems. {pats : term list} is a list of state-component patterns selecting
+which reads are tracked and kept. {snums : int list} is the list of step
+numbers to execute. The goal must have the form {eventually x86 (\s'. P s' /\
+MAYCHANGE ... s0 s') s}; the tactic runs the requested steps, introducing a new
+state variable {sn}.
+{
+   A ?- eventually x86 (\s'. P s' /\ MAYCHANGE ... s0 s') s
+   ================================================================  X86_QUICKSTEPS_TAC th pats snums
+   A' ?- eventually x86 (\s'. P' s' /\ MAYCHANGE ... s0 s') sn
+}
+\noindent Here {P'} is {P} with the conjuncts that have been discharged (such
+as an implication about the computed result) dropped, leaving the
+program-counter condition and the {MAYCHANGE} conjunct. In {A'}, the old
+per-state assumptions about the initial state — register and memory reads, the
+instruction-pointer value, the trivial {MAYCHANGE}, and the arithmetic side
+conditions — are discarded, while non-overlapping assumptions are retained;
+added to {A'} are assumptions that the code is still loaded, the reads selected
+by {pats} holding of {sn}, the new program-counter value, and an accumulated
+{MAYCHANGE} relating the original state to {sn}.
+
+\COMMENTS
+Every observed trace shows exactly one resulting subgoal and this one kind of
+transformation, on goals of this single {eventually}-with-{MAYCHANGE} shape.
+
+\ENDDOC

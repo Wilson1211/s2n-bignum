@@ -1,0 +1,27 @@
+\DOC DISCARD_FLAGS_TAC
+
+\TYPE {DISCARD_FLAGS_TAC : tactic}
+
+\SYNOPSIS
+Deletes from the assumption list every hypothesis stating the value of a
+processor condition flag in a state, leaving the conclusion untouched.
+
+\DESCRIBE
+Takes no arguments. The tactic scans the assumptions and drops those of the
+form asserting that reading a status flag component of a machine state is
+equivalent to some boolean expression. All other assumptions — register and
+memory reads, arithmetic side conditions, loaded-code and frame assumptions —
+are kept in their original order.
+{
+       A, f1 ... fn ?- t
+     ===================== DISCARD_FLAGS_TAC
+             A ?- t
+}
+\noindent Here {f1 ... fn} are the flag-valued assumptions removed; n may be
+zero.
+
+\COMMENTS
+All observed traces show this single kind of outcome, always on goals that do
+contain such flag assumptions.
+
+\ENDDOC

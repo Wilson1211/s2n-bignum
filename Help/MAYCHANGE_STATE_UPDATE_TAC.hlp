@@ -1,0 +1,34 @@
+\DOC MAYCHANGE_STATE_UPDATE_TAC
+
+\TYPE {MAYCHANGE_STATE_UPDATE_TAC : tactic}
+
+\SYNOPSIS
+Replaces the goal's accumulated {MAYCHANGE} frame assumption, which relates the
+initial state to one state, by an updated frame relating the initial state to
+the successor state named in the goal's state-update equation, extending the
+frame with any components written by that update.
+
+\DESCRIBE
+Takes no arguments. It acts only on the assumptions, leaving the conclusion
+unchanged and producing a single subgoal. The unique assumption of the form
+{(MAYCHANGE ... ,, ...) s t} (possibly a bare {MAYCHANGE []} relation) is
+deleted, and an assumption of the same shape is appended at the end of the
+assumption list: the second state becomes the later state {u} occurring in the
+goal's {write ... = u} premise, and zero or more further {MAYCHANGE [...]}
+components are composed on the right, in order, for those state components the
+write touches that are not already listed (if all written components are
+already covered, the component list is unchanged). All other assumptions keep
+their order, so those after the removed one shift index.
+{
+     A, (MAYCHANGE [c1] ,, ... ,, MAYCHANGE [cn]) s t ?- t'
+     ===================================================================================  MAYCHANGE_STATE_UPDATE_TAC
+     A, (MAYCHANGE [c1] ,, ... ,, MAYCHANGE [cn] ,, MAYCHANGE [d1] ,, ... ,, MAYCHANGE [dk]) s u ?- t'
+}
+\noindent where k may be zero.
+
+\COMMENTS
+The observed traces show only this single kind of outcome, always on goals
+whose conclusion is an implication from a state-update equation to an
+{eventually} statement carrying a {MAYCHANGE} frame.
+
+\ENDDOC

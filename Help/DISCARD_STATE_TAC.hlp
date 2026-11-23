@@ -1,0 +1,28 @@
+\DOC DISCARD_STATE_TAC
+
+\TYPE {DISCARD_STATE_TAC : string -> tactic}
+
+\SYNOPSIS
+Deletes from the assumption list every hypothesis that mentions the machine
+state named by the given string, leaving the conclusion untouched.
+
+\DESCRIBE
+The argument {s : string} names a state variable; every assumption whose
+statement involves that state is discarded, while assumptions not mentioning it
+— arithmetic and bound facts, non-overlapping conditions, abbreviation
+equations, and facts about other states — are kept in their original order.
+{
+       A ?- t
+    ============ DISCARD_STATE_TAC s
+       A' ?- t
+}
+\noindent where {A'} is {A} with the state-dependent assumptions deleted:
+typically register, flag and memory {read} facts about the named state, the
+{bytes_loaded} fact, the {MAYCHANGE} frame relating an earlier state to it, and
+event-list facts about it.
+
+\COMMENTS
+In all observed traces this single kind of outcome occurs, and the tactic is
+always applied to goals that do have assumptions.
+
+\ENDDOC

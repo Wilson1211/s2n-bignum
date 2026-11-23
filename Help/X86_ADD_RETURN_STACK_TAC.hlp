@@ -1,0 +1,41 @@
+\DOC X86_ADD_RETURN_STACK_TAC
+
+\TYPE {X86_ADD_RETURN_STACK_TAC : thm * (thm option array) -> thm -> term -> int -> tactic}
+
+\SYNOPSIS
+Discharges a universally quantified {ensures} specification for a stack-using
+x86 subroutine from a corresponding core-function specification, either closing
+the goal or reducing it to a single residual trace-equality obligation with the
+symbolic post-return state available as assumptions.
+
+\DESCRIBE
+The arguments are {execth : thm * (thm option array)}, the machine-code
+execution package for the program concerned (a code-length theorem paired with
+per-instruction decoding data); {coreth : thm}, the already-proved
+specification of the core routine from which the goal's specification is to be
+derived; {reglist : term}, a term that is a list of registers, naming the
+callee-saved registers whose save/restore is to be accounted for; and
+{stackoff : int}, the integer size of the stack frame reserved below the
+incoming stack pointer. It applies to an assumption-free goal whose conclusion
+is {forall x1 ... xn. A ==> ensures ...}, possibly wrapped in an outer
+existential over an event function, and either solves it outright, leaving no
+subgoals, or leaves exactly one subgoal. In the latter case the quantified
+variables are fixed, the hypotheses {A} of the specification are broken apart
+and placed in the assumption list in expanded form {A'} (overlap conditions
+rewritten to their {nonoverlapping_modulo} form), accompanied by a large set of
+further assumptions {st} recording the symbolically computed state after return
+— register, flag and stack-memory contents, the loaded code, the accumulated
+{MAYCHANGE} relation between the initial and final states, and the final event
+list — and the conclusion {u} is what remains of the postcondition, typically
+an existential equation about the event trace.
+{
+           ?- forall x1 ... xn. A ==> t
+      ==================================== X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff
+           (no subgoals)   or   A', st ?- u
+}
+
+\COMMENTS
+In all observed traces, the goals have this specification shape with no prior
+assumptions, and only these two outcomes occur.
+
+\ENDDOC

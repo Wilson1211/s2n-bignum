@@ -1,0 +1,39 @@
+\DOC LOCAL_AMONTSQR_P384_TAC
+
+\TYPE {LOCAL_AMONTSQR_P384_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances the {eventually} goal of a machine-code correctness proof across an
+inlined almost-Montgomery-squaring subroutine, replacing the current symbolic
+state by a successor state and adding the subroutine's result specification to
+the assumptions.
+
+\DESCRIBE
+The first argument, an {int}, selects which of the available input/output
+buffer-location variants of the subroutine step is used; the second, a
+{string list}, names the result variable {t} and the input variable {u} whose
+values the newly introduced assumptions talk about. Applied to a goal whose
+conclusion is an {eventually} statement, it yields a single subgoal about a
+fresh later state {s''}:
+{
+   A ?- eventually x86 (\s'. ...) s
+   =============================================  LOCAL_AMONTSQR_P384_TAC n ["t"; "u"]
+   A' ?- eventually x86 (\s'. ...) s''
+}
+\noindent Here {A'} retains the purely arithmetic/nonoverlapping assumptions of
+{A} and drops all state-indexed assumptions about {s} (program-counter,
+register, memory and {MAYCHANGE} facts), re-adding them restated at {s''}: a
+new program-counter equation, the code-loaded fact, the register and
+input/output memory readings, and a {MAYCHANGE} relation from the initial state
+to {s''} extended with the frame components written by this step. {A'} further
+contains a bound assumption of the form {t < 2 EXP 384}, a congruence
+assumption relating {t} to the Montgomery-scaled square of {u}, and a
+memory-read equation giving {t} as the contents of the destination buffer at
+{s''}.
+
+\COMMENTS
+In all observed traces, the tactic exhibits exactly this single-subgoal
+state-advancing behaviour, always on goals whose conclusion is such an
+{eventually} statement.
+
+\ENDDOC

@@ -1,0 +1,25 @@
+\DOC REPEAT_GEN_AND_OFFSET_STACKPTR_TAC
+
+\TYPE {REPEAT_GEN_AND_OFFSET_STACKPTR_TAC : tactic}
+
+\SYNOPSIS
+Strips all leading universal quantifiers from the goal's conclusion, fixing the
+bound variables as free variables.
+
+\DESCRIBE
+Takes no arguments. Applied to a goal whose conclusion is {!x1 ... xn. t}, it
+repeatedly generalizes, leaving the body {t} as the conclusion with {x1 ... xn}
+now free variables of the goal; nothing else in the conclusion changes.
+{
+   ?- !x1 ... xn. t
+   ================  REPEAT_GEN_AND_OFFSET_STACKPTR_TAC
+   ?- t
+}
+
+\COMMENTS
+In all observed traces this is the only transformation seen, always yielding
+exactly one subgoal, and only on goals with no assumptions whose conclusions
+are universally quantified implications about machine-code {ensures}
+statements.
+
+\ENDDOC

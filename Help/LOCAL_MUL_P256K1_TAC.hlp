@@ -1,0 +1,39 @@
+\DOC LOCAL_MUL_P256K1_TAC
+
+\TYPE {LOCAL_MUL_P256K1_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Symbolically executes an inlined modular-multiplication subroutine in an
+{eventually}-style machine goal, advancing the symbolic state by one step and
+recording the multiplication's result as a new assumption.
+
+\DESCRIBE
+{LOCAL_MUL_P256K1_TAC} takes an {int}, an offset/index used to locate the code
+block to execute, and a {string list} of three names: the first names the
+variable introduced for the computed result, the other two name the inputs
+whose stored values the result is expressed in terms of (the destination and
+the two source operands of the multiplication). Applied to a goal whose
+conclusion is an {eventually} statement about state variable {s_n}, it advances
+the state variable in the conclusion and in all state-dependent assumptions to
+its successor. The old program-counter assumption, the old {bytes_loaded}, the
+register- and memory-read assumptions and the old accumulated {MAYCHANGE}
+assumption are discharged and re-asserted at the new state; the {MAYCHANGE}
+assumption is extended by the memory region written, and there are added a read
+assumption for that region equating it to a freshly introduced result variable,
+a new program-counter assumption, and a pure arithmetic assumption defining
+that variable as the product of the two operand values reduced modulo the field
+prime. Purely arithmetic and nonoverlapping assumptions are kept, though their
+position in the assumption list may change. The outer postcondition of the
+conclusion is unchanged.
+{
+   A ?- eventually ... s_n
+   ========================================  LOCAL_MUL_P256K1_TAC i [dest; src1; src2]
+   A' ?- eventually ... s_{n+1}
+}
+\noindent where {A'} is as described above.
+
+\COMMENTS
+In all observed traces the tactic shows only this single-subgoal
+state-advancing behaviour, always on goals of this machine-execution shape.
+
+\ENDDOC

@@ -1,0 +1,39 @@
+\DOC LOCAL_AMONTSQR_SM2_TAC
+
+\TYPE {LOCAL_AMONTSQR_SM2_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances an {eventually}-style machine-state goal across one inlined
+almost-Montgomery-squaring subroutine call, replacing the current state
+variable by a fresh successor state and adding assumptions characterising the
+squared result stored in memory.
+
+\DESCRIBE
+The tactic takes an {int} selecting which code block/offset of the enclosing
+program the step corresponds to, and a {string list} naming the result variable
+and the input operand variable, which appear in the added assumptions about the
+computed value and the memory location it is written to. Applied to a goal
+whose conclusion is an {eventually} property of a state {s}, it yields a single
+subgoal with the same {eventually} property applied to a fresh later state
+variable {s'}:
+{
+   A ?- eventually ... s
+   =================================  LOCAL_AMONTSQR_SM2_TAC n ["result"; "input"]
+   A' ?- eventually ... s'
+}
+\noindent Here {A'} is obtained as follows. All state-dependent assumptions of
+{A} — program-counter, register, memory-content and loading facts, and the
+accumulated {MAYCHANGE} frame relating the initial state to the current one —
+are discharged and re-added with {s'} in place of {s}, the {MAYCHANGE} frame
+being extended by the memory region written in this step; purely arithmetic
+assumptions are kept unchanged. Three new assumptions appear: the new program
+counter value, a bound of the form {t < u} on the result variable, and a
+congruence stating that the result is the Montgomery square of the named input
+modulo the field prime, together with an equation reading the result out of the
+appropriate memory block of the stack frame.
+
+\COMMENTS
+The observed traces show only this single-subgoal state-advancing behaviour, on
+goals of this one {eventually} shape.
+
+\ENDDOC

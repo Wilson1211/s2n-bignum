@@ -1,0 +1,40 @@
+\DOC LOCAL_ROUGHMUL_P256K1_TAC
+
+\TYPE {LOCAL_ROUGHMUL_P256K1_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal over one inlined "rough multiplication"
+subroutine call, replacing the current machine state by its successor and
+adding assumptions describing the result that call writes.
+
+\DESCRIBE
+LOCAL_ROUGHMUL_P256K1_TAC takes an {int}, an offset/index used to locate the
+call site, and a {string list} whose first element names the result variable
+and whose remaining two elements name the operand variables whose stored values
+are multiplied. It applies to a goal whose conclusion is an {eventually}
+statement about a current state variable, with assumptions recording the
+program image, the register and memory contents of that state, and the
+accumulated frame-change relation. The conclusion is re-expressed as the same
+{eventually} statement about a fresh successor state variable. Every assumption
+mentioning the old state — the program-counter value, the program image,
+register and memory reads, and the frame-change relation — is discharged and
+re-added for the new state, with the program counter advanced and the
+frame-change relation extended by an extra changed memory region; further new
+assumptions give the contents of that region, a bound on the result value, and
+a congruence relating that result modulo the field prime to the product of the
+two named operands. Arithmetic assumptions that do not mention the state are
+kept unchanged.
+{
+   A ?- t
+   =============================  LOCAL_ROUGHMUL_P256K1_TAC n [res; op1; op2]
+   A' ?- t'
+}
+\noindent where {A'} is {A} with the old state's facts replaced by the
+corresponding new-state facts together with the result bound and congruence,
+and {t'} is {t} with the new state substituted.
+
+\COMMENTS
+In all observed traces, only this single-subgoal state-advancing behaviour
+occurs, on goals of this one symbolic-execution shape.
+
+\ENDDOC

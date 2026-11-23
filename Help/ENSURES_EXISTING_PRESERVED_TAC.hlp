@@ -1,0 +1,29 @@
+\DOC ENSURES_EXISTING_PRESERVED_TAC
+
+\TYPE {ENSURES_EXISTING_PRESERVED_TAC : term -> tactic}
+
+\SYNOPSIS
+Given a state component {ctm}, transforms an {ensures} goal whose precondition
+fixes the value of {ctm} by appending that same equation to the postcondition
+and adding {ctm} to the frame of changeable components.
+
+\DESCRIBE
+The argument {ctm : term} is the state component whose precondition-fixed value
+is to be asserted in the postcondition and added to the frame. The goal must be
+of the form {ensures m P Q F} where {P} contains a conjunct equating the read
+of {ctm} to some term; that equation is appended as a final conjunct of {Q},
+and {MAYCHANGE [ctm]} is joined to the frame. The resulting precondition {P'}
+states the same conditions as {P} but with its conjunction re-associated into a
+flat right-nested form, so nested bracketed groups of conjuncts are flattened.
+{
+   A ?- ensures m P Q F
+   ========================================================  ENSURES_EXISTING_PRESERVED_TAC ctm
+   A ?- ensures m P' Q' (F ,, MAYCHANGE [ctm])
+}
+
+\COMMENTS
+The observed traces show only this single kind of transformation, always on
+{ensures} goals for the same machine model whose precondition already
+constrains the given component.
+
+\ENDDOC

@@ -1,0 +1,40 @@
+\DOC LOCAL_SUB_P521_TAC
+
+\TYPE {LOCAL_SUB_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+Advances a symbolic-execution goal over an inlined modular-subtraction
+subroutine, replacing the current machine state with a successor state and
+adding an assumption characterising the stored result.
+
+\DESCRIBE
+The first argument is an {int} (zero in all observed traces); the second is a
+{string list} of three names giving the result variable followed by the two
+operand variables of the subtraction whose specification is introduced. The
+goal is an {eventually} statement about a state variable, and the tactic yields
+a single subgoal in which that state variable is replaced throughout the
+conclusion by a fresh successor state. Every assumption mentioning the old
+state — the program-counter value, {bytes_loaded}, register and memory-content
+readings, and the accumulated {MAYCHANGE} frame relating the initial state to
+the current one — is discharged and re-added in a form about the new state,
+with the program counter advanced and the {MAYCHANGE} frame extended by the
+memory block holding the result; the memory-content assumption for the
+destination block now equates it with the named result variable. A new
+implication assumption is also introduced, conditional on the two named
+operands being below the field modulus and stating that the result is their
+modular difference. Purely arithmetic and non-overlapping assumptions are left
+untouched, though their positions in the assumption list may shift.
+{
+      A ?- t
+      ======================================  LOCAL_SUB_P521_TAC n ["res"; "op1"; "op2"]
+      A' ?- t'
+}
+\noindent Here {A'} is {A} with the state-dependent assumptions restated for
+the successor state plus the new specification assumption, and {t'} is {t} with
+the state variable replaced.
+
+\COMMENTS
+The observed traces show only this single-subgoal transformation, always on
+goals of this shape with a three-name argument list.
+
+\ENDDOC

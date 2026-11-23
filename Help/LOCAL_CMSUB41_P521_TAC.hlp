@@ -1,0 +1,37 @@
+\DOC LOCAL_CMSUB41_P521_TAC
+
+\TYPE {LOCAL_CMSUB41_P521_TAC : int -> string list -> tactic}
+
+\SYNOPSIS
+LOCAL_CMSUB41_P521_TAC advances a symbolic-execution {eventually} goal past an
+inlined modular combine-and-subtract subroutine, replacing the current state
+variable by a later one and adding an assumption characterising the newly
+written result.
+
+\DESCRIBE
+The first argument is an {int} selecting which code/offset variant of the block
+is stepped over, which affects the program-counter value and the register/stack
+layout assumed; the second is a {string list} naming the result variable and
+the two input variables whose relationship is asserted in the new assumption.
+In the conclusion {eventually x86 (\s'. ...) s}, the state variable {s} is
+replaced by a fresh, later state variable {s'}-successor, the postcondition
+predicate itself being left unchanged. All assumptions mentioning the old state
+— the program counter, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} frame — are discharged and re-added for the new state,
+with the program counter updated to the block's exit address, the {MAYCHANGE}
+frame extended by the newly written destination location, and a new memory-read
+assumption equating the destination to the named result variable; additionally
+a pure arithmetic assumption of the form {t ==> u}, relating the named result
+to the named inputs modulo the prime, is added, and some unchanged assumptions
+are renumbered.
+{
+   A(s) ?- eventually x86 (\s'. P s') s
+   ======================================  LOCAL_CMSUB41_P521_TAC n ["r"; "a"; "b"]
+   A'(z1), t ==> u ?- eventually x86 (\s'. P s') z1
+}
+
+\COMMENTS
+The observed traces show only this single kind of transformation, on goals of
+this one symbolic-execution shape.
+
+\ENDDOC
