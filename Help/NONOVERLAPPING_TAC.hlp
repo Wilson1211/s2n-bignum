@@ -3,25 +3,35 @@
 \TYPE {NONOVERLAPPING_TAC : tactic}
 
 \SYNOPSIS
-Proves a goal whose conclusion asserts that two address ranges do not overlap,
-closing it outright.
+{NONOVERLAPPING_TAC} proves a goal asserting that memory regions do not
+overlap, deriving it from the non-overlap facts already in the assumption list.
 
 \DESCRIBE
-Takes no arguments. The conclusion {t} may be a non-overlap claim about two
-memory regions stated either in the {nonoverlapping} form or in the explicit
-modulo form, with region bases built from program counters, stack pointers,
-word offsets and symbolic pointers, and with sizes that may be arithmetic
-expressions in free variables. The assumptions {A} are left untouched and serve
-as the source of the non-overlap and size facts from which the conclusion is
-derived.
+The tactic takes no arguments. It applies to a goal whose conclusion is a
+memory non-overlap claim, in either the modular form or the abbreviated form,
+and possibly a conjunction of several such claims; it uses the non-overlap
+assumptions in the goal's assumption list, which may also contain many
+unrelated assumptions about machine states, arithmetic bounds and quantified
+lemmas. The target regions may be described by base pointers offset by word
+arithmetic and by sizes involving symbolic arithmetic, and need not match any
+assumption literally; claims about code regions given by a program counter and
+length are also handled.
 {
-   A ?- t
-   =============  NONOVERLAPPING_TAC
-   (no goals)
+       A ?- t
+     ============  NONOVERLAPPING_TAC
+       (no goals)
 }
 
+\FAILURE
+Fails when the conclusion is not of a non-overlap form it can handle: a plain
+equation between two pointer terms fails in the internal conversion step, and a
+disjunction of such an equation with a non-overlap claim fails because none of
+the alternatives searched can be established. Both failing shapes were seen
+with assumption lists that do contain non-overlap facts, so failure is driven
+by the shape of the conclusion rather than by missing assumptions.
+
 \COMMENTS
-In all observed traces the goal conclusion is a non-overlap assertion and the
-goal is always closed, so no other behaviour is demonstrated.
+In all observed successful traces the tactic closes the goal, leaving zero
+subgoals, so no transformed goal state is observed.
 
 \ENDDOC

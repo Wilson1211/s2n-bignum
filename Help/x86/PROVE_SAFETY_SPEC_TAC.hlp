@@ -3,30 +3,30 @@
 \TYPE {PROVE_SAFETY_SPEC_TAC : ?public_vars:term list -> thm * (thm option array) -> tactic}
 
 \SYNOPSIS
-A complete decision procedure for constant-time/safety specification goals: it
-discharges an existentially quantified event-trace specification goal outright.
+Fully proves an existentially quantified constant-time/memory-safety
+specification goal about an assembly routine, leaving no subgoals.
 
 \DESCRIBE
-The optional argument {public_vars : term list} lists the terms naming the
-variables treated as public, i.e. those the event function may depend on; {exec
-: thm * (thm option array)} is the execution record for the program under
-analysis, consisting of a theorem giving the length of the machine-code list
-together with an array of per-instruction decoding theorems. It applies to a
-goal whose postcondition asserts that the emitted event trace equals {f_events}
-applied to some of the quantified variables and satisfies a
-memory-access-inbounds condition:
+Takes an optional {public_vars : term list}, the terms treated as the publicly
+visible inputs on which the produced event trace may depend, and {exec : thm *
+(thm option array)}, the execution record for the program: a theorem giving the
+length of the byte list for the code paired with an array of
+decoded-instruction theorems used to step through it. It applies to a goal
 {
-   ?- ?f_events. !x1 ... xn. t ==> ensures ...
-   =============================================  PROVE_SAFETY_SPEC_TAC public_vars exec
+   ?- ?f. !x1 ... xn. t ==> ensures ...
 }
+\noindent (the implication's antecedent may be absent), where the postcondition
+asserts that the newly appended event trace equals {f} applied to some of the
+bound variables and satisfies a memory-access-inbounds condition. The tactic
+discharges such a goal completely:
 {
-   
+   ?- ?f. !x1 ... xn. t ==> ensures ...
+   =================================================  PROVE_SAFETY_SPEC_TAC public_vars exec
 }
-\noindent so the goal is proved completely, leaving nothing behind and
-introducing no new assumptions.
 
 \COMMENTS
-The observed traces show only this single outcome, on assumption-free goals of
-exactly this existential/universal {ensures} safety-specification shape.
+All observed traces show this single outcome, on goals with no assumptions and
+of this one shape: an existential witness for an event function over an
+{ensures} specification with a {MAYCHANGE} frame.
 
 \ENDDOC

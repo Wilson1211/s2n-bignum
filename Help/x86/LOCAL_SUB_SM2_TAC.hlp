@@ -3,38 +3,35 @@
 \TYPE {LOCAL_SUB_SM2_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances the symbolic execution of an {eventually} goal across an inlined
-modular-subtraction subroutine, replacing the current state variable with a
-successor state and recording the subtraction's specification as a new
-assumption.
+Advances a symbolic-execution goal across an inlined modular-subtraction
+subroutine, replacing the current machine-state assumptions with ones about a
+later state and adding a conditional specification for the computed difference.
 
 \DESCRIBE
-The first argument is an {int} offset/index selector ({0} in all observed
-traces); the second is a {string list} naming, in order, the destination buffer
-and the two operand buffers of the subtraction, which determine which stored
-value is produced and which stored values are subtracted. Applied to a goal
-whose conclusion is an {eventually} claim about machine state {s} and whose
-assumptions describe {s}, it yields a single subgoal about a fresh successor
-state {s'}:
+LOCAL_SUB_SM2_TAC takes an {int}, an offset/index used in locating the
+subroutine call site, and a {string list} naming, in order, the result operand
+and the two operands of the subtraction; these names fix the terms appearing in
+the added specification assumption. The goal's conclusion is an {eventually}
+statement about a state variable, and it is rewritten with a fresh, later state
+variable. All assumptions describing the old state — program counter value,
+{bytes_loaded}, register and memory contents, and the accumulated {MAYCHANGE}
+relation — are discharged and replaced by corresponding assumptions about the
+new state, the {MAYCHANGE} component possibly extended by further memory
+components. One new assumption is also introduced: an implication whose
+antecedent bounds the two input values and whose conclusion equates the named
+result to the modular difference of the inputs. The specification assumption
+added previously is retained, though reordered among the assumptions.
 {
-   A ?- eventually ... s
-   ================================  LOCAL_SUB_SM2_TAC 0 [dest; op1; op2]
-   A' ?- eventually ... s'
+   A ?- t
+   ========================================  LOCAL_SUB_SM2_TAC n ["res"; "op1"; "op2"]
+   A' ?- t'
 }
-\noindent Every assumption mentioning the old state — program-counter value,
-code-loaded fact, register contents, memory-block contents, and the accumulated
-{MAYCHANGE} relation from the initial state — is discharged and re-added in
-{A'} with {s'} in place of {s}: the program counter is advanced, the
-{MAYCHANGE} relation is extended with the destination memory block, and an
-assumption giving the destination buffer's new contents is added. One further
-assumption is added stating that, under the hypothesis that both operands are
-reduced, the destination value equals the difference of the operands taken as
-an integer remainder modulo the field prime. Assumptions not referring to the
-state are left unchanged and keep their relative order.
+\noindent Here {t'} is {t} with a fresh later state variable, and {A'} is {A}
+with the old-state facts swapped for new-state ones plus the new difference
+specification.
 
 \COMMENTS
-The observed traces show only this single-subgoal state-advancing behaviour,
-always on goals whose conclusion is an {eventually} claim with a
-state-describing assumption list.
+In all observed traces, the tactic performs exactly this single-subgoal
+transformation on symbolic-execution goals of this shape.
 
 \ENDDOC

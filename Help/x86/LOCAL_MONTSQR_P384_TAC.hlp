@@ -3,38 +3,37 @@
 \TYPE {LOCAL_MONTSQR_P384_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style symbolic execution goal across an inlined P-384
-Montgomery squaring block, replacing the current-state assumptions with ones
-about a later state and adding a conditional specification of the squaring
-result.
+Advances an {eventually}-style machine-state goal across one inlined
+Montgomery-squaring subroutine, replacing the current state variable by a fresh
+successor state and adding an assumption characterising the squared result.
 
 \DESCRIBE
-The first argument, an {int}, selects a variant of the block being stepped
-over; both values occur in the observed traces, with no visible difference in
-the shape of the outcome. The second argument, a {string list}, names the
-result variable and the input variable of the squaring step; these names appear
-in the newly introduced specification assumption and in the memory-read
-assumption recording where the result is stored.
+The first argument is an {int} index/offset selecting which instance of the
+subroutine block to step over; it affects the program-counter offset and which
+temporaries are carried. The second is a {string list} naming the output
+variable and the input variable of the squaring step; these names are used in
+the new result assumption and in the memory-read assumption for the output
+buffer. Applied to a goal whose conclusion is {eventually ... s} for a current
+state {s}, the tactic produces the same conclusion with the successor state
+{s'} in place of {s}:
 {
    A ?- eventually ... s
-   ================================  LOCAL_MONTSQR_P384_TAC n [res; inp]
+   ================================================ LOCAL_MONTSQR_P384_TAC i [out; in]
    A' ?- eventually ... s'
 }
-\noindent Here {s'} is a fresh later state variable and the {eventually} body
-is otherwise unchanged. In {A'}, every assumption of {A} mentioning the old
-state — the program-counter read, {bytes_loaded}, register and memory reads,
-and the accumulated {MAYCHANGE} frame relating the initial state to the current
-one — is discharged and re-added with the new state variable, the program
-counter advanced and the {MAYCHANGE} frame extended by the component written
-to; the remaining mathematical assumptions are retained, possibly reordered.
-{A'} also gains an implication whose hypothesis bounds the square of the input
-and whose conclusion equates the named result variable with the
-Montgomery-reduced square modulo {p_384}, together with a memory-read
-assumption giving that result at the destination address.
+\noindent Here {A'} is obtained from {A} as follows: every state-dependent fact
+about {s} — program counter, loaded-bytes fact, register and memory reads, and
+the accumulated {MAYCHANGE} relation from the initial state — is discharged and
+re-added in the corresponding form for {s'}, with the {MAYCHANGE} relation
+extended by the components written by this step. A new memory-read assumption
+records that the output buffer of {s'} holds the named result, and a new
+implication assumption states that, under a bound hypothesis on the square of
+the input, the named result equals the Montgomery product of the input with
+itself modulo the prime. Purely arithmetic/nonoverlapping assumptions are kept,
+sometimes reordered.
 
 \COMMENTS
-The observed traces show only this single-subgoal state-advancing behaviour,
-always on goals of this {eventually} form carrying a full set of machine-state
-assumptions.
+The observed traces show only this single kind of transformation, always on
+goals of this {eventually} shape with a full set of state assumptions.
 
 \ENDDOC

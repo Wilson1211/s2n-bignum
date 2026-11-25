@@ -3,26 +3,23 @@
 \TYPE {UNIFY_F_EVENTS_TAC : tactic}
 
 \SYNOPSIS
-Closes a goal whose conclusion equates an explicit event-list expression with
-an application of an uninterpreted event-list function to arguments, leaving no
-subgoals.
+Closes a goal whose conclusion equates an explicitly built event-trace term
+with an application of a defined event function.
 
 \DESCRIBE
-Takes no arguments. Applied to a goal {A ?- t = u} in which {t} is a concrete
-list (or an {APPEND} of concrete lists and other event-list terms) and {u} is a
-call of a function symbol to arguments, it discharges the goal entirely,
-leaving {A} untouched — nothing added, nothing removed, no residual subgoal:
+Takes no arguments. Applied to a goal {A ?- t = u} in which one side is a
+concrete list/{APPEND} expression of trace events and the other is a call of a
+named event-trace function, it proves the equation outright; the assumptions
+{A} are left untouched and play no role.
 {
       A ?- t = u
-      ==========  UNIFY_F_EVENTS_TAC
-}
-{
-   
+    ================ UNIFY_F_EVENTS_TAC
+      (no goals)
 }
 
 \COMMENTS
-In all observed traces the inputs are uniformly goals of this event-list
-equality form, under large assumption lists describing machine states, and the
-single outcome shown is the tactic closing the goal.
+In all observed traces, this is the only outcome — the tactic closing such an
+equational goal — and the goals always carry a large context of assumptions
+that is neither added to nor removed from.
 
 \ENDDOC

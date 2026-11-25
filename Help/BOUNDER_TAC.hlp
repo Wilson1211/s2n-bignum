@@ -3,32 +3,37 @@
 \TYPE {BOUNDER_TAC : thm list -> tactic}
 
 \SYNOPSIS
-{BOUNDER_TAC} closes an arithmetic goal asserting numeric bounds by automatic
-interval reasoning.
+{BOUNDER_TAC} closes a goal asserting numeric bounds by automatic interval
+reasoning.
 
 \DESCRIBE
-The single argument has type {thm list}: theorems supplied alongside the goal,
-in the observed successful traces either empty or a collection of facts drawn
-from the surrounding context; the goal's own assumptions are left untouched.
-The goal's conclusion {t} must be a bound assertion — a single {<=}/{<}/{>}
-comparison, or a conjunction of such comparisons, between arithmetic
-expressions over naturals, integers and reals built from word/bit operations,
-sums, products, divisions and literals.
+Takes one argument of type {thm list}, a list of theorems supplied alongside
+the goal; in all observed successes this list is empty, while failures occur
+both with an empty list and with a long list of theorems drawn from the ambient
+context. The goal's conclusion {t} is a bound assertion ({u < v}, {u <= v}, or
+a conjunction of two such, with either side an arithmetic expression) over
+naturals, integers or reals built from word values, bignum expressions,
+arithmetic and numerals. The assumptions {A} are left untouched and are not
+needed, however large and heterogeneous they are.
 {
-           A ?- t
-      ==================  BOUNDER_TAC thl
+          A ?- t
+     ====================  BOUNDER_TAC [] 
+         (no subgoals)
 }
-\noindent It never splits the goal or rewrites it in place; every successful
-trace closes it outright, with assumption lists ranging from none to large
-machine-state contexts that play no visible role.
 
 \FAILURE
-Fails when the conclusion is not of the bound form it can handle — for instance
-an equation between non-arithmetic terms — where the internal normalisation of
-the conclusion raises an error; and when the conclusion is a bound assertion
-whose truth it cannot establish from the available information, where it
-reports that no tactic applied. Both failures arise from the tactic itself
-rather than from the supplied theorem list, which in the failing traces
-includes both an empty list and a long list of context facts.
+Fails when the conclusion is not a bound assertion that its interval analysis
+can verify: observed failures are on an equation between opaque terms and on a
+negated equation, raising a rewriting-level error, and on a conjunction of
+inequalities over integer-division expressions whose bounds it cannot
+establish, reporting that no tactic applied. Since these failures arise with
+both an empty and a populated theorem-list argument, they stem from the
+tactic's own inability to handle the conclusion rather than from the supplied
+theorems.
+
+\COMMENTS
+In the observed traces, every goal with a bound-assertion conclusion was
+closed, and no trace shows the tactic transforming a goal rather than closing
+it.
 
 \ENDDOC

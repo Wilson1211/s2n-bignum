@@ -3,29 +3,27 @@
 \TYPE {ADD_IBT_OPEN_EXISTS : thm -> (thm -> tactic) -> tactic}
 
 \SYNOPSIS
-Proves the current goal outright from a supplied theorem together with a
-user-supplied continuation tactic, leaving no subgoals.
+Applied with a theorem and a tactic-producing continuation, this tactic closes
+the current goal outright, leaving no subgoals.
 
 \DESCRIBE
-{th : thm} is the theorem from which the goal is to be derived — a correctness
-statement closely matching the goal; {k : thm -> tactic} is a continuation that
-is handed a theorem and produces the tactic doing the actual work (in the
-observed traces, continuations that specialise and {MP_TAC} the inner theorem,
-rewrite with calling-convention and {MAYCHANGE} definitions, and discharge side
-conditions). Applied to a goal, it closes it completely:
+The first argument {th : thm} is a theorem; in the observed traces it is a
+specification theorem whose statement closely parallels the goal, differing in
+the code constant and side conditions. The second argument {k : thm -> tactic}
+is a continuation applied to a theorem derived from {th}, supplying the tactic
+that performs the remaining work; in the observed traces it is a large
+composite tactic that specialises the theorem, rewrites with calling-convention
+and MAYCHANGE abbreviations, and finishes the goal. Nothing of the conclusion
+or the assumptions remains:
 {
        A ?- t
-   ============ ADD_IBT_OPEN_EXISTS th k
-}
-{
-   
+       ==================  ADD_IBT_OPEN_EXISTS th k
 }
 
 \COMMENTS
-In every observed trace the conclusion is a universally quantified correctness
-statement, sometimes wrapped in an outer existential, and none of the goals
-carry assumptions, so nothing can be said about assumption handling. The traces
-show only this single outcome — the goal being closed on goals of this one
-shape.
+The observed traces show only this closing behaviour, and only on goals with no
+assumptions whose conclusions are universally quantified correctness statements
+(sometimes under a leading existential) of the form "side conditions imply an
+{ensures} property".
 
 \ENDDOC

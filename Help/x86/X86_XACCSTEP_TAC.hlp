@@ -3,28 +3,39 @@
 \TYPE {X86_XACCSTEP_TAC : thm * (thm option array) -> term list -> bool -> string -> tactic}
 
 \SYNOPSIS
-Symbolically executes one x86 machine instruction, advancing an {eventually}
-goal from the current symbolic state to a freshly named successor state and
-updating the state-component assumptions.
+Symbolically executes one x86 instruction of the program in an
+{eventually}-style goal, advancing the goal's state variable to a fresh
+successor state and re-deriving all state-component assumptions for it.
 
 \DESCRIBE
-{X86_XACCSTEP_TAC} takes {th : thm * (thm option array)}, the code/length
-theorem paired with a cache of per-instruction decoding theorems, which
-identifies the program being stepped through; {excs : term list}, a list of
-terms treated as exceptions during the step; {aflag : bool}, controlling
-whether the arithmetic/auxiliary-flag effect of the step is kept in precise
-form or abstracted into a fresh unconstrained variable; and {s : string}, the
-name used for the new state variable introduced by the step.
+The arguments are {th : thm * (thm option array)}, the program's code-length
+theorem paired with a cache of per-instruction decoding theorems, used to step
+the loaded bytes; {excs : term list}, terms serving as exceptions/extra data
+for the step; {aflag : bool}, a flag selecting how the step is performed (in
+the observed traces it is computed per instruction from the step number); and
+{s : string}, the name given to the state after the step. The conclusion is
+rewritten with the new state name, the postcondition {P} being unchanged. All
+assumptions mentioning the old state are discarded and replaced by
+corresponding assumptions about the new state: every surviving register, flag
+and memory read, the {bytes_loaded} assumption, and the accumulated {MAYCHANGE}
+frame (sometimes extended with further components written by the instruction).
+The instruction's effect appears as new reads of the updated components, an
+updated program-counter assumption, and updated flag assumptions; arithmetic
+facts about the freshly introduced result variables (and any flag-defining
+conditions) are added, typically migrating into the block of purely arithmetic
+assumptions kept at the front of the assumption list.
 {
-          A ?- eventually x86 P t
-   ======================================  X86_XACCSTEP_TAC th excs aflag s
-          A' ?- eventually x86 P u
-   ```
-   Here `u` is the newly named successor state. In `A'`, all assumptions describing readings of the old state (program-code loading, register, flag and memory reads, and the accumulated `MAYCHANGE` relation) are discharged and replaced by corresponding assumptions about the new state, with the `MAYCHANGE` relation extended by the components written by the executed instruction and the instruction-pointer assumption advanced. Assumptions that do not mention a state (side conditions and arithmetic facts) are kept unchanged, and the step adds new arithmetic/defining assumptions `x1 ... xn` (`n` may be zero) relating freshly introduced value variables, such as products, sums and carries, to earlier ones; previously derived value assumptions are retained and the step's own result equation is moved into this non-state block. Depending on `aflag`, flag-related assumptions appear either as explicit symbolic expressions in the old values or as equations against fresh unconstrained variables.
+               A ?- eventually x86 P t
+     ==================================================  X86_XACCSTEP_TAC th excs aflag s
+               A' ?- eventually x86 P u
 }
+\noindent Here {u} is the new state term and {A'} is {A} with all old-state
+assumptions replaced by their new-state counterparts plus the new facts, among
+which may be zero or more new arithmetic equations.
 
 \COMMENTS
-All observed traces show only this single kind of one-instruction advance, on
-goals whose conclusion is an {eventually} statement about an x86 program.
+The observed traces show only this single-step, one-subgoal behaviour, always
+on goals of this {eventually} form with large assumption sets about machine
+state.
 
 \ENDDOC

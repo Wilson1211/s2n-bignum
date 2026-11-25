@@ -4,25 +4,28 @@
 
 \SYNOPSIS
 Strips the leading existential quantifier from the goal's conclusion, replacing
-the bound variable by a free variable of the same name (primed as needed to
-avoid clashing with names already in use in the goal).
+the bound variable by a fresh free variable (renamed if the original name is
+already in use) and recording that variable in the supplied reference.
 
 \DESCRIBE
-The single argument {freevars : term list ref} is a reference cell holding a
-list of terms; it does not appear in the printed goal. Applied to a goal whose
-conclusion is {?x1. t}, the tactic yields one subgoal whose conclusion is the
-body with the bound variable instantiated to a free variable {x1'}, every
-occurrence in the body being renamed accordingly; {x1'} is {x1} itself unless
-that name already occurs elsewhere in the goal, in which case a primed variant
-is used.
+The single argument {freevars : term list ref} is a reference cell in which the
+tactic registers the newly introduced free variable; the observed traces show
+only this role for it, and its contents are not visible in the goal state.
+Applied to a goal whose conclusion is an existential statement, the tactic
+performs existential elimination:
 {
-       A ?- ?x1. t
-   =============================  SAFE_META_EXISTS_TAC freevars
-       A ?- t[x1'/x1]
+   A ?- ?x. t[x]
+   ==============  SAFE_META_EXISTS_TAC freevars
+     A ?- t[y]
 }
+\noindent Here {y} is {x} itself when that name is not already taken by the
+assumptions or surrounding context, and a primed variant of {x} otherwise. The
+assumption list is left completely unchanged, and nothing else in the
+conclusion is rewritten.
 
 \COMMENTS
-All observed traces show this single kind of outcome, always on goals whose
-conclusion begins with one existential quantifier.
+All observed traces show this single existential-elimination outcome, always on
+goals whose conclusion begins with one existential quantifier, and always with
+the same reference argument.
 
 \ENDDOC

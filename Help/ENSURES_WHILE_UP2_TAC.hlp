@@ -3,36 +3,36 @@
 \TYPE {ENSURES_WHILE_UP2_TAC : term -> term -> term -> term -> tactic}
 
 \SYNOPSIS
-Reduces an {ensures} goal about a program containing a counted upward loop to a
-single conjunctive goal combining a non-triviality side condition, an entry
-(set-up) {ensures}, a universally quantified per-iteration {ensures}, and an
-exit (post-loop) {ensures}.
+Reduces an {ensures} goal about a program containing a counted up-loop to a
+single subgoal conjoining a nonzero-trip-count condition, a loop-entry
+{ensures}, a universally quantified loop-body {ensures}, and a loop-exit
+{ensures}, all under the original assumptions.
 
 \DESCRIBE
-The tactic takes four terms: a loop trip count {k}; two program counters {pc1}
-and {pc2}, denoting the loop-body entry point and the loop-exit point
-respectively; and {new_inv}, a state invariant parameterised by the iteration
-counter, used as the intermediate pre/postcondition at each step. Applied to a
-goal whose conclusion is {ensures t}, where {t} is the original pre/post/frame
-triple, it yields:
+The tactic takes four terms: a trip count {t} (a numeral or an arbitrary
+numeric term), program-counter terms {u1} and {u2} giving the loop-head and
+loop-exit addresses, and an invariant {\i s. ...} parameterised by the
+iteration index and the machine state.
 {
-   A ?- ensures t
-   =============================================  ENSURES_WHILE_UP2_TAC k pc1 pc2 new_inv
-   A ?- ~(k = 0) /\ ensures ... /\ (!i. ... ==> ensures ...) /\ ensures ...
+   A ?- ensures step precond postcond frame
+   ================================================  ENSURES_WHILE_UP2_TAC t u1 u2 (\i s. ...)
+   A ?- t_ne /\ ensures ... /\ (forall x1. ...) /\ ensures ...
 }
-\noindent The first conjunct asserts that the count is nonzero. The second is
-an {ensures} leading from the original precondition to {new_inv} instantiated
-at {0} with program counter {pc1}. The third quantifies a fresh index variable
-{i} under hypotheses bounding it by {k} (together with the nonzero and
-positivity conditions) and demands an {ensures} from {new_inv} at {i} to
-{new_inv} at {i + 1}, whose target program counter is a conditional selecting
-{pc1} while {i + 1} is below {k} and {pc2} otherwise. The fourth is an
-{ensures} from {new_inv} at {k} with program counter {pc2} to the original
-postcondition. The original frame/{MAYCHANGE} component is reused verbatim in
-all three {ensures} conjuncts.
+\noindent The resulting conclusion is a four-way conjunction: first, the
+condition that the trip count is nonzero; second, an {ensures} from the
+original precondition to the invariant instantiated at index zero, with the
+program counter set to the loop-head address {u1}; third, a universally
+quantified {ensures} over a fresh index variable {x1}, with hypotheses saying
+that the index is below the trip count, that it is not equal to the trip count,
+and that the trip count is nonzero and positive, stepping from the invariant at
+that index to the invariant at its successor together with a program counter
+chosen by a conditional between {u1} and {u2} according to whether the
+successor is still below the trip count; and fourth, an {ensures} from the
+invariant at the trip count, with the program counter at the loop-exit address
+{u2}, to the original postcondition. Each of the three {ensures} components
+reuses the state frame {frame} of the original goal unchanged.
 
 \COMMENTS
-All observed traces show this single-subgoal transformation of an {ensures}
-goal, with assumption lists carried through untouched.
+The observed traces show only this single transformation.
 
 \ENDDOC

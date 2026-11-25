@@ -3,31 +3,30 @@
 \TYPE {CONCRETIZE_F_EVENTS_TAC : term -> tactic}
 
 \SYNOPSIS
-Instantiates the leading existentially quantified event-function variable of a
-goal with a given lambda term, beta-reducing its applications and
-re-quantifying existentially over the free function variables of that term.
+Refines a single existentially quantified function unknown in the goal's
+conclusion by substituting a supplied skeleton term for it, leaving the
+skeleton's free function symbols as the new existential variables.
 
 \DESCRIBE
 The argument {concrete_f_events : term} is a lambda abstraction giving the
-concrete shape to substitute for the goal's existential event-function
-variable; the function symbols left free (uninstantiated) in it become the new
-existential variables. Applied to a goal whose conclusion is a single
-existential over an event-function variable {f}, the tactic replaces {f}
-throughout the body by the supplied term and performs the beta-reductions, so
-that occurrences of {f} applied to the universally quantified parameters become
-the corresponding instantiated body, yielding {u}, the beta-reduced instance of
-the body.
+concrete shape to use for the existentially quantified witness; its free
+(unbound) function variables become the new existential variables of the
+resulting goal. Applied to a goal whose conclusion is {?f. t}, where the body
+applies {f} to some arguments, the tactic replaces every application of {f} in
+{t} by the skeleton applied to the same arguments and beta-reduced, giving {u},
+and binds existentially the free function variables {x1 ... xn} of the
+skeleton, in the order they appear:
 {
-   A ?- ?f. t[f]
-   =================================  CONCRETIZE_F_EVENTS_TAC concrete_f_events
-   A ?- ?x1 ... xn. t[u]
+       A ?- ?f. t
+       ================================  CONCRETIZE_F_EVENTS_TAC concrete_f_events
+       A ?- ?x1 ... xn. u
 }
-\noindent Here {x1 ... xn} are the function variables occurring free in
-{concrete_f_events}; in the observed traces n is at least one.
+\noindent The rest of the conclusion, including the universal quantifiers and
+hypotheses inside it, is unchanged.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, always on
-goals whose conclusion is a single existential over an event-function variable
-inside an {ensures}-style specification.
+In all observed traces only this one transformation occurs, always on goals
+whose conclusion is a single existential over a function later applied inside
+the body.
 
 \ENDDOC

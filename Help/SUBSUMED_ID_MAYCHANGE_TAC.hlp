@@ -3,23 +3,30 @@
 \TYPE {SUBSUMED_ID_MAYCHANGE_TAC : tactic}
 
 \SYNOPSIS
-Proves goals stating that the identity relation {(=)} is subsumed by a
-{MAYCHANGE}-style state-component relation built from {ASSIGNS} components
-combined with {,,}.
+Closes goals stating that the identity relation is subsumed by a relation built
+from {ASSIGNS} components, possibly combined with the sequencing operator.
 
 \DESCRIBE
-Takes no arguments. Applied to a goal whose conclusion is {(=) subsumed t},
-where {t} is a single {ASSIGNS} term or a {,,}-chain of such terms, it closes
-the goal outright; the assumptions {A} are untouched and play no role in the
-outcome.
+Takes no arguments. The goal must have the form {A ?- (=) subsumed t}, where
+{t} is either a single {ASSIGNS} applied to a state component (including
+composed components such as a register sub-field or a memory region), or a
+chain of such {ASSIGNS} terms joined by the relation-composition operator. The
+assumptions {A} are untouched and play no role; they may be absent or an
+arbitrarily large context.
 {
    A ?- (=) subsumed t
    =================== SUBSUMED_ID_MAYCHANGE_TAC
 }
 
+\FAILURE
+Fails when the right-hand side of {subsumed} is not of the {ASSIGNS}-based form
+handled — in particular when it is a differently shaped change relation — the
+failure arising inside the tactic as an unsuccessful match of its implication
+theorem against the conclusion; this occurs both with and without assumptions
+present.
+
 \COMMENTS
-In all observed traces, only this outcome occurs, on conclusions of exactly
-that shape, with the subsuming relation ranging over single components and long
-{,,}-chains alike.
+The observed traces show only this closing behaviour, never a transformed or
+split goal.
 
 \ENDDOC

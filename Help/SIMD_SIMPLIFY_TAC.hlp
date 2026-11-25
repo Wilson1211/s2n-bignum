@@ -3,30 +3,31 @@
 \TYPE {SIMD_SIMPLIFY_TAC : thm list -> tactic}
 
 \SYNOPSIS
-Rewrites assumptions equating a machine-word read with a nested bit-vector
-expression into a simplified form, collapsing {word_subword}/{word_join}
-lane-extraction chains and unfolding supplied definitions.
+{SIMD_SIMPLIFY_TAC} rewrites a goal's assumptions, normalising nested
+word-level SIMD expressions (joins, subwords, shifts) into simpler equivalent
+forms, leaving the conclusion unchanged.
 
 \DESCRIBE
-The argument {unfold_defs : thm list} is a list of equational theorems whose
-left-hand sides are expanded while the assumptions are simplified; in the
-observed traces it is always a single-element list. The tactic touches only the
-assumption list: an assumption of the form {t = u} (a register or memory read
-equated with a word expression) may be replaced by a simplified equation, the
-old assumption being removed and the new one appended at the end, so the
-ordering of the surrounding assumptions can shift; in other applications no
-assumption changes and the goal is returned unaltered.
+The argument {unfold_defs : thm list} supplies extra equational theorems
+(typically definitions) that are expanded during the simplification, so that
+terms built from the defined constants can be simplified too; it may be the
+empty list. Assumptions whose bodies contain reducible word-level SIMD terms
+are discharged and re-added in simplified form — often collapsing a large
+{word_subword}/{word_join} nest into a compact expression, or evaluating a term
+to a literal — which also moves them to the end of the assumption list;
+assumptions already in normal form are left untouched, and in some applications
+no assumption changes at all.
 {
-           A ?- t
-   ======================  SIMD_SIMPLIFY_TAC unfold_defs
+            A ?- t
+   =================  SIMD_SIMPLIFY_TAC unfold_defs
            A' ?- t
 }
-\noindent Here {A'} is {A} with zero or more word-equation assumptions
-rewritten and moved to the end.
+\noindent where {A'} is {A} with zero or more assumptions replaced by
+simplified versions.
 
 \COMMENTS
-The observed traces show only this behaviour: the tactic never splits or closes
-a goal, and every input is a single machine-level {eventually} goal carrying a
-long list of read-equation assumptions.
+All observed traces show the same shape of behaviour on goals arising from
+machine-state reasoning, with large assumption lists and an unchanged
+conclusion.
 
 \ENDDOC

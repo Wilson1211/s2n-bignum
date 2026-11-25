@@ -3,35 +3,34 @@
 \TYPE {X86_QUICKSTEP_TAC : thm * (thm option array) -> term list -> string -> tactic}
 
 \SYNOPSIS
-Symbolically executes a single x86 instruction in an {eventually}-style goal,
-advancing the current state variable to a freshly named successor state.
+Advances a symbolic x86 {eventually} execution goal by one machine instruction,
+replacing the current state variable throughout the goal and assumptions by a
+fresh successor state.
 
 \DESCRIBE
-The argument {th : thm * (thm option array)} pairs the code-length theorem for
-the loaded byte list with a cached array of per-instruction decoding theorems,
-used to step the machine; {pats : term list} is a list of state-component
-patterns controlling which reads are selected/retained for the new state;
-{s : string} is the name to give the new state variable produced by the step.
-The goal's assumptions {A} describe the current state {t}: code loaded, stack
-pointer, the accumulated {MAYCHANGE} relation from the initial state, and the
-current instruction pointer. Each assumption mentioning {t} is dropped and
-replaced by the corresponding assumption about the new state {u} named by {s},
-the instruction-pointer assumption being updated to the next instruction
-address and the {MAYCHANGE} assumption re-expressed between the initial state
-and {u} (its component list may grow where the stepped instruction writes
-further components); assumptions not mentioning the state, such as
-nonoverlapping side conditions, are left untouched.
+The first argument {th : thm * (thm option array)} pairs the code-length
+theorem for the loaded program with an array of (optional) per-instruction
+decoding theorems used to step the execution; {pats : term list} is a list of
+term patterns selecting which state components are carried over/retained
+symbolically for the new state; {s : string} names the new state variable to
+introduce for the state after the step. The goal must have an {eventually}
+conclusion about a current state variable, with assumptions including a
+program-loaded fact, a program-counter fact, a {MAYCHANGE} relation from the
+initial state to the current state, and further state-indexed reads. All of
+these are re-expressed for the new state named by {s}: the state-dependent
+assumptions are removed and replaced by the corresponding assumptions about the
+new state, with the program-counter assumption's offset advanced past the
+executed instruction, while assumptions not mentioning the state (such as
+nonoverlapping conditions) are left untouched; the conclusion is the same
+{eventually} statement applied to the new state (written {t'} below).
 {
-   A ?- eventually x86 P t
-   ======================================  X86_QUICKSTEP_TAC th pats s
-   A' ?- eventually x86 P u
+       A, read PC t = u, R t ?- eventually ... t
+   =============================================  X86_QUICKSTEP_TAC th pats s
+      A, read PC t' = u', R t' ?- eventually ... t'
 }
-\noindent where {u} is the state named by {s} and {A'} consists of the
-untouched assumptions together with the state-dependent assumptions transferred
-to {u}.
 
 \COMMENTS
-The observed traces show only this single-step, one-subgoal behaviour, always
-on goals of this shape with a state-describing assumption set.
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals of this x86 symbolic-execution shape.
 
 \ENDDOC

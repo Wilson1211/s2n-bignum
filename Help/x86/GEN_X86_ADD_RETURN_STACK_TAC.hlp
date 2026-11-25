@@ -3,42 +3,40 @@
 \TYPE {GEN_X86_ADD_RETURN_STACK_TAC : thm * (thm option array) -> thm -> term -> int -> int * int -> tactic}
 
 \SYNOPSIS
-Proves an {ensures} specification for a subroutine that saves callee-saved
-registers and allocates stack space, deriving it from a given core
-specification about the subroutine body.
+Discharges a top-level {ensures} correctness goal for a subroutine wrapped in a
+stack-frame/register-save prologue and epilogue, deriving it from a supplied
+core correctness theorem, either closing the goal or leaving one residual goal
+about the resulting state.
 
 \DESCRIBE
-{GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)} takes
-{execth : thm * (thm option array)}, the execution/decoding data for the
-program, including a theorem giving the length of the byte list;
-{coreth : thm}, the correctness theorem for the subroutine's core, stated for
-the inner entry/exit addresses; {reglist : term}, a term list of the
-callee-saved registers the wrapper preserves; {stackoff : int}, the size of the
-stack frame subtracted from the stack pointer; and {(n,m) : int * int},
-instruction counts for the wrapper's prologue and epilogue. It applies to a
-universally quantified (and sometimes outermost existentially quantified) goal
-of the form {A ?- ... ensures x86 ...} relating entry at the program's start
-with a stack-allocating wrapper and the return address. The goal is either
-closed outright or reduced to a single subgoal in which all the outer
-quantifiers have been stripped, the non-overlapping side conditions and the
-derived facts about the final machine state (register and flag reads, memory
-reads at the saved-register slots, the frame condition, and the accumulated
-event trace) have been added as assumptions, and the conclusion is the
-remaining existential claim about the event trace.
+{execth : thm * (thm option array)} supplies the executable-decoding data for
+the machine code: a code-length theorem together with the per-instruction
+decode array. {coreth : thm} is the correctness theorem for the core of the
+routine, which the tactic specialises and composes with the wrapper.
+{reglist : term} is a HOL list of the registers the wrapper saves and restores,
+{stackoff : int} the size of the stack frame subtracted from the incoming stack
+pointer, and {(n,m) : int * int} the instruction counts of the wrapper's
+prologue and epilogue. It applies to an assumption-free goal that is
+universally quantified (or existentially-then-universally quantified) and whose
+conclusion is an {ensures} statement for the full wrapped routine. Either the
+goal is closed outright, or a single goal remains in which all quantifiers
+{x1 ... xn} have been stripped, the hypotheses of the implication appear as
+assumptions in expanded ({nonoverlapping_modulo}) form, many further derived
+facts about the final state are added as assumptions — loaded code, restored
+register values, flag values, saved stack slots, the accumulated {MAYCHANGE}
+relation between initial and final states, final instruction pointer and stack
+pointer, and the event trace — and the conclusion is reduced to the remaining
+postcondition component for that state:
 {
-           A ?- t
-      ==============================  GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)
-           (no subgoals)
+   A ?- t
+   =============================  GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)
+              (no goals)
+      or
+   A, hyps, state facts ?- u
 }
-\noindent         A ?- t    ==============================
-GEN_X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff (n,m)       A, h1
-... hn ?- u ```
-
-where {h1 ... hn} are the added hypotheses and {u} is the residual part of the
-specification's postcondition.
 
 \COMMENTS
-The observed traces show only these two outcomes, on goals stating x86
-subroutine {ensures} specifications of this shape.
+In all observed traces only these two outcomes occur, on goals that initially
+have no assumptions.
 
 \ENDDOC

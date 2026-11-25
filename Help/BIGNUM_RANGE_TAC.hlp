@@ -3,25 +3,24 @@
 \TYPE {BIGNUM_RANGE_TAC : string -> string -> tactic}
 
 \SYNOPSIS
-Adds to the assumptions a size bound stating that a named bignum value is less
-than {2 EXP (64 * k)} for a named length variable, leaving the conclusion
-unchanged.
+Adds an assumption bounding a named bignum value by {2 EXP (64 * k)}, where {k}
+is a named digit count, leaving the conclusion unchanged.
 
 \DESCRIBE
-The two arguments are strings naming variables occurring in the goal: {k} names
-the length variable (the digit count) and {m} names the numeric value variable
-to be bounded. The new assumption is appended at the end of the assumption
-list; no existing assumption is removed or altered.
+The two arguments are strings: {k}, the name of the variable giving the number
+of 64-bit digits, and {m}, the name of the variable denoting the numeric value
+held in that bignum. Writing {u} for the variable named by {m} and {k} for the
+variable named by the first argument, the new assumption is appended at the end
+of the assumption list:
 {
-               A ?- t
-   ===================================  BIGNUM_RANGE_TAC k m
-     A, m < 2 EXP (64 * k) ?- t
+           A ?- t
+   ======================================  BIGNUM_RANGE_TAC k m
+   A, u < 2 EXP (64 * k) ?- t
 }
 
 \COMMENTS
-In all observed traces the goals are {ensures}-style machine specifications
-whose preconditions contain a {bignum_from_memory} equation tying the named
-value to a block of the named length, and only this single kind of outcome
-appears.
+In all observed traces this is the only kind of outcome, and it always occurs
+on goals whose conclusion is an {ensures} specification with assumptions
+relating the digit-count variables to machine words.
 
 \ENDDOC

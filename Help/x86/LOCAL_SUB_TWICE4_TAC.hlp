@@ -3,37 +3,36 @@
 \TYPE {LOCAL_SUB_TWICE4_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a machine-state program-logic goal across one inlined
-modular-subtraction subroutine, replacing the current state variable by a
-successor state and adding the arithmetic specification of the computed result.
+Advances a symbolic-execution goal past an inlined modular-subtraction
+subroutine, replacing the current machine-state assumptions with ones about the
+successor state and adding assumptions characterising the computed difference.
 
 \DESCRIBE
-The first argument is an {int} offset/index selecting which call site (block)
-within the code is stepped over; the second is a {string list} naming the
-result and the two operand variables of the subtraction, which fixes the names
-used in the newly introduced assumptions. The tactic takes one goal to one
-goal: the conclusion's final state argument changes from the previous state
-variable to a fresh successor state variable, the {eventually} body being
-otherwise unchanged. Every assumption mentioning the old state — the
-program-counter reading, {bytes_loaded}, register and memory reads, and the
-accumulated {MAYCHANGE} relation — is discharged and re-added at the new state,
-with the program counter advanced and the {MAYCHANGE} relation extended by the
-memory component written by the subroutine. A new memory-read assumption gives
-the destination buffer's contents as the result variable, and one or two purely
-arithmetic assumptions are added, bounding the result and stating that it is
-congruent to the difference of the two operands modulo the relevant prime,
-sometimes as an implication conditional on a bound on an operand.
+The first argument is an {int} offset/index used to locate the call site within
+the enclosing code; the second is a {string list} naming the result and the two
+operand variables (destination, minuend, subtrahend), whose assumptions
+describe the subtraction performed. The conclusion retains its
+{eventually}-style form, except that {t} applied to the previous state becomes
+{t} applied to its successor. In the assumptions, every fact about the old
+state — program-counter value, {bytes_loaded}, register and memory reads, and
+the accumulated {MAYCHANGE} relation — is discarded and re-asserted for the new
+state, with the program counter advanced and the {MAYCHANGE} relation extended
+by the components written by the subroutine. A new memory-read assumption
+equating the destination region to the named result variable is added, together
+with one or two arithmetic assumptions bounding that result and relating it
+modulo the prime to the difference of the two named operands (sometimes stated
+as implications conditioned on bounds for the operands).
 {
-           A ?- t
-   ======================================  LOCAL_SUB_TWICE4_TAC n [res; op1; op2]
-           A' ?- t'
+         A ?- t
+      ====================  LOCAL_SUB_TWICE4_TAC n [dest; minuend; subtrahend]
+         A' ?- t'
 }
-\noindent Here {A'} is {A} with the state-dependent assumptions restated at the
-new state, plus the new memory-read assumption and the new arithmetic
-assumptions, and {t'} is {t} at the new state.
+\noindent Here {A'} replaces the old state's facts by the new state's and adds
+the result's read and arithmetic assumptions, and {t'} is {t} with the state
+variable advanced.
 
 \COMMENTS
-In all observed traces only this single kind of transformation occurs, on goals
-of this program-logic shape.
+All observed traces show this single kind of transformation, on goals in
+symbolic execution of this one style.
 
 \ENDDOC

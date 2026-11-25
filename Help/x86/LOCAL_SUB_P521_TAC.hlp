@@ -3,38 +3,36 @@
 \TYPE {LOCAL_SUB_P521_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic-execution goal over an inlined modular-subtraction
-subroutine, replacing the current machine state with a successor state and
-adding an assumption characterising the stored result.
+Symbolically executes an inlined modular-subtraction subroutine call, advancing
+the machine state in an {eventually} goal past that call and recording its
+result as a new assumption.
 
 \DESCRIBE
-The first argument is an {int} (zero in all observed traces); the second is a
-{string list} of three names giving the result variable followed by the two
-operand variables of the subtraction whose specification is introduced. The
-goal is an {eventually} statement about a state variable, and the tactic yields
-a single subgoal in which that state variable is replaced throughout the
-conclusion by a fresh successor state. Every assumption mentioning the old
-state — the program-counter value, {bytes_loaded}, register and memory-content
-readings, and the accumulated {MAYCHANGE} frame relating the initial state to
-the current one — is discharged and re-added in a form about the new state,
-with the program counter advanced and the {MAYCHANGE} frame extended by the
-memory block holding the result; the memory-content assumption for the
-destination block now equates it with the named result variable. A new
-implication assumption is also introduced, conditional on the two named
-operands being below the field modulus and stating that the result is their
-modular difference. Purely arithmetic and non-overlapping assumptions are left
-untouched, though their positions in the assumption list may shift.
+The first argument is an {int} selecting the code offset / instance of the call
+site to discharge; the second is a {string list} naming the three operands of
+the subtraction — the destination variable and the two source variables — from
+which the new result assumption is built. The goal's conclusion is an
+{eventually} property at a state {s_n}, with assumptions {A} describing {s_n}:
+program counter value, {bytes_loaded}, register and memory-content reads, a
+{MAYCHANGE} relation from the initial state, and accumulated arithmetic facts.
+All state-specific assumptions about {s_n} (program counter, {bytes_loaded},
+register and memory reads, and the {MAYCHANGE} frame) are replaced by the
+corresponding assumptions about a fresh successor state {s_{n+1}}, with an
+updated program-counter offset, a possibly enlarged {MAYCHANGE} frame covering
+the written destination buffer, a new read assumption giving the destination
+buffer the named result value, and a new conditional arithmetic assumption {t <
+p /\ u < p ==> &d = (&t - &u) rem &p} for the three named operands.
 {
-      A ?- t
-      ======================================  LOCAL_SUB_P521_TAC n ["res"; "op1"; "op2"]
-      A' ?- t'
+   A, state facts about s_n ?- eventually ... s_n
+   ================================================  LOCAL_SUB_P521_TAC n ["d"; "t"; "u"]
+   A, state facts about s_{n+1},
+      (t < p /\ u < p ==> &d = (&t - &u) rem &p)
+   ?- eventually ... s_{n+1}
 }
-\noindent Here {A'} is {A} with the state-dependent assumptions restated for
-the successor state plus the new specification assumption, and {t'} is {t} with
-the state variable replaced.
 
 \COMMENTS
-The observed traces show only this single-subgoal transformation, always on
-goals of this shape with a three-name argument list.
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals of this {eventually} shape with a full set of state
+assumptions.
 
 \ENDDOC

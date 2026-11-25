@@ -3,37 +3,35 @@
 \TYPE {SIMPLE_ARITH_TAC : tactic}
 
 \SYNOPSIS
-{SIMPLE_ARITH_TAC} attempts to prove a goal's conclusion by linear arithmetic
-reasoning over the natural-number facts available in the goal, discharging the
-assumptions into the problem.
+{SIMPLE_ARITH_TAC} proves the goal's conclusion by linear arithmetic from the
+goal's own assumptions, closing it outright on success.
 
 \DESCRIBE
-It takes no arguments. Applied to a goal, it either closes it outright or
-fails:
+It takes no arguments. Applied to {A ?- t}, it either closes the goal or fails;
+the observed traces show no case where it transforms the goal or leaves
+subgoals.
 {
-   A ?- t
-   ======================  SIMPLE_ARITH_TAC
+           A ?- t
+   =============== SIMPLE_ARITH_TAC
 }
-\noindent The assumptions {A} are used as extra hypotheses; they may number in
-the dozens and include non-arithmetic facts such as machine-state readings, and
-assumptions irrelevant to the arithmetic are harmless. It succeeds on
-conclusions built from arithmetic comparisons, equations and
-conjunctions/disjunctions of them over naturals, including goals whose
-conclusion is a word term or conditional whose equality follows from arithmetic
-facts, and it also closes goals with no assumptions at all when the conclusion
-is a valid arithmetic statement.
+\noindent It uses the assumptions in {A} as well as the conclusion: {t} may be
+a plain numeric inequality or equation, a conjunction or disjunction of such, a
+universally quantified or conditional statement, or an equation between
+word/address terms, and is proved from arithmetic facts present among the
+assumptions. Irrelevant assumptions (register reads, memory reads, {MAYCHANGE}
+relations, nonoverlapping conditions, large event traces) are tolerated and
+left untouched. Successful traces include both goals with no assumptions and
+goals with large assumption lists.
 
 \FAILURE
-Fails when the conclusion, taken together with whatever arithmetic content the
-assumptions supply, is not derivable by the linear decision procedure it
-invokes: for instance when the conclusion is plainly false as a numeric
-inequality, when it depends on nonlinear facts or on non-arithmetic subterms
-treated as opaque atoms, or when the assumptions needed to justify it are not
-expressible in the linear fragment. The failure is reported by the arithmetic
-rule the tactic calls, signalling that no contradiction could be found.
-
-\COMMENTS
-The observed traces show only the two outcomes of closing the goal or failing;
-none shows it transforming a goal into new subgoals or altering assumptions.
+Fails with an arithmetic-decision-procedure exception reporting that no
+contradiction could be derived, when the conclusion is not a consequence of the
+assumptions by linear arithmetic over the naturals/integers: for instance when
+it is simply false as stated, when the needed facts are nonlinear or involve
+congruences, divisibility or other non-arithmetic predicates that the procedure
+abstracts away, or when the conclusion contains terms (such as memory/word
+reads) treated as opaque atoms so that no arithmetic reasoning can establish
+it. The failure comes from the underlying arithmetic decision procedure invoked
+by the tactic.
 
 \ENDDOC

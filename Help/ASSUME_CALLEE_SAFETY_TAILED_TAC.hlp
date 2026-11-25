@@ -3,31 +3,34 @@
 \TYPE {ASSUME_CALLEE_SAFETY_TAILED_TAC : thm -> string -> tactic}
 
 \SYNOPSIS
-Adds to the goal's assumptions a labelled instance of a callee safety theorem,
-with its existentially quantified event function replaced by a fresh named
-function and its event trace generalised by an extra universally quantified
-tail variable.
+Adds a labelled assumption derived from a supplied safety theorem,
+instantiating its existential event-function witness to a freshly named
+function and generalising its event trace over an extra trailing-events
+variable, leaving the goal's conclusion unchanged.
 
 \DESCRIBE
-The first argument {safety_th : thm} is the callee's safety specification, an
-existentially quantified {ensures} statement about the event trace; the second,
-{name : string}, is the label under which the derived assumption is placed in
-the assumption list. The conclusion is unchanged, and the added assumption
-{th'} is the body of {safety_th} with its leading existential witness
-instantiated to a freshly generated event-function constant and with an extra
-trailing universally quantified trace variable appended to the quantifier
-prefix, so that the pre- and post-condition trace equalities are stated
-relative to that trace being appended to the original one. Existing
-assumptions, including ones added by earlier applications, are retained.
+The first argument {safety_th : thm} is the callee safety theorem — an
+existentially quantified {ensures} statement — whose body becomes the new
+assumption; it may be given by any theorem-producing expression. The second
+argument {name : string} is the label attached to the new assumption. The added
+assumption {u} is the universally quantified body of the theorem argument, in
+which the existential witness is replaced by a fresh concrete function constant
+whose name carries an index, one extra universally quantified variable {z} for
+a trailing event list is appended at the end of the bound-variable list
+{x1 ... xn}, and the two occurrences of the initial event trace in the
+precondition and postcondition are replaced by that trace appended onto {z}.
+Where the theorem is a subroutine-style statement, the assumption's state
+components may appear in an expanded or rewritten form relative to the goal's
+conclusion.
 {
-           A ?- t
-   ======================  ASSUME_CALLEE_SAFETY_TAILED_TAC safety_th name
-        A, th' ?- t
+               A ?- t
+   ===============================  ASSUME_CALLEE_SAFETY_TAILED_TAC safety_th name
+        A, name: u ?- t
 }
+\noindent Existing assumptions {A} keep their labels unchanged.
 
 \COMMENTS
-In all observed traces this single kind of outcome occurs, always on goals
-whose conclusion is an existentially quantified {ensures}-style safety
-statement.
+In all observed traces the tactic leaves one goal and only ever adds an
+assumption, never removing or altering others.
 
 \ENDDOC

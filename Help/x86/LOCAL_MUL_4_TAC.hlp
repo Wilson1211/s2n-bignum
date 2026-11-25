@@ -3,38 +3,35 @@
 \TYPE {LOCAL_MUL_4_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style machine-execution goal across one inlined
-multiplication subroutine, replacing the current state variable by a fresh
-successor state and installing the subroutine's arithmetic specification as new
-assumptions.
+Steps an {eventually}-style symbolic-execution goal forward over an inlined
+4-word modular multiplication subroutine, replacing the current state by its
+successor and recording the multiplication's result as new assumptions.
 
 \DESCRIBE
-The first argument is an {int} offset/index selecting which code block to step
-over (the same value throughout the observed traces); the second is a
-{string list} naming the result location and the two operand locations of the
-multiplication, which fix the name of the new result variable and the operand
-terms appearing in the generated bound and congruence assumptions. The
-conclusion keeps its shape, with its trailing state term replaced by a new
-state variable one step later. All state-dependent assumptions about the old
-state (program-counter value, {bytes_loaded}, register and memory contents, and
-the accumulated frame-change assumption) are discharged and re-added for the
-new state: the memory cell named by the first string now holds a freshly named
-result value, the program counter is updated, and the frame-change assumption
-is possibly extended by further components. Two new state-independent
-assumptions are added, giving a bound on the result and a congruence relating
-it to the product of the two operands. State-independent assumptions already
-present are retained unchanged, though their position in the list may shift.
+The first argument is an {int} giving the code-offset/instruction adjustment
+used when locating the call site. The second is a {string list} naming the
+result variable followed by the two operand variables of the multiplication:
+the first name becomes the fresh variable for the product, and the other two
+identify the inputs appearing in the derived congruence. The conclusion is
+rewritten from {eventually ... s} to {eventually ... s'} for a successor state
+{s'}, the predicate being otherwise unchanged. All assumptions describing the
+old state — program-counter value, {bytes_loaded}, register and memory reads,
+and the accumulated {MAYCHANGE ... s0 s} frame — are discharged and replaced by
+the corresponding assumptions about {s'}, with the frame extended by the
+components written by the subroutine; the pure arithmetic/side-condition
+assumptions not mentioning the state are retained. Two further assumptions
+about a fresh result variable {x1} are introduced, bounding it below twice the
+modulus and asserting that it is congruent to the product of the two named
+operands, along with a memory-read assumption giving {x1} as the contents of
+the destination buffer in {s'} (part of {S(s')} below).
 {
-      A ?- t
-      ==========================================  LOCAL_MUL_4_TAC n ["res"; "op1"; "op2"]
-      A' ?- t'
+          A, S(s) ?- eventually P s
+   =============================================================  LOCAL_MUL_4_TAC n ["x1"; "t"; "u"]
+    A, x1 < .., (x1 == t * u) (mod ..), S(s') ?- eventually P s'
 }
-\noindent where {A'} is {A} with the old state's assumptions replaced by their
-successor-state counterparts plus the two new arithmetic facts, and {t'} is {t}
-with the trailing state term replaced by the successor state.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, applied to
-goals of the same machine-execution form.
+In all observed traces, this is the only kind of forward step performed, always
+on goals of this symbolic-execution shape.
 
 \ENDDOC

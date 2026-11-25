@@ -3,39 +3,42 @@
 \TYPE {X86_ADD_RETURN_STACK_TAC : thm * (thm option array) -> thm -> term -> int -> tactic}
 
 \SYNOPSIS
-Discharges a universally quantified {ensures} specification for a stack-using
-x86 subroutine from a corresponding core-function specification, either closing
-the goal or reducing it to a single residual trace-equality obligation with the
-symbolic post-return state available as assumptions.
+Derives a full-procedure {ensures} specification — including stack frame
+set-up, callee-saved register restore and return — from a specification of the
+procedure core body, either closing the goal outright or leaving one residual
+subgoal about the event trace.
 
 \DESCRIBE
-The arguments are {execth : thm * (thm option array)}, the machine-code
-execution package for the program concerned (a code-length theorem paired with
-per-instruction decoding data); {coreth : thm}, the already-proved
-specification of the core routine from which the goal's specification is to be
-derived; {reglist : term}, a term that is a list of registers, naming the
-callee-saved registers whose save/restore is to be accounted for; and
-{stackoff : int}, the integer size of the stack frame reserved below the
-incoming stack pointer. It applies to an assumption-free goal whose conclusion
-is {forall x1 ... xn. A ==> ensures ...}, possibly wrapped in an outer
-existential over an event function, and either solves it outright, leaving no
-subgoals, or leaves exactly one subgoal. In the latter case the quantified
-variables are fixed, the hypotheses {A} of the specification are broken apart
-and placed in the assumption list in expanded form {A'} (overlap conditions
-rewritten to their {nonoverlapping_modulo} form), accompanied by a large set of
-further assumptions {st} recording the symbolically computed state after return
-— register, flag and stack-memory contents, the loaded code, the accumulated
-{MAYCHANGE} relation between the initial and final states, and the final event
-list — and the conclusion {u} is what remains of the postcondition, typically
-an existential equation about the event trace.
+{X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff} takes {execth : thm *
+(thm option array)}, the machine-code execution package for the program, whose
+first component supplies the code length; {coreth : thm}, the specification of
+the core body that is lifted to the whole procedure; {reglist : term}, a list
+(possibly empty) of callee-saved register components that are saved and
+restored; and {stackoff : int}, the size in bytes of the stack frame below the
+incoming stack pointer. The goal is a universally quantified {ensures}
+statement, optionally under an outer existential (e.g. an event-function
+witness), carrying non-overlapping side conditions, with an initial state at
+the procedure entry and a final state at the return address with the stack
+pointer restored. In most observed traces the goal is discharged completely,
+leaving no subgoals. In the remaining traces exactly one subgoal results: the
+universal variables and the outer existential witness are instantiated, the
+side conditions are stripped into the assumptions in expanded
+({nonoverlapping_modulo}) form, and a large set of assumptions describing the
+final symbolic state is added — register and flag readings, saved stack slots
+holding the initial callee-saved values and the return address, the accumulated
+{MAYCHANGE} relation between initial and final state, and the final event list;
+the conclusion becomes the remaining existential claim about the event trace.
 {
-           ?- forall x1 ... xn. A ==> t
-      ==================================== X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff
-           (no subgoals)   or   A', st ?- u
+               A ?- t
+       ===========================  X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff
+         (no goals)
 }
-
-\COMMENTS
-In all observed traces, the goals have this specification shape with no prior
-assumptions, and only these two outcomes occur.
+{
+               A ?- t
+       ===========================  X86_ADD_RETURN_STACK_TAC execth coreth reglist stackoff
+             A, B ?- u
+}
+\noindent where {B} is the stripped side conditions together with the derived
+final-state assumptions, and {u} is the residual trace obligation.
 
 \ENDDOC

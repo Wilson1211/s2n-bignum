@@ -3,37 +3,37 @@
 \TYPE {LOCAL_SUB_P384_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic-execution goal through an inlined modular-subtraction
-subroutine, replacing the current machine-state assumptions with those for a
-later state and adding a conditional assumption characterising the computed
-difference modulo the field prime.
+Steps an {eventually}-style machine-code goal through an inlined
+modular-subtraction subroutine, advancing the symbolic state to the next state
+index and recording the subroutine's arithmetic specification as a new
+assumption.
 
 \DESCRIBE
-The first argument, an {int}, selects which code variant/offset of the
-subtraction block to step over. The second, a {string list}, names the result
-and the two operand values; these names fix which variables occur in the added
-assumption {u1 < p /\ u2 < p ==> &t = (&u1 - &u2) rem &p} and in the
-memory-content assumption recording where the result is stored. The conclusion,
-an {eventually} statement about a machine state {s}, is rewritten to the same
-statement about a fresh successor state {s'}. All assumptions describing the
-old state — program-counter value, {bytes_loaded}, register and memory-content
-reads, and the accumulated {MAYCHANGE} relation — are discharged and replaced
-by the corresponding assumptions for the new state; the {MAYCHANGE} component
-may gain extra written locations, and a new memory-content assumption binds the
-named result value at its storage location. The new conditional arithmetic fact
-about the named result and operands is added, while previously added facts of
-the same kind and the other purely arithmetic side conditions are retained,
-sometimes re-asserted in a reordered form.
+The first argument is an {int} selecting which of the available
+instantiations/offset variants of the subtraction block to apply; the second is
+a {string list} naming the destination and the two source operands, in that
+order, used both to build the result assumption and to locate the corresponding
+memory/register locations.
 {
-   A ?- eventually ... s
-   ================================================  LOCAL_SUB_P384_TAC n ["t"; "u1"; "u2"]
-   A' ?- eventually ... s'
+   A ?- eventually ... s_i
+   ======================================  LOCAL_SUB_P384_TAC n [dest; src1; src2]
+   A' ?- eventually ... s_j
 }
-\noindent where {A'} is the rewritten assumption set described above, including
-{u1 < p /\ u2 < p ==> &t = (&u1 - &u2) rem &p}.
+\noindent Here {j} is a later state index, and the conclusion differs only in
+that final state term. In passing from {A} to {A'}, every fact mentioning the
+old state — the program-counter value, {bytes_loaded}, the register/memory
+reads, and the accumulated {MAYCHANGE} relation — is removed and replaced by
+the corresponding fact about the new state, with the {MAYCHANGE} component
+possibly extended by the newly written location; reads whose locations were
+overwritten are dropped, and a read of the destination location yielding the
+named result is added. One further assumption is added: an implication stating
+that if the two source values are below the modulus then the (integer)
+destination value equals the difference of the sources reduced modulo the
+prime. Some applications also re-add, unchanged, a block of previously present
+arithmetic side conditions.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, always on
-goals of this symbolic-execution shape.
+All observed traces show this single kind of transformation, on goals of this
+{eventually} form carrying a large assumption list of machine-state facts.
 
 \ENDDOC

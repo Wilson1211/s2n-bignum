@@ -3,33 +3,37 @@
 \TYPE {LOCAL_JADD_TAC : int -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style machine-state goal across a called
-point-addition subroutine, replacing the pre-call state assumptions by
-post-call ones together with a specification of the subroutine's result.
+Advances an {eventually}-style machine-execution goal across one inlined
+point-addition subroutine call, replacing the pre-call state assumptions by
+post-call ones, including a new specification assumption about the subroutine's
+result.
 
 \DESCRIBE
-The tactic takes one integer argument {n+1}, the index of the new state
-variable; the resulting goal and all its new assumptions are phrased in terms
-of that numbered state, i.e. the previous state's index plus one.
+The argument is an {int}: the index of the state variable for the new
+(post-call) machine state. The tactic applies to a goal whose assumptions {A}
+describe the machine state at the call site and whose conclusion is an
+{eventually} predicate about state {s}n; the call's start state is that
+previous state, and the resulting conclusion is the same {eventually} predicate
+applied to a fresh state variable named by the argument index.
 {
-   A ?- eventually <machine> P s<n>
-   ================================================  LOCAL_JADD_TAC (n+1)
-   A' ?- eventually <machine> P s<n+1>
+   A ?- eventually ... sn
+   ================================================  LOCAL_JADD_TAC n'
+   A' ?- eventually ... sn'
 }
-\noindent Here {A'} is obtained from {A} as follows. The assumptions about the
-pre-call state — the register and memory reads, the loaded-program fact, and
-the accumulated {MAYCHANGE} frame relating the initial state to {s<n>} — are
-discharged, and corresponding assumptions about the new state are added: the
-same memory/register contents re-expressed at {s<n+1>}, program-counter and
-stack-pointer readings reflecting the return from the call, a {MAYCHANGE} fact
-extended with the regions written by the call, and one new assumption of the
-form {!z1 ... zp. <hypotheses on the inputs> ==> <memory triple at the
-subroutine's output address represents the group sum of the two input points>}.
-Assumptions not mentioning a state (arithmetic side conditions, non-overlap
-facts, previously derived specifications) are left untouched.
+\noindent Here {A'} is obtained as follows. All assumptions of {A} mentioning
+the old state are discharged and re-added, restated for the new state: the
+program-loaded assumption, the register and memory-read assumptions (with those
+describing the call's argument registers and return address dropped), the
+instruction-pointer and stack-pointer assumptions set to the post-return
+values, and a widened {MAYCHANGE} frame assumption relating the initial state
+to the new state. One new universally quantified assumption is added, stating
+the mathematical specification of the called routine in terms of memory reads
+of the output buffers in the new state. Assumptions not referring to machine
+state (arithmetic side conditions, earlier specification assumptions) are kept
+unchanged.
 
 \COMMENTS
-All observed traces show this single kind of transformation, on goals whose
-conclusion is an {eventually} statement about a concrete state variable.
+The observed traces show only this single kind of transformation, always on
+goals of this {eventually} form with a full set of machine-state assumptions.
 
 \ENDDOC

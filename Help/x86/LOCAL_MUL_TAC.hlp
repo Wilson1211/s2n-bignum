@@ -3,36 +3,31 @@
 \TYPE {LOCAL_MUL_TAC : int -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style machine-state goal over one inlined subroutine
-call, replacing the current state variable by the next one and rewriting the
-assumptions to describe the post-call state.
+Discharges a subroutine call to a modular-multiplication routine inside an
+{eventually} goal, advancing the symbolic machine state by one step and
+replacing the state-describing assumptions with ones about the new state.
 
 \DESCRIBE
-The single {int} argument is the index of the new state variable to introduce:
-a conclusion about state {s}*n-1* becomes a conclusion about state {s}*n*, and
-the surviving assumptions are restated about {s}*n*. The conclusion's body is
-unchanged; only its trailing state argument is replaced by the freshly numbered
-state. Assumptions describing the old state — program counter, stack pointer,
-register contents, memory contents, loaded code, and the accumulated
-{MAYCHANGE} frame relating the initial state to the old one — are discharged
-and replaced by corresponding assumptions about the new state, while general
-side conditions not mentioning a state (non-overlapping facts, arithmetic
-hypotheses, abbreviation equations) are kept untouched. Among the new
-assumptions, the program-counter assumption records a new code address, one
-memory-region assumption records the computed result value in place of its
-earlier contents, the {MAYCHANGE} frame may gain extra components for newly
-written locations, and some assumptions about registers used only to pass
-arguments are dropped rather than restated.
+The tactic takes one {int} argument, {n}, the index of the new symbolic state;
+it is used to name the state variable mentioned by the resulting assumptions
+and by the goal's {eventually} argument. The goal is always of the form
+{A ?- eventually ... s}, where {A} contains a block {S(s)} of assumptions
+describing the state {s}: code loaded, register and memory contents, program
+counter, and an accumulated MAYCHANGE relation from the initial state. The new
+block {S'(s')} for the successor state {s'} has the program counter set to the
+post-call address, the destination memory block's contents replaced by the
+product of the two argument blocks reduced modulo the prime, the assumptions
+for registers holding the now-consumed call arguments dropped, and the
+MAYCHANGE relation re-stated for the new state. Other assumptions in {A}, such
+as the nonoverlapping and arithmetic side conditions, are left untouched.
 {
-      A, B(s_k) ?- P(s_k)
-   =================================   LOCAL_MUL_TAC n
-      A, B'(s_{k+1}) ?- P(s_{k+1})
+   A, S(s) ?- eventually P s
+   ========================== LOCAL_MUL_TAC n
+   A, S'(s') ?- eventually P s'
 }
-\noindent where {B'} is the rewritten state description.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, always on
-goals whose conclusion is an {eventually} statement about a machine state with
-a substantial state description among the assumptions.
+The observed traces show only this single kind of transformation, on goals of
+this shape.
 
 \ENDDOC

@@ -1,0 +1,28 @@
+\DOC AUTO_ABBREV_TAC
+
+\TYPE {AUTO_ABBREV_TAC : term -> tactic}
+
+\SYNOPSIS
+Replaces every occurrence of a given term in the goal's conclusion by a freshly
+generated variable and adds the defining equation for that variable as a new
+assumption.
+
+\DESCRIBE
+The argument {tm : term} is the subterm to abbreviate: all of its occurrences
+in the conclusion are rewritten to a new variable {v}, whose name is not
+previously in use. The existing assumptions {A} are left untouched — including
+earlier abbreviation equations of the same shape produced by prior applications
+— and the new equation is appended last.
+{
+         A ?- t
+   =============================  AUTO_ABBREV_TAC tm
+     A, (tm = v) ?- t'
+}
+\noindent where {t'} is {t} with each occurrence of {tm} replaced by {v}.
+
+\COMMENTS
+In all observed traces, this abbreviation step is applied only to goals whose
+conclusion is a large implication containing several copies of the argument
+term, so no other kind of outcome is exercised.
+
+\ENDDOC

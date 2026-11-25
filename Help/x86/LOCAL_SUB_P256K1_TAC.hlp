@@ -3,39 +3,30 @@
 \TYPE {LOCAL_SUB_P256K1_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a machine-state symbolic-execution goal across an inlined
-modular-subtraction subroutine, replacing the current state variable by its
-successor and adding a conditional specification of the computed result.
+Symbolically executes an inlined modular-subtraction subroutine, advancing the
+goal's machine state from one symbolic state to the next and adding an
+assumption characterising the stored difference modulo the prime.
 
 \DESCRIBE
-{LOCAL_SUB_P256K1_TAC n [out; in1; in2]} takes an {int} (the same fixed value
-in all observed traces) and a {string list} of three names identifying the
-output variable and the two input variables of the subtraction step, in terms
-of which the generated specification is phrased. The goal is an {eventually}
-statement about a current state variable {s}; the tactic yields exactly one
-subgoal in which {s} is replaced by a successor state {s'}, both in the
-conclusion and in every assumption mentioning it. Concretely, each
-state-dependent assumption — the program-counter reading, the code-loaded
-assumption, register readings, memory-block readings, and the accumulated
-{MAYCHANGE} relation from the initial state — is discharged and re-added for
-{s'}, with an updated program-counter value, a possibly extended {MAYCHANGE}
-list, and a new memory-block reading equating the output buffer with a fresh
-variable {r} for the subtraction result. Purely mathematical assumptions are
-kept unchanged, sometimes reordered. One further assumption is added: an
-implication whose antecedents bound the two input values below the modulus and
-whose conclusion equates {r} with the integer remainder of the difference of
-the inputs modulo the modulus.
-{
-   A, state-dependent assumptions about s, mathematical assumptions ?- eventually ... s
-   ================================================================================  LOCAL_SUB_P256K1_TAC n [out; in1; in2]
-   state-dependent assumptions about s' (updated pc, extended MAYCHANGE, output buffer = r),
-   mathematical assumptions,
-   (in1 < modulus /\ in2 < modulus ==> r = (in1 - in2) rem modulus)
-     ?- eventually ... s'
-}
+Takes an {int}, the offset/index locating the code block to be executed, and a
+{string list} of three operand names — the result variable followed by the two
+input variables — which fix the new names occurring in the added assumption and
+in the memory-read assumptions. The goal is an {eventually} statement about a
+symbolic state, with assumptions describing the state at that point. One
+subgoal results, in which the state variable is replaced by its successor both
+in the conclusion and in the state-describing assumptions: all
+{read}/{bytes_loaded}/{MAYCHANGE} assumptions are discharged and re-added for
+the new state, with an updated program-counter assumption and a new assumption
+recording the memory location now holding the result value. A further
+implication assumption is added, of the form "{t < m} and {u < m} imply the
+integer value of the result equals {(&t - &u) rem &m}", where {t} and {u} are
+the values of the two input operands. Pre-existing non-state assumptions
+(definitional equations and earlier such implications) are kept, sometimes in a
+different order.
 
 \COMMENTS
-In all observed traces only this single kind of outcome occurs, always on goals
-of this symbolic-execution form with a large assumption list.
+In all observed traces the behaviour is this same single-subgoal state advance,
+always on goals whose assumptions already describe a full symbolic machine
+state.
 
 \ENDDOC

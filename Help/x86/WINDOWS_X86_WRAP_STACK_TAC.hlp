@@ -3,38 +3,44 @@
 \TYPE {WINDOWS_X86_WRAP_STACK_TAC : thm -> thm -> thm -> term -> int -> tactic}
 
 \SYNOPSIS
-Proves a Windows-ABI {ensures} specification for a stack-using wrapper routine
-from the corresponding standard-ABI core specification, either closing the goal
-outright or reducing it to a residual event-trace obligation.
+Proves a Windows-ABI x86 correctness/safety specification of a wrapper function
+from the corresponding System V specification of the core routine, either
+closing the goal outright or leaving a single residual event-trace goal.
 
 \DESCRIBE
-The arguments are {winmc : thm}, the definition of the Windows wrapper's
-machine code, matching the code loaded in the goal; {stdmc : thm}, the
-definition of the standard-ABI core machine code; {coreth : thm}, the
-already-proved specification of the core routine (a correctness {ensures}
-statement, or an existentially quantified event-trace/safety statement);
-{reglist : term}, a HOL list of the callee-saved registers the wrapper spills
-(possibly empty); and {stdstackoff : int}, the stack offset used by the
-standard-ABI core. It applies to a goal with no assumptions whose conclusion is
-a universally quantified Windows-ABI {ensures} statement, optionally preceded
-by an existential quantifier over an event-trace function. The tactic either
-closes the goal or leaves one subgoal, whose conclusion {?x1 ... xn. u} is a
-purely event-trace statement relating a concrete explicit trace (stores of
-saved registers, the core routine's trace, loads and a final jump) to the
-required trace function, and whose assumption list {A} is created from nothing,
-containing: the nonoverlapping side conditions in unfolded
-{nonoverlapping_modulo} form, the core routine's trace and {memaccess_inbounds}
-facts, and facts about a final concrete state — code loaded, register and flag
-values, saved values in stack slots, program counter and stack pointer, and a
-{MAYCHANGE} frame relating the initial and final states.
+{winmc : thm} is the machine-code definition of the Windows wrapper;
+{stdmc : thm} is the machine-code definition of the standard (System V)
+routine; {coreth : thm} is the already-proved specification of the core
+routine, a universally quantified {ensures} statement, possibly wrapped in an
+existential over an event-trace function; {reglist : term} is a list of the
+callee-saved registers the wrapper saves and restores; {stdstackoff : int} is
+the stack offset used by the standard routine. It applies to a goal {A ?- t}
+with {A} empty and {t} a universally quantified implication whose conclusion is
+an {ensures} statement about the Windows wrapper, optionally wrapped in an
+outer existential over an event-trace function.
+
+If the event-trace existential is absent, the goal is closed:
 {
-            ?- t
-   =================================  WINDOWS_X86_WRAP_STACK_TAC winmc stdmc coreth reglist stdstackoff
-      (no goals)   or   A ?- ?x1 ... xn. u
+   ?- t
+   ========================================  WINDOWS_X86_WRAP_STACK_TAC winmc stdmc coreth reglist stdstackoff
 }
+\noindent If it is present, one subgoal remains, whose conclusion {u} is an
+existentially quantified equation identifying a concrete symbolic event trace
+with the witness function applied to the wrapper's arguments, conjoined with a
+memory-access-bounds condition:
+{
+   ?- t
+   ========================================  WINDOWS_X86_WRAP_STACK_TAC winmc stdmc coreth reglist stdstackoff
+   A' ?- u
+}
+\noindent Here {A'} is a large set of newly added assumptions: instantiated
+non-overlapping conditions, the core routine's trace and access-bounds
+properties, and facts about the final symbolic state (loaded bytes, register,
+flag and stack-slot contents, the accumulated {MAYCHANGE} relation, and the
+final event list).
 
 \COMMENTS
-The observed traces show only these two outcomes, always starting from goals
-with no assumptions.
+The observed traces show only these two outcomes, on goals of this single
+shape.
 
 \ENDDOC

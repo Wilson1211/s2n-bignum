@@ -3,35 +3,39 @@
 \TYPE {ACCUMULATEX_ARITH_TAC : term list -> string -> tactic}
 
 \SYNOPSIS
-Rewrites the assumptions about a named machine state so that a raw
-word-arithmetic expression for a just-computed register/flag value is replaced
-by a fresh abbreviated result variable together with an arithmetic equation
-characterising it.
+{ACCUMULATEX_ARITH_TAC excls s} rewrites the goal's assumptions describing
+low-level word arithmetic for the state named {s}, replacing them by abstract
+named summands/products plus an arithmetic equation relating them.
 
 \DESCRIBE
-{ACCUMULATEX_ARITH_TAC excls s} takes {excls : term list}, a list of terms
-excluded from the rewriting/abbreviation (in the observed traces either empty
-or a supplied list), and {s : string}, the name of the state whose assumptions
-are processed; {s} also fixes the suffix of the newly introduced variables. On
-success it leaves exactly one goal with the same conclusion. It deletes one or
-two assumptions of the form {read ... s = t} (and/or a flag assumption
-expressed as a comparison on {val}-terms), where {t} is a composite
-word/arithmetic expression, and puts in their place assumptions equating the
-same locations to fresh variables named after {s}, together with a new
-assumption giving the exact arithmetic identity defining those variables (an
-equation over the reals of the {2 pow 64 * bitval ... + val ... = ...} style).
-All other assumptions are left untouched.
+{excls : term list} lists terms to be excluded from consideration (often
+empty); {s : string} names the state whose assumptions are processed. The
+conclusion is left untouched and only the assumption list changes: assumptions
+whose right-hand sides are concrete word expressions (products split into
+low/high halves, sums with carry, differences with borrow) are deleted, and in
+their place are appended assumptions of the form {t = u}, where each {u} is a
+fresh abstract constant named after {s}, together with one new real-arithmetic
+assumption equating a power-of-two-weighted combination of the fresh constants
+to the arithmetic expression they stand for; flag assumptions mentioning the
+same expression are rewritten to mention the fresh carry constant. Typically
+two or three assumptions are removed and two or three added at the end of the
+list.
+{
+   A ?- t
+   ========================  ACCUMULATEX_ARITH_TAC excls s
+   A' ?- t
+}
+\noindent where {A'} is {A} with the matched assumptions replaced as described.
 
 \FAILURE
-In the observed traces it fails with a {tryfind} error when no assumption about
-the named state matches the pattern the tactic looks for, i.e. the state's
-assumptions contain no composite word-arithmetic result expression that it can
-abbreviate; this happens both with an empty and with a non-empty exclusion
-list.
+Fails with a search failure ({tryfind}) when no assumption matches any of the
+arithmetic patterns sought under the given state name and exclusion list, i.e.
+the chosen state's assumptions contain no word expression of the kinds it can
+abstract; this is seen for both empty and non-empty exclusion lists.
 
 \COMMENTS
-The observed traces show only this single kind of rewriting, on goals whose
-conclusion is an {eventually}-style machine-semantics statement and whose
-assumption list contains an assumption naming the state {s}.
+In all observed traces this one-goal, assumption-rewriting behaviour is the
+only behaviour, always on goals whose conclusion is an {eventually}
+machine-step statement with the given state name.
 
 \ENDDOC

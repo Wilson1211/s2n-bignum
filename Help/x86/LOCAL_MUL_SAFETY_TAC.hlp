@@ -3,38 +3,41 @@
 \TYPE {LOCAL_MUL_SAFETY_TAC : string -> int -> tactic}
 
 \SYNOPSIS
-Discharges a subroutine call in an {eventually} symbolic-execution goal by
-applying a named assumed specification theorem, advancing the goal's state
-variable past the call and replacing the pre-call state facts with post-call
-ones.
+Uses the subroutine {ensures} specification labelled {assump_name} in the
+assumption list to take one call step, advancing the symbolic state from index
+{n} to index {n+1}.
 
 \DESCRIBE
-The first argument {assump_name : string} is the label of a universally
-quantified {ensures} specification occurring among the goal's assumptions; it
-justifies the call. The second argument {n : int} is the index of the current
-symbolic state, fixing the state variable used in the conclusion and in the new
-assumptions.
-
-Applied to a goal {A ?- eventually ... s_n} where {A} contains the labelled
-specification together with facts about state {s_n} (register and memory reads,
-flag values, the event trace, and the accumulated {MAYCHANGE} relation from the
-initial state):
+{assump_name : string} is the label of the assumption holding the universally
+quantified {ensures} specification of the called subroutine, used to take the
+call step. {n : int} is the index of the current symbolic state, so the goal's
+state variable is advanced from the one indexed {n} to the one indexed {n+1}.
+The conclusion, an {eventually} statement about the current state variable,
+becomes the same {eventually} statement about the next state variable. All
+assumptions describing the old state — program-counter, register, flag and
+memory reads, the event-trace equation, the cumulative frame/{MAYCHANGE}
+relation and the {bytes_loaded} fact — are removed and replaced by the
+corresponding assumptions about the new state, with an updated frame relation
+and an event-trace equation phrased in terms of a freshly introduced trace
+variable {x1 ... xn} (one new variable per application), together with that
+variable's defining equation and an accompanying memory-access-bounds
+assumption; some reads present before (for instance ones about registers
+overwritten by the call) are simply dropped. Assumptions unrelated to the
+state, including the specification named by {assump_name} and the other
+quantified subroutine specifications, survive, although their order in the list
+may change.
 {
-   A ?- eventually ... s_n
-   =========================================  LOCAL_MUL_SAFETY_TAC assump_name n
-   A' ?- eventually ... s_(n+1)
+       A ?- t
+       ==================================  LOCAL_MUL_SAFETY_TAC assump_name n
+       A' ?- u
 }
-\noindent Here {A'} drops the pre-call facts about {s_n} and instead contains
-corresponding facts about {s_(n+1)}: a new program-counter equation, an
-extended {MAYCHANGE} relation, the preserved register/memory reads, and a new
-event-trace equation prefixing a freshly introduced trace variable {z}, plus
-two further assumptions characterising {z} — its defining equation and an
-in-bounds memory-access property. The labelled specification assumption and the
-unrelated assumptions of {A} are kept, with the labelled one moved to the end.
+\noindent where {A'} is {A} with the old state's facts replaced by the new
+state's facts plus the equation and bounds assumption for the new trace
+variable, and {u} is {t} with the state variable advanced.
 
 \COMMENTS
-In all observed traces the behaviour is this single-goal state advance, on
-goals whose assumptions include both a labelled specification and a full set of
-facts about the current symbolic state.
+The observed traces show only this single kind of outcome, always on goals
+whose conclusion is an {eventually} statement at a subroutine call site with a
+large body of state assumptions present.
 
 \ENDDOC

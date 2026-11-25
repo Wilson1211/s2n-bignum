@@ -3,29 +3,26 @@
 \TYPE {ADD_IBT_TAC_PARAMETRIZED : thm -> thm -> tactic}
 
 \SYNOPSIS
-Completely proves a machine-code correctness goal whose byte list is described
-by a bridging equation, deriving it from the corresponding theorem about the
-variant program.
+Proves an {ensures} correctness goal for a program whose byte list carries an
+extra prefix, by combining a bridging equation between the full and offset
+program with an already-established correctness theorem, closing the goal
+outright.
 
 \DESCRIBE
-{bridge_th : thm} is an equation stating that the program's byte list equals a
-fixed prefix appended to the variant program's byte list at a shifted program
-counter; {th : thm} is the already-proved correctness theorem for that variant
-program, from which the goal is obtained. The goal's conclusion is a
-correctness statement: a universally quantified implication whose conclusion is
-an {ensures} triple, possibly itself under an existential quantifier binding a
-function variable. The tactic discharges such a goal outright.
+{bridge_th} is an equation stating that the full machine-code list for the
+program equals the four-byte prefix appended to the code list for the shifted
+program; {th} is the previously proved correctness theorem for the shifted
+program, supplying the actual specification content. The goal's conclusion is a
+universally quantified (and sometimes existentially prefixed) implication from
+{riprel32_within_bounds} and nonoverlapping side conditions to an {ensures}
+statement about the full code list.
 {
-         A ?- t
-     ==============  ADD_IBT_TAC_PARAMETRIZED bridge_th th
-}
-{
-   
+   A ?- t
+   ========================  ADD_IBT_TAC_PARAMETRIZED bridge_th th
 }
 
 \COMMENTS
-The observed traces show only this closing behaviour, on goals with no
-assumptions whose conclusions are machine-code correctness specifications
-matching the supplied bridging equation and source theorem.
+In all observed traces this single outcome occurs, on goals with no assumptions
+and of this specific {ensures}-specification shape.
 
 \ENDDOC

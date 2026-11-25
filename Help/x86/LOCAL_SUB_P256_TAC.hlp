@@ -3,37 +3,40 @@
 \TYPE {LOCAL_SUB_P256_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a machine-state {eventually} goal past an inlined modular-subtraction
-subroutine, moving to a fresh successor state and adding an assumption
-describing the subtraction's result.
+Steps an {eventually} goal over an inlined modular-subtraction subroutine call,
+advancing the symbolic state to a fresh successor state and replacing the
+state-dependent assumptions with ones about that new state, plus a
+specification of the subtraction result.
 
 \DESCRIBE
-The first argument is an {int} (constant {0} in all observed traces); the
-second is a {string list} naming the destination and the two operand buffers of
-the subtraction step being discharged. On a goal {A ?- t} whose conclusion
-asserts {eventually} at some machine state, the tactic produces one subgoal in
-which that state variable is replaced throughout the conclusion by a fresh
-successor state. Every hypothesis mentioning the old state — the
-program-counter equation, the code-loaded assertion, the register and
-memory-contents equations, and the accumulated {MAYCHANGE} relation from the
-initial state — is removed and re-asserted about the new state, with the
-program counter advanced, the {MAYCHANGE} relation possibly extended by a
-further memory component, and the memory equation for the destination buffer
-now giving the newly computed value. All other assumptions are carried over
-unchanged. One new assumption is added, stating that provided both operands are
-below the modulus (named by the first string argument), the destination value
-equals the difference of the operands reduced modulo that modulus.
+The first argument, an {int}, selects a variant/offset of the subroutine
+instance being stepped. The second, a {string list}, names in order the output
+variable and the two input variables of the modular subtraction; these names
+appear in the newly introduced assumption characterising the output in terms of
+the two inputs modulo {p_256}, and determine which memory location is asserted
+to hold the output. Applied to a goal whose conclusion is an {eventually}
+predicate at a state variable {s_old}, the tactic produces one subgoal whose
+conclusion has the same form but with a new, later state variable {s_new} in
+place of {s_old}. Every assumption mentioning the old state — program-counter
+equality, {bytes_loaded}, register reads, memory-content reads, and the
+accumulated {MAYCHANGE} relation — is discharged and replaced by the
+corresponding assumption about the new state; the {MAYCHANGE} component may
+gain extra frame entries for the newly written location. The pure,
+state-independent assumptions are retained (reordered), and one new such
+assumption is added, saying that under range hypotheses on the two named inputs
+the named output equals their difference modulo {p_256}; alongside it a
+memory-read assumption records that the output location of the new state holds
+the named output.
 {
-   A ?- t
-   ========================================  LOCAL_SUB_P256_TAC n [dest; op1; op2]
-   A' ?- t'
+       A ?- eventually ... s_old
+    ====================================  LOCAL_SUB_P256_TAC n [out; in1; in2]
+       A' ?- eventually ... s_new
 }
-\noindent where {A'} is {A} with the state-dependent hypotheses relocated to
-the new state, plus the new subtraction hypothesis, and {t'} is {t} at the new
-state.
+\noindent Here {A'} is {A} with the old state's assumptions replaced by the new
+state's and the subtraction specification added.
 
 \COMMENTS
-The observed traces show only this single-subgoal state-advancing behaviour, on
-goals of this one {eventually}-with-machine-state shape.
+All observed traces show this single kind of transformation, on goals of this
+symbolic-execution shape.
 
 \ENDDOC

@@ -3,35 +3,34 @@
 \TYPE {LOCAL_MUL_P25519_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style x86 machine-code goal past an inlined
-modular-multiplication subroutine, moving the goal to a successor state
-variable and recording the new result value in the assumptions.
+Advances a symbolic {eventually}-style machine-execution goal past an inlined
+modular-multiplication subroutine, replacing the current state variable by a
+later one and adding an assumption characterising the newly written result.
 
 \DESCRIBE
-The first argument is an {int} selecting which of the subroutine's possible
-entry/variant offsets to use; the second is a {string list} giving the name of
-the fresh result variable followed by the names of the two input operands whose
-product is computed. The conclusion retains its {eventually} form and
-postcondition, but is restated for a new, later state variable; symmetrically,
-each assumption about the old state (program counter, loaded bytes, register
-and memory contents, and the accumulated {MAYCHANGE} frame) is discharged and
-re-added for the new state, with the {MAYCHANGE} frame extended by the
-components written by the executed code. Two further assumptions are added: one
-defining the named result variable as the product of the two named operand
-values reduced modulo the field prime, and a memory-read fact stating that the
-destination buffer holds that result. Pre-existing arithmetic/bound assumptions
-are kept, sometimes in a different order.
+The first argument, an {int}, selects which of several variants/offsets of the
+inlined code block to step over; the second, a {string list}, names the
+variable to introduce for the product together with the two input variables it
+is formed from. Applied to a goal whose conclusion is an {eventually} statement
+about state {sN}, it yields a single subgoal about a later state variable {sM}:
 {
-   A ?- eventually x86 P s
-   ========================================  LOCAL_MUL_P25519_TAC n ["u"; "t1"; "t2"]
-   A' ?- eventually x86 P s'
+   A, state-facts about sN ?- eventually P sN
+   =========================================  LOCAL_MUL_P25519_TAC n ["t"; "u"; "u'"]
+   A, t = (u * u') MOD p_25519, state-facts about sM, read dest sM = t ?- eventually P sM
 }
-\noindent where {A'} is {A} with the state-dependent assumptions re-indexed to
-{s'} and augmented by {u = (t1 * t2) MOD p} together with the corresponding
-memory-read fact.
+\noindent Here the whole block of state-dependent facts about {sN} —
+program-counter value, {bytes_loaded}, register and memory reads, and the
+accumulated {MAYCHANGE} frame — is discharged and re-added in terms of {sM},
+with the frame extended by the locations written and a new read assumption
+giving the destination contents as the freshly named variable {t}, for which
+the defining equation {t = (u * u') MOD p_25519} is also added. Purely
+arithmetic or side-condition assumptions not mentioning the state are left in
+place, though some may be removed and re-added unchanged, so their position in
+the list shifts.
 
 \COMMENTS
-In all observed traces, the tactic performs exactly this single-subgoal step on
-goals of this machine-code form.
+The observed traces show only this single-subgoal state-advancing behaviour,
+always on goals whose conclusion is an {eventually} statement about an x86
+machine state.
 
 \ENDDOC

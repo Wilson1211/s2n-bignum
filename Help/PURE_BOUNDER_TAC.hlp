@@ -3,25 +3,26 @@
 \TYPE {PURE_BOUNDER_TAC : thm list -> tactic}
 
 \SYNOPSIS
-Proves a real-arithmetic inequality goal outright from bounding facts supplied
-as theorems, closing the goal.
+Proves a real-arithmetic inequality goal, or a conjunction of such
+inequalities, outright by interval reasoning from a supplied list of bound
+theorems.
 
 \DESCRIBE
-Takes one argument of type {thm list}: theorems giving ranges and defining
-equations for the real-valued subterms appearing in the goal's conclusion,
-which supply the bounds used to discharge the goal. Applied to a goal whose
-conclusion is an inequality between real-valued arithmetic expressions, or a
+The single argument has type {thm list}: theorems supplying bounds on the
+variables occurring in the goal. In the observed traces this is a large list of
+upper/lower bound and defining-equation facts about the goal's subterms,
+typically obtained from the current assumptions (sometimes with equations
+oriented or rewritten relative to the assumption form). The proof draws on this
+supplied list rather than on the goal's own assumption list. Given a goal whose
+conclusion is an inequality ({<=} or {<}) between real-valued expressions, or a
 conjunction of such inequalities, it closes the goal:
 {
    A ?- t
-   ======================  PURE_BOUNDER_TAC thl
+   ========================  PURE_BOUNDER_TAC [th1; ...; thn]
 }
 
 \COMMENTS
-In all observed traces only this single outcome occurs — goals closed — and
-only with conclusions that are strict or non-strict real inequalities built
-from arithmetic over terms constrained by the supplied theorems; the goals
-carry large assumption lists {A}, which are left untouched, with nothing added
-to them.
+The observed traces show only this one outcome: goals that are real
+inequalities, each closed by the tactic given a list of bound theorems.
 
 \ENDDOC

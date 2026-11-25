@@ -3,43 +3,41 @@
 \TYPE {X86_GEN_ACCSTEPS_TAC : (string -> tactic) -> thm * (thm option array) -> int list -> int list -> tactic}
 
 \SYNOPSIS
-Symbolically executes a block of x86 machine instructions inside an
-{eventually x86} goal, advancing the goal's current state variable and
-recording the effect of each executed instruction as new assumptions, with
-accumulator-style arithmetic steps summarised as numeric carry/product
-equations.
+Symbolically executes a block of x86 instructions in an {eventually} goal,
+advancing the goal's state to a later state, replacing the old state's
+register/memory/flag assumptions with ones about the new state, and adding
+accumulated arithmetic (carry/product) equations as assumptions.
 
 \DESCRIBE
-The arguments are: {acc_preproc : string -> tactic}, a tactic generator applied
-during processing of each accumulated step (in the observed traces either a
-no-op or a pair of {RULE_ASSUM_TAC} rewrites normalising word
-subtraction/multiplication forms in the assumptions);
-{th : thm * (thm option array)}, the execution/code-length record for the
-program being stepped (its length theorem is displayed alongside the goal);
-{anums : int list}, the step numbers to be treated as accumulation steps,
-yielding arithmetic equations; and {snums : int list}, the step numbers to be
-executed symbolically. The conclusion's {eventually x86 (\s'. ...)} body is
-left unchanged, while its final state argument becomes the new state variable
-reached after the requested steps. Among the assumptions, those describing the
-old state (code loaded, register and memory reads, the accumulated {MAYCHANGE}
-relation, and any initial trivial {MAYCHANGE [] s s}) are discarded and
-replaced by the corresponding hypotheses about the new state:
-register/flag/memory read equations, the updated {MAYCHANGE} chain from the
-initial state, and {bytes_loaded} for the new state. For each accumulation step
-an arithmetic equation over {&}/{val}/{bitval} (addition, subtraction or
-multiplication with carry) is added. Some purely arithmetic or side assumptions
-are dropped and re-added unchanged, so they may change position in the
-assumption list.
+{X86_GEN_ACCSTEPS_TAC acc_preproc th anums snums} takes:
+{acc_preproc : string -> tactic}, a tactic generator applied during the
+stepping (given a state name) to post-process assumptions, e.g. rewriting them
+with word identities — a constant function returning {ALL_TAC} does nothing
+extra; {th : thm * (thm option array)}, an execution record for the program,
+namely a theorem giving the length of the code together with a cached array of
+decoded-instruction theorems; {anums : int list}, the instruction numbers whose
+effects are summarised as accumulated arithmetic equations; and
+{snums : int list}, the instruction numbers to step through. Writing {S(s)} for
+the state-indexed assumptions and {Acc} for the accumulated equations:
 {
-               A ?- eventually x86 (\s'. P s') s
-       ================================================  X86_GEN_ACCSTEPS_TAC acc_preproc th anums snums
-              A' ?- eventually x86 (\s'. P s') s'
+       A, S(s_i) ?- eventually ... s_i
+       ==============================================  X86_GEN_ACCSTEPS_TAC acc_preproc th anums snums
+       A, Acc, S(s_j) ?- eventually ... s_j
 }
-\noindent where {A'} replaces the state assumptions of {A} by ones about the
-new state, plus the arithmetic step equations.
+\noindent The deleted assumptions {S(s_i)} are those describing the previous
+state: code loadedness, program-counter, register, memory and flag reads, and
+the frame/{MAYCHANGE} relation for that state. The added assumptions {S(s_j)}
+are, for the new state: the code-loadedness fact, reads of registers, flags and
+memory locations, an updated {MAYCHANGE} composition relating the original and
+new state, and the new program-counter value. The accumulated equations {Acc}
+are signed-arithmetic equations of the form {2 pow 64 * <high/carry> + <low> =
+<expression>}, recording the multiply/add/subtract results of the stepped
+instructions. Purely arithmetic side assumptions that do not mention a state
+may be re-added unchanged, so their positions shift.
 
 \COMMENTS
-All observed traces show this single-subgoal state-advancing behaviour on goals
-whose conclusion is an {eventually x86} statement.
+The observed traces show only this single-goal state-advancing behaviour,
+always on goals whose conclusion is an {eventually} statement about an x86
+machine state.
 
 \ENDDOC

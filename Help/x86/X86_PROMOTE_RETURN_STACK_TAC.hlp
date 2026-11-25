@@ -39,8 +39,11 @@ between the initial and final states.
      ======================  X86_PROMOTE_RETURN_STACK_TAC mc core regs off
            (no goals)
 }
-\noindent        A ?- t   ======================  X86_PROMOTE_RETURN_STACK_TAC
-mc core regs off        A' ?- u ```
+{
+          A ?- t
+     ======================  X86_PROMOTE_RETURN_STACK_TAC mc core regs off
+          A' ?- u
+}
 
 \COMMENTS
 The observed traces show only these two outcomes, always on goals of this

@@ -3,34 +3,37 @@
 \TYPE {X86_ACCSIM_TAC : thm * (thm option array) -> int list -> int list -> tactic}
 
 \SYNOPSIS
-Symbolically executes a straight-line block of x86 machine code in an {ensures}
-goal, accumulating arithmetic/flag facts as new assumptions and reducing the
-goal to the remaining postcondition obligations, or closing it outright.
+Symbolically executes a block of x86 instructions through an {ensures} goal,
+recording per-instruction accumulator equations for selected steps and leaving
+the residual arithmetic obligation on the final state.
 
 \DESCRIBE
 {X86_ACCSIM_TAC execth anums snums} takes {execth : thm * (thm option array)},
-the precomputed execution data for the code being simulated (its length theorem
-together with per-instruction decoding information); {anums : int list}, the
-step numbers whose results are recorded as "accumulated" arithmetic equations;
-and {snums : int list}, the range of instruction steps to simulate. Applied to
-a goal {A ?- ensures ...}, it either closes the goal outright or leaves one
-subgoal whose conclusion is the residual arithmetic/word content of the
-postcondition, re-expressed in terms of freshly introduced symbolic variables
-for the intermediate results and for the final machine state. In the latter
-case:
+the program's execution data (a length theorem for the byte list of the code
+together with the per-instruction decoding array), used to step through the
+loaded code; {anums : int list}, the step numbers to be summarised as
+accumulated arithmetic equations (multiply/add/subtract-with-carry relations
+phrased with fresh {sum_}, {carry_}, {mullo_}, {mulhi_} variables); and
+{snums : int list}, the full range of step numbers to execute symbolically.
+Applied to a goal whose conclusion is an {ensures} statement with precondition,
+postcondition and frame describing a code fragment, it discharges the {ensures}
+statement itself, leaving as conclusion the leftover mathematical condition {t}
+that relates the postcondition's quantities to the newly introduced
+symbolic-state variables. The assumptions {x1 ... xn} added are: the conjuncts
+of the precondition, one accumulator equation per step named in {anums}, a
+collection of {read}/{bytes_loaded} facts about the final symbolic state, and a
+{MAYCHANGE} frame fact linking the initial and final states; occasionally an
+existing assumption is deleted and re-added, i.e. moved to the end.
 {
-      A ?- t
-   ================================ X86_ACCSIM_TAC execth anums snums
-      A, h1 ... hn ?- u
+          A ?- ensures ...
+   ====================================   X86_ACCSIM_TAC execth anums snums
+       A, x1 ... xn ?- t
 }
-\noindent where {h1 ... hn} are real-arithmetic equations for the accumulated
-steps (relating products, sums and carry bits of the introduced variables), the
-rewritten precondition facts transported to the final state, equations giving
-the final state's register, flag and memory reads, the loaded-code fact, and a
-{MAYCHANGE} relation between the initial and final symbolic states.
+\noindent Alternatively no goals remain, when the residual condition is solved
+outright.
 
 \COMMENTS
-The observed traces show only these two outcomes, on {ensures} goals for x86
-code with a straight-line instruction range.
+The observed traces show only these two outcomes, on goals whose conclusion is
+always an {ensures} triple for x86 code.
 
 \ENDDOC

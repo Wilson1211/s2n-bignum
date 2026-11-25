@@ -4,29 +4,29 @@
 
 \SYNOPSIS
 Fully discharges an existentially quantified constant-time/safety specification
-goal, leaving no subgoals.
+goal about a machine program, leaving no subgoals.
 
 \DESCRIBE
 The tactic takes five arguments: a {term list} naming the variables treated as
-public; a {tactic} performing preparatory/expansion work on the goal (here
-expanding register-set {MAYCHANGE} components); a pair
-{thm * (thm option array)} packaging the program's length theorem with a
-per-instruction decoding table; a {thm list} of extra rewrite theorems applied
-to the loaded-bytes hypothesis; and a function {(thm * (thm option array)) ->
-string -> tactic} that builds the single-stepping tactic from that pair. It
-applies to an assumption-free goal of the form {?- ?f. !x1 ... xn. t ==>
-ensures ...}, whose postcondition asserts the existence of an event trace equal
-to {f x1 ... xn} and constrained by a memory-access bound, and proves it
-outright:
+public inputs; a {tactic} for the execution/decoding steps; a
+{thm * (thm option array)} pairing a program-length theorem with a
+per-instruction table; a {thm list} of extra rewrite theorems used on the
+loading hypothesis; and a step-generating function of type {(thm * (thm option
+array)) -> string -> tactic}, which is instantiated with the program data to
+drive stepping. It applies to goals of the form
 {
-   ?- ?f. !x1 ... xn. t ==> ensures ...
-   =====================================  GEN_PROVE_SAFETY_SPEC_TAC pubvars prep (lenth, decode) rewrites mkstep
-                                          (no subgoals)
+   A ?- ?f. !x1 ... xn. t ==> u
+          ==========================  GEN_PROVE_SAFETY_SPEC_TAC [public inputs] exec_tac (len_th, instr_table) [rewrites] step_fn
 }
+\noindent where {u} is an {ensures} specification whose postcondition
+constrains the event trace produced relative to the initial one and asserts
+memory-access bounds, and {t} is a conjunction of side conditions on the
+quantified addresses. The goal is proved outright, with nothing of {A} left
+behind.
 
 \COMMENTS
-In all observed traces there is only this single outcome: goals with no
-assumptions, all of the above existential {ensures} shape, always closed
-completely.
+In all observed traces it is used on such existentially quantified,
+implication-shaped {ensures} goals with no assumptions and the same shape of
+argument package, so only this single closing behaviour is attested.
 
 \ENDDOC

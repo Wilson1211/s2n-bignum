@@ -3,42 +3,41 @@
 \TYPE {ENSURES_EVENTS_WHILE_UP2_TAC : term -> term -> term -> term -> tactic}
 
 \SYNOPSIS
-Reduces an {ensures} goal about a whole program whose postcondition event trace
-is built from a prologue, an {ENUMERATEL}-style iterated loop body and an
-epilogue to a single conjunctive goal: a non-triviality side condition together
-with three {ensures} subproblems for loop entry, a generic iteration, and loop
-exit.
+Reduces an {ensures} goal about a program containing a counted loop to a single
+conjunctive goal made up of a non-triviality condition on the iteration count,
+an entry step, a parametrised loop-body step, and an exit step.
 
 \DESCRIBE
-The arguments are four terms: {k}, the iteration count (a numeral or an
-arithmetic term), used both as the loop bound and as the index at which the
-loop trace is complete; {pc1}, the loop head address, i.e. the postcondition
-program counter of the entry step and of an iteration that is not the last;
-{pc2}, the loop exit address, i.e. the program counter reached by the final
-iteration and assumed at the start of the exit step; and {loop_inv}, a function
-of the iteration index and the machine state giving the state part of the loop
-invariant, instantiated at {0}, at a variable {i}, at {i + 1} and at {k}.
+The arguments are {k : term}, the loop trip count (a numeral or an arithmetic
+term); {pc1 : term}, the program address at the loop head, used as the target
+of the entry step, as the start of the body, and as the body's next address
+while more iterations remain; {pc2 : term}, the address reached after the final
+iteration, used as the body's next address on the last iteration and as the
+start of the exit step; and {loop_inv : term}, a function {\i s. ...} giving
+the loop invariant on the state at iteration index {i}, which is inserted into
+the intermediate pre/postconditions. The assumptions {A} are left untouched and
+the conclusion is replaced by a conjunction of four parts: {~(k = 0)}; an
+{ensures} from the original precondition to an intermediate state description
+built from {pc1}, {loop_inv} instantiated at {0}, and the original
+postcondition's event component indexed at {0}; a universally quantified body
+obligation {forall i. i < k /\ ~(i = k) /\ ~(k = 0) /\ 0 < k ==> ensures ...},
+whose precondition uses index {i} at {pc1} and whose postcondition uses index
+{i + 1} at the address {if i + 1 < k then pc1 else pc2}; and an {ensures} from
+the state at index {k} at {pc2} to the original postcondition. The frame
+({MAYCHANGE ...} component) of the original goal is reused unchanged in each
+{ensures}, and the loaded-program condition from the precondition is propagated
+into the intermediate state descriptions.
 {
-            A ?- t
-     ============================  ENSURES_EVENTS_WHILE_UP2_TAC k pc1 pc2 loop_inv
-            A ?- u
+   A ?- ensures ...
+   ========================================================= ENSURES_EVENTS_WHILE_UP2_TAC k pc1 pc2 loop_inv
+   A ?- ~(k = 0) /\
+        ensures ... /\
+        (forall i. i < k /\ ~(i = k) /\ ~(k = 0) /\ 0 < k ==> ensures ...) /\
+        ensures ...
 }
-\noindent Here {t} is an {ensures} statement and {u} is a conjunction of four
-parts: {~(k = 0)}; an {ensures} with the original precondition and a
-postcondition formed from the loop head address, {loop_inv} at index {0}, and
-the trace being the prologue extended by the enumerated body up to {0}; a
-universally quantified iteration goal {forall i. i < k /\ ~(i = k) /\ ~(k = 0)
-/\ 0 < k ==> ensures ...} whose pre- and postconditions use {loop_inv} at {i}
-and at {i + 1}, with the post program counter written as a conditional choosing
-the loop head or the exit address according to whether {i + 1 < k}, and the
-trace growing from index {i} to {i + 1}; and an {ensures} from the exit address
-with {loop_inv} at {k} and the completed loop trace to the original
-postcondition. The frame ({MAYCHANGE} component) of the original goal is reused
-in each of the three {ensures} conjuncts.
 
 \COMMENTS
-The observed traces show only this single-subgoal transformation, applied to
-{ensures} goals whose postcondition trace already has the
-prologue/enumerated-body/epilogue shape.
+In all observed traces only this transformation occurs, always on {ensures}
+goals of this shape.
 
 \ENDDOC

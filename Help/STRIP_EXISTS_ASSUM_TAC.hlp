@@ -3,31 +3,30 @@
 \TYPE {STRIP_EXISTS_ASSUM_TAC : tactic}
 
 \SYNOPSIS
-Finds an existentially quantified assumption, removes it, and replaces it by
-its body with the witnesses as free variables and the body's conjuncts as
-separate assumptions.
+Strips an existentially quantified, conjunctive assumption from the goal,
+replacing it by its conjuncts as separate assumptions with the existential
+variables freed.
 
 \DESCRIBE
-Takes no arguments. Applied to a goal whose assumption list contains an
-assumption of the form {?x1 ... xn. t1 /\ ... /\ tk}, the tactic removes that
-assumption and puts the conjuncts {t1}, ..., {tk} in its place as individual
-assumptions, with {x1 ... xn} now free. The conclusion is untouched. Note that
-the removed assumption's position is not preserved: the new assumptions are
-appended at the end, while the remaining assumptions keep their relative order.
+Takes no arguments. It searches the assumption list for an assumption of the
+form {?x1 ... xn. u1 /\ ... /\ uk} (with n at least one and k at least two),
+deletes it, and appends the conjuncts as individual assumptions in which
+{x1 ... xn} now occur free; the conclusion is unchanged.
 {
-       A, (?x1 ... xn. t1 /\ ... /\ tk) ?- u
-       ===================================== STRIP_EXISTS_ASSUM_TAC
-       A, t1, ..., tk ?- u
+   A, (?x1 ... xn. u1 /\ ... /\ uk) ?- t
+   ======================================  STRIP_EXISTS_ASSUM_TAC
+   A, u1, ..., uk ?- t
 }
 
 \FAILURE
-Fails whenever no assumption in the list is an existentially quantified
-statement of the shape it can strip; the failure is a search failure raised by
-the tactic itself when none of the candidate assumptions is suitable.
+Fails (a "tryfind" failure, i.e. no candidate assumption was suitable) on goals
+whose assumption lists contain no assumption of the required existentially
+quantified form, including goals where all assumptions are plain equations,
+non-overlap conditions, or universally quantified statements.
 
 \COMMENTS
-The observed traces show only this one kind of transformation, always on goals
-carrying a sizeable assumption list and a conclusion that is not itself
-touched.
+In the observed traces, only a single existential assumption is processed per
+application, the conclusion is never touched, and the goals are all of the same
+assembly-reasoning shape.
 
 \ENDDOC

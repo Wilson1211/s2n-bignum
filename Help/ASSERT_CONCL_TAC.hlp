@@ -7,9 +7,10 @@ Checks that the goal's conclusion is the supplied term, leaving the goal
 unchanged.
 
 \DESCRIBE
-Takes one argument {t : term}, which is compared against the goal's conclusion.
-Applied to a goal {A ?- t}, it yields a single subgoal identical to the input,
-with the conclusion unaltered and no assumptions added or removed.
+Takes a term {t : term} to be compared against the goal's conclusion. It yields
+exactly one subgoal identical to the input goal, the conclusion returned
+unaltered and no assumptions added or removed; it is thus an identity step
+whose only role in a proof script is to assert that the conclusion is {t}.
 {
         A ?- t
      ============  ASSERT_CONCL_TAC t
@@ -17,8 +18,8 @@ with the conclusion unaltered and no assumptions added or removed.
 }
 
 \COMMENTS
-The observed traces show only this identity behaviour, on goals with no
-assumptions whose conclusions are existentially quantified specification
-statements matching the supplied term.
+In all observed traces only this single outcome occurs, and only on goals with
+no assumptions whose conclusions are existentially quantified specification
+statements.
 
 \ENDDOC

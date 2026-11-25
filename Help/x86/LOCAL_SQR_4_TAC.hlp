@@ -3,36 +3,35 @@
 \TYPE {LOCAL_SQR_4_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic-execution goal across an inlined 4-word modular squaring
-subroutine, swapping the current machine-state assumptions for those of the
-successor state and adding the bound and congruence facts that characterise the
-squared result.
+Advances an {eventually}-style machine-code goal across one inlined 4-word
+modular squaring subroutine, replacing the current symbolic state with the next
+one and recording the squaring result as new assumptions.
 
 \DESCRIBE
-The tactic takes two arguments: an {int} and a {string list}. The integer is a
-fixed numeric parameter (the same value throughout the observed traces). The
-string list names the output and input quantities of the squaring step —
-destination variable first, then source variable — and these determine the new
-result variable and the term it is equated to in the added facts. The
-conclusion retains its {eventually} postcondition but is restated about a fresh
-later state variable. The assumptions describing the old state (program
-counter, loaded bytes, register and memory reads, and the accumulated
-{MAYCHANGE} relation) are discharged and replaced by the corresponding
-assumptions about the new state; the {MAYCHANGE} frame may be extended by the
-newly written memory component, and the memory assumption for the destination
-location now reads a fresh variable. Two new arithmetic assumptions about that
-fresh variable are added: a bound of the form {t < u} and a modular congruence
-relating it to the square of the source quantity. Purely arithmetic assumptions
-that do not mention the state are kept unchanged.
+The first argument is an {int} offset/index used to locate the call site; the
+second is a {string list} of two names identifying the destination and source
+operand locations of the squaring step. The conclusion's final state variable
+is replaced by a fresh successor state, and the whole block of assumptions
+describing the old state (program-counter value, {bytes_loaded}, register and
+memory reads, and the accumulated {MAYCHANGE} relation) is discharged and
+re-added in terms of the new state, with the {MAYCHANGE} term extended by the
+components the step may clobber; the program-counter assumption for the new
+state names a larger offset. Two new assumptions about the freshly introduced
+result value z1 are added, bounding it below twice the modulus and asserting
+that it is congruent to the square of the source value modulo that modulus.
+Mathematical side conditions already present in {A} (bounds, congruences,
+definitional equations) are carried over unchanged.
 {
-   A_arith, A_state(x1 ... xn) ?- eventually ... (old state)
-   =============================================================  LOCAL_SQR_4_TAC n ["dest"; "src"]
-   A_arith, A_state'(z1 ... zp), t < u, (congruence: fresh var vs. square of src)
-     ?- eventually ... (new state)
+   A ?- eventually ... s_n
+   ========================================  LOCAL_SQR_4_TAC n ["dest"; "src"]
+   A' ?- eventually ... s_(n+1)
 }
+\noindent where {A'} is {A} with the old state's assumption block replaced by
+the corresponding assumptions for {s_(n+1)} (extended {MAYCHANGE}, larger
+program-counter offset) together with the two new assumptions about z1.
 
 \COMMENTS
-In all observed traces only this single kind of step occurs, always on goals of
-this symbolic-execution shape and always with the same integer argument.
+In all observed traces, only this single kind of transformation occurs, always
+on goals of this {eventually} form carrying a symbolic-state assumption block.
 
 \ENDDOC

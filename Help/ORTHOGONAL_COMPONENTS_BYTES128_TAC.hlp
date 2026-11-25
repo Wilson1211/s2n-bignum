@@ -3,29 +3,28 @@
 \TYPE {ORTHOGONAL_COMPONENTS_BYTES128_TAC : tactic}
 
 \SYNOPSIS
-Proves goals stating that two 128-bit byte-sized components at related
-addresses are orthogonal, closing them outright.
+Proves that two 128-bit byte-memory components at distinct addresses are
+orthogonal, closing the goal.
 
 \DESCRIBE
-Takes no arguments. Applied to a goal whose conclusion is
-{orthogonal_components t u}, where {t} and {u} are both 128-bit byte components
-whose addresses share the same base, one of them possibly offset by a literal
-word, it solves the goal:
+Takes no arguments. Applied to a goal whose conclusion is a single
+orthogonality statement about a pair of 128-bit byte components, each at a base
+pointer possibly offset by a word-valued constant, it closes the goal:
 {
    A ?- orthogonal_components t u
-   ========================================  ORTHOGONAL_COMPONENTS_BYTES128_TAC
+   ================================  ORTHOGONAL_COMPONENTS_BYTES128_TAC
 }
 
 \FAILURE
-Fails when the goal's conclusion is not an orthogonality statement between two
-components of this particular 128-bit byte form — for example when the
-components have a different width or kind, or when the two addresses are built
-from different base terms — the failure coming from an internal matching step
-that finds no instance of the required shape.
+Fails, with a matching failure raised by an internal backchaining step,
+whenever the conclusion is an orthogonality claim about components that are not
+both of the 128-bit byte kind — for instance when one or both sides are
+components of a different width, a different component family, or of a
+non-fixed size.
 
 \COMMENTS
-In all observed traces only this one kind of successful outcome appears, on
-goals with no assumptions and with both component arguments built from the same
-base address.
+In all observed traces the goal is closed, never transformed or split, and
+every input goal had no assumptions and a conclusion that was a single
+orthogonality statement about such a pair of components.
 
 \ENDDOC

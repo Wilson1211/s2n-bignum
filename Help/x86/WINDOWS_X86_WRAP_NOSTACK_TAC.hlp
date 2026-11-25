@@ -3,38 +3,37 @@
 \TYPE {WINDOWS_X86_WRAP_NOSTACK_TAC : thm -> thm -> thm -> tactic}
 
 \SYNOPSIS
-Discharges a Windows-ABI {ensures} specification goal for an x86 subroutine by
-deriving it from a standard-ABI core correctness theorem for the same code.
+Proves a Windows-ABI {ensures} specification for a wrapped x86 routine from the
+corresponding System V specification, either closing the goal or reducing it to
+a residual event-trace obligation.
 
 \DESCRIBE
-The arguments are {winmc : thm}, the definition of the Windows-ABI machine-code
-byte list for the routine; {stdmc : thm}, the definition of the corresponding
-standard-ABI machine-code byte list; and {coreth : thm}, the already-proved
-specification of the standard-ABI core, given either as a plain universally
-quantified {ensures} statement or as one wrapped in an existential over an
-event function. It applies to an assumption-free, universally quantified
-Windows-ABI {ensures} goal, possibly preceded by an existential quantifier over
-an event-trace function, and usually closes it outright:
+The arguments are {winmc : thm}, the definition (or name) of the
+Windows-wrapper machine-code list occurring in the goal; {stdmc : thm}, the
+definition of the standard (non-Windows) machine-code list; and {coreth : thm},
+the already-proved specification of the core routine stated in the System V
+calling convention, which supplies the functional/safety content being
+transported. It applies to a goal {A ?- t} in which {t} is a universally
+quantified Windows-ABI {ensures} statement, possibly prefixed by an existential
+quantifier over an event-trace function. Either the goal is closed with no
+subgoals, or exactly one subgoal remains, leaving {A} otherwise untouched:
 {
-   ?- t
-   ========================  WINDOWS_X86_WRAP_NOSTACK_TAC winmc stdmc coreth
-   (no subgoals)
+   A ?- ?e. !x1 ... xn. hyps ==> ensures ...
+   =================================================  WINDOWS_X86_WRAP_NOSTACK_TAC winmc stdmc coreth
+   A, hyps', z1 ... zp ?- residual existential statement about the concatenated event list
 }
-\noindent In the existentially quantified event-trace form it can instead leave
-a single residual goal, whose conclusion {u} is the existential event-trace
-obligation about the wrapper's trace and whose new assumption list {A}
-describes the symbolic state: the instantiated non-overlapping side conditions,
-the core theorem's event and memory-access facts, the loaded code and
-register/stack contents at the final state, the accumulated {MAYCHANGE}
-relation, and the final program counter, stack pointer and event trace:
-{
-   ?- t
-   ========================  WINDOWS_X86_WRAP_NOSTACK_TAC winmc stdmc coreth
-   A ?- u
-}
+\noindent Here the outer existential witness has been instantiated and the
+quantifiers {x1 ... xn} and the implication stripped; {hyps'} are all the
+hypotheses of the original implication in a normalised form, with
+non-overlapping conditions expanded into their modular form; and {z1 ... zp}
+are many new assumptions describing the final machine state: register and
+memory reads at the exit state, the {bytes_loaded} hypothesis, a {MAYCHANGE}
+relation between the initial and final states, the event-list value, and the
+properties of the core routine's event trace coming from {coreth}.
 
 \COMMENTS
-The observed traces show only these two outcomes, on goals of this one shape
-with no initial assumptions.
+The observed traces show only these two outcomes — closing the goal, or
+producing this single event-trace subgoal — and only for goals of this
+wrapper-specification shape with no prior assumptions.
 
 \ENDDOC

@@ -3,34 +3,32 @@
 \TYPE {LOCAL_ADD_4_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic {eventually} execution goal across one inlined
-modular-addition subroutine, replacing the current state variable with a
-successor and adding a characterisation of the result written to memory.
+Steps an {eventually}-style machine-code goal forward across one inlined
+modular-addition subroutine, advancing the symbolic state variable and adding
+assumptions describing the new state and the result stored in memory.
 
 \DESCRIBE
-The first argument is an {int} offset/index selecting which call site or
-variant of the addition block to step over; the second is a {string list}
-naming the result and the two operands, used both to name the new result
-variable and to phrase the arithmetic consequence derived about it. The
-conclusion is rewritten to the same {eventually} statement applied to a fresh
-successor state variable. In the assumptions, every fact about the old state —
-program counter, register and memory reads, {bytes_loaded}, and the accumulated
-{MAYCHANGE ... s0 s} — is removed and replaced by the corresponding fact about
-the new state, with the program counter advanced and the {MAYCHANGE} relation
-extended by one further component for the memory block written. Two further
-assumptions are added: a read assumption giving the contents of that block as a
-fresh variable {t}, and a conditional arithmetic assumption of the form {u1 <
-... /\ u2 < ... ==> t = u1 + u2}.
-{
-   A ?- eventually x86 (\s'. P s') s
-   =================================================  LOCAL_ADD_4_TAC n ["res"; "op1"; "op2"]
-   A' ?- eventually x86 (\s'. P s') s_new
-   ```
-   where `A'` is `A` with the old-state facts replaced by their new-state counterparts (program counter advanced, `MAYCHANGE` extended) together with the new read and conditional arithmetic assumptions.
-}
+{LOCAL_ADD_4_TAC} takes an {int} offset, a positional/offset parameter of the
+step, and a {string list} of three names: the first names the result variable
+whose value is asserted to be stored in memory, and the other two name the
+operand variables, the summands appearing in the added arithmetic assumption.
+Applied to a goal whose conclusion is an {eventually} claim about a symbolic
+machine state, it produces exactly one subgoal. In the conclusion, the state
+term the {eventually} predicate is applied to becomes the next symbolic state
+variable, the predicate body being unchanged. Every assumption mentioning the
+old state variable — the program-counter assumption, the {bytes_loaded}
+assumption, the register and memory {read} assumptions, and the accumulated
+{MAYCHANGE} assumption relating the initial state to the current one — is
+discharged and re-added with the new state variable, the {MAYCHANGE} assumption
+gaining one further component for the memory block just written. Two
+assumptions are added: a new memory {read} assumption giving the stored result
+value, and an implication bounding the two operands below the modulus and
+concluding that the result equals their sum. Assumptions that do not mention
+the state variable (nonoverlapping conditions, earlier arithmetic facts, side
+conditions) are kept unchanged, though their position in the list may shift.
 
 \COMMENTS
-The observed traces show only this single kind of step, always on goals that
-are symbolic-execution states of this form with assumptions already present.
+The observed traces show only this single kind of transformation, always on
+goals whose conclusion is an {eventually} claim about a symbolic machine state.
 
 \ENDDOC

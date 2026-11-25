@@ -3,27 +3,31 @@
 \TYPE {MONOTONE_MAYCHANGE_TAC : tactic}
 
 \SYNOPSIS
-Closes a goal asserting that a pair of states satisfies a {,,}-composed
-{MAYCHANGE} relation, given an assumption asserting a smaller such relation for
-the same two states.
+Closes a goal whose conclusion asserts a composite {MAYCHANGE} relation between
+two states, using an assumption asserting a smaller {MAYCHANGE} relation
+between the same two states.
 
 \DESCRIBE
-Takes no arguments. It applies to a goal {A ?- t} where {t} is a composition
-via {,,} of {MAYCHANGE} components applied to two state terms, and {A} contains
-an assumption of the same shape on the same two states. The assumption and the
-conclusion may differ in the grouping, ordering and granularity of the
-{MAYCHANGE} components (for instance individual components versus components
-bundled into one list, or several narrow memory/register components versus one
-wider one), with the conclusion covering at least as much as the assumption.
-Other assumptions in {A} may be arbitrary and are neither used nor altered.
+The tactic takes no arguments. On a goal {A ?- t} where {t} is a
+{MAYCHANGE}-composition (built with {,,}) applied to two state variables, it
+discharges the goal using an assumption in {A} of the same shape relating the
+same two states, provided the assumed set of changed components is subsumed by
+the one in the conclusion. The assumption list is otherwise left untouched.
 {
-   A ?- t
-   =================  MONOTONE_MAYCHANGE_TAC
-                      (no subgoals)
+       A ?- t
+     ==========  MONOTONE_MAYCHANGE_TAC
 }
 
+\FAILURE
+Fails when the conclusion is not a {MAYCHANGE} relation between two states at
+all (for instance an existentially quantified conclusion about something else),
+and when the conclusion is such a relation but no assumption supplies a
+matching relation between the same two states that it subsumes — including when
+the conclusion mentions component sets not covered by any available assumption.
+These failures arise from the matching step inside the tactic.
+
 \COMMENTS
-In all observed traces, only this closing behaviour on goals of this
-{MAYCHANGE} form appears.
+In all observed traces, the only successful outcome is this complete closing of
+the goal.
 
 \ENDDOC

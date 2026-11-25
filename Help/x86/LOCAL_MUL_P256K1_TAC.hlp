@@ -3,37 +3,42 @@
 \TYPE {LOCAL_MUL_P256K1_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Symbolically executes an inlined modular-multiplication subroutine in an
-{eventually}-style machine goal, advancing the symbolic state by one step and
-recording the multiplication's result as a new assumption.
+Advances an {eventually}-style machine-state goal across one inlined
+modular-multiplication subroutine call, replacing the current symbolic state by
+a successor state and adding an assumption characterising the newly written
+result.
 
 \DESCRIBE
-{LOCAL_MUL_P256K1_TAC} takes an {int}, an offset/index used to locate the code
-block to execute, and a {string list} of three names: the first names the
-variable introduced for the computed result, the other two name the inputs
-whose stored values the result is expressed in terms of (the destination and
-the two source operands of the multiplication). Applied to a goal whose
-conclusion is an {eventually} statement about state variable {s_n}, it advances
-the state variable in the conclusion and in all state-dependent assumptions to
-its successor. The old program-counter assumption, the old {bytes_loaded}, the
-register- and memory-read assumptions and the old accumulated {MAYCHANGE}
-assumption are discharged and re-asserted at the new state; the {MAYCHANGE}
-assumption is extended by the memory region written, and there are added a read
-assumption for that region equating it to a freshly introduced result variable,
-a new program-counter assumption, and a pure arithmetic assumption defining
-that variable as the product of the two operand values reduced modulo the field
-prime. Purely arithmetic and nonoverlapping assumptions are kept, though their
-position in the assumption list may change. The outer postcondition of the
-conclusion is unchanged.
+The first argument is an {int}, the instruction-offset/index adjustment used
+when locating the call site (the same constant in all observed traces). The
+second is a {string list} naming the three operand locations of the
+multiplication — the destination buffer and the two sources — which selects the
+stored values the new assumptions talk about. The goal must be a predicate of
+the form "{eventually} ... holds of state {s}"; the tactic rewrites it to the
+same predicate applied to a fresh successor state {s'} and rebuilds the
+assumption list for that state. Every assumption mentioning the old state — the
+program-counter value, the program-loaded fact, register contents,
+memory-contents facts, and the accumulated frame/{MAYCHANGE} relation from the
+initial state — is discharged and re-added with the new state name, the
+program-counter assumption being updated to the new offset and the frame
+relation extended by the destination location just written. Additionally, a
+fresh variable {z} (named from the first element of the string list) is
+introduced by an equation defining it as the modular product of the values held
+in the two source locations, accompanied by a memory-contents assumption that
+the destination holds {z}; equations established earlier are retained
+unchanged.
 {
-   A ?- eventually ... s_n
-   ========================================  LOCAL_MUL_P256K1_TAC i [dest; src1; src2]
-   A' ?- eventually ... s_{n+1}
+   A, {assumptions about s} ?- eventually ... s
+   ======================================================  LOCAL_MUL_P256K1_TAC n ["dest"; "src1"; "src2"]
+   A, {same assumptions restated for s', pc at new offset,
+       frame relation extended by dest},
+      z = (value at src1) * (value at src2) (mod ...),
+      memory at dest = z
+    ?- eventually ... s'
 }
-\noindent where {A'} is as described above.
 
 \COMMENTS
-In all observed traces the tactic shows only this single-subgoal
-state-advancing behaviour, always on goals of this machine-execution shape.
+All observed traces show this same single kind of transformation, on goals of
+this {eventually} shape.
 
 \ENDDOC

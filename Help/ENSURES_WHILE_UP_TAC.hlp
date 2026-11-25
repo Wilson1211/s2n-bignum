@@ -3,35 +3,35 @@
 \TYPE {ENSURES_WHILE_UP_TAC : term -> term -> term -> term -> tactic}
 
 \SYNOPSIS
-Reduces an {ensures} goal about a counted-up loop to a single conjunctive goal
-containing a nonzero-trip-count side condition together with {ensures} subgoals
+Reduces an {ensures} goal describing a counted loop to a single conjunctive
+goal containing a nonzero trip-count condition plus {ensures} subspecifications
 for loop entry, body, backedge and exit.
 
 \DESCRIBE
-The tactic takes four {term} arguments: a bound {t}, the number of loop
-iterations; two program-counter terms {pc1} and {pc2} marking the loop's
-body-start and backedge/body-end labels; and a loop invariant of the form
-{\i s. ...}, parameterised by the iteration counter {i} and the machine state.
-Applied to an {ensures} goal with precondition {pre}, postcondition {post} and
-frame {frame}, it yields one subgoal whose conclusion conjoins: {~(t = 0)}; an
-{ensures} from {pre} to the invariant at {0} at {pc1}; a quantified body step
-from the invariant at {i} at {pc1} to the invariant at {i + 1} at {pc2}; a
-quantified backedge step carrying the invariant at {i} from {pc2} back to
-{pc1}; and an {ensures} from the invariant at {t} at {pc2} to {post}. Every
-component retains the original frame ({MAYCHANGE}) component.
+The tactic takes four term arguments: {count}, the loop trip count (a
+numeral-valued term); {pc1}, the program counter at the top of the loop body;
+{pc2}, the program counter at the loop backedge/test; and {inv}, a loop
+invariant given as a lambda abstraction {\i s. ...} over the iteration index
+and the machine state. Applied to an {ensures} goal, it produces one subgoal
+whose conclusion is a conjunction of five parts: {~(count = 0)}; an {ensures}
+from the original precondition to {inv} instantiated at {0} at {pc1}; a
+{forall i. ...} body step from {inv} at {i} at {pc1} to {inv} at {i + 1} at
+{pc2}, guarded by hypotheses bounding {i} below {count} and asserting {count}
+is positive; a similarly quantified backedge step from {inv} at {i} at {pc2}
+back to {inv} at {i} at {pc1}, guarded by the same bounds together with
+{0 < i}; and an {ensures} from {inv} instantiated at {count} at {pc2} to the
+original postcondition. The frame ({MAYCHANGE ...}) of the original goal is
+reused in every component.
 {
-   A ?- ensures ... pre post frame
-   ================================================  ENSURES_WHILE_UP_TAC `t` `pc1` `pc2` `\i s. ...`
-   A ?- ~(t = 0) /\
-        ensures ... /\
-        (forall i. i < t /\ ~(i = t) /\ ~(t = 0) /\ 0 < t ==> ensures ...) /\
-        (forall i. 0 < i /\ i < t /\ ~(i = t) /\ ~(i = 0) /\ ~(t = 0) /\ 0 < t
-                   ==> ensures ...) /\
-        ensures ...
+   A ?- t
+   =================================  ENSURES_WHILE_UP_TAC count pc1 pc2 (\i s. ...)
+   A ?- u
 }
+\noindent where {u} is the four-part conjunction described above together with
+the added nonzero-count conjunct.
 
 \COMMENTS
-The observed traces show only this single-subgoal transformation, on {ensures}
-goals for x86 machine-code loops.
+The observed traces show only this single-subgoal transformation of {ensures}
+goals for the x86 model.
 
 \ENDDOC

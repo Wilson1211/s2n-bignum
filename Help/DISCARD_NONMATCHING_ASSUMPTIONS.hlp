@@ -3,25 +3,25 @@
 \TYPE {DISCARD_NONMATCHING_ASSUMPTIONS : term list -> tactic}
 
 \SYNOPSIS
-Discards every assumption that fails to match any of the supplied term
-patterns, leaving the conclusion unchanged.
+Deletes from the goal's assumption list every assumption that does not match
+any of the supplied term patterns, leaving the conclusion unchanged.
 
 \DESCRIBE
-The argument {pats : term list} is a list of term patterns: an assumption
-survives only if it matches one of them, and all others are dropped. The
-surviving assumptions keep their relative order in the assumption list.
+The argument {pats : term list} is the list of patterns to keep: an assumption
+survives only if it matches one of them, and all others are discarded. The
+retained assumptions {A'} form a sublist of {A} in their original order (and
+are renumbered accordingly).
 {
-        A ?- t
+            A ?- t
      ====================  DISCARD_NONMATCHING_ASSUMPTIONS pats
-        A' ?- t
+           A' ?- t
 }
-\noindent where {A'} is the sublist of {A} consisting of those assumptions
-matching some pattern in {pats}.
+\noindent The number of assumptions removed varies from one to several,
+depending on how many fail to match.
 
 \COMMENTS
-In all observed traces, the tactic only performs this filtering, always
-yielding a single subgoal, and is applied only to goals whose assumptions are
-machine-state facts, with the same pattern list supplied throughout; the number
-of assumptions removed ranges from one to most of them.
+In all observed traces the filtering is nontrivial, each application removing
+at least one assumption and leaving a single goal with an unchanged conclusion;
+all inputs are goals with sizeable assumption lists about machine-state reads.
 
 \ENDDOC

@@ -3,37 +3,38 @@
 \TYPE {LOCAL_SQR_P256K1_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic execution goal of the form {A ?- eventually x86 P s} past
-an inlined modular-squaring subroutine call, replacing the current state
-variable by a fresh later one and recording the mathematical result of the
-squaring in the assumptions.
+Advances an {eventually}-style machine-code goal past an inlined modular
+squaring subroutine, replacing the current state variable by a successor state
+and adding assumptions describing the squaring's result.
 
 \DESCRIBE
-The first argument is an {int} selecting which code block/offset of the
-enclosing program the call occupies; the second is a {string list} naming the
-squaring's variables, the first string naming the fresh output value and the
-second the existing input value. The conclusion predicate is kept, but the
-final state argument becomes a fresh state variable at a later program point.
-The invariant-style assumptions about the old state — program counter, loaded
-bytes, register contents, memory contents, and the accumulated {MAYCHANGE}
-relation from the initial state — are deleted and reinstated for the new state,
-with the program counter updated to the instruction after the call and the
-{MAYCHANGE} relation extended by the memory region written. Two new assumptions
-are added: one equating the freshly named output variable with the modular
-square of the named input, and one reading that value out of the destination
-memory region in the new state. Purely side-condition assumptions
-(nonoverlapping facts and earlier arithmetic facts) are retained unchanged.
+The first argument is an {int} selecting which of the subroutine's
+variants/entry alternatives to step through (two different values occur in the
+observed traces). The second is a {string list} naming the result variable and
+the input operand of the squaring: the first name becomes the new result value
+introduced into the assumptions, and the pair together determines which stored
+quantity gets characterised. The conclusion keeps the same {eventually} body,
+but its state argument changes from the current state variable to a fresh
+successor one.
 {
-          A ?- eventually x86 P s
-     ======================================  LOCAL_SQR_P256K1_TAC n [out; inp]
-          A' ?- eventually x86 P s'
+   A ?- eventually ... s ...
+   ========================================  LOCAL_SQR_P256K1_TAC n ["res"; "inp"]
+   A' ?- eventually ... s' ...
 }
-\noindent where {s'} is the fresh later state and {A'} is {A} with the
-state-dependent assumptions re-expressed at {s'} and the new equation for the
-squaring result added.
+\noindent Here the assumptions of {A} that mention the old state — the
+program-counter value, the code-loaded fact, register contents and
+memory-content equations — are discharged and re-added in {A'} in terms of the
+new state, with an updated program-counter offset and an extended {MAYCHANGE}
+frame relating the initial state to the new one, the previously accumulated
+frame assumption being replaced by this extended one. {A'} also gains two new
+assumptions: an equation defining the named result as the square of the named
+input reduced modulo the field prime, and a memory-content equation saying the
+destination buffer in the new state holds that result. Earlier definitional
+equations of this kind are retained, possibly reordered, and side conditions
+such as non-overlapping hypotheses are left untouched.
 
 \COMMENTS
-In all observed traces, only this single kind of transformation occurs, always
-on goals of this symbolic-execution shape.
+The observed traces show only this single kind of forward-stepping
+transformation, on goals of this one {eventually} shape.
 
 \ENDDOC

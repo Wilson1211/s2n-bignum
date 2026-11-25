@@ -3,31 +3,35 @@
 \TYPE {CONTAINED_ASM_TAC : tactic}
 
 \SYNOPSIS
-Proves a goal asserting that one address range is contained, modulo a power of
-two, within another, by arithmetic reasoning from the goal's assumptions.
+Proves a {contained_modulo} containment goal outright from the numeric facts in
+the assumption list.
 
 \DESCRIBE
-Takes no arguments. Applied to a goal whose conclusion {t} is a
-containment-modulo statement between two (base, length) pairs, it closes the
-goal:
+Takes no arguments. Applied to a goal whose conclusion is a {contained_modulo}
+statement relating a (base, length) pair to an enclosing (base, length) pair,
+it closes the goal:
 {
    A ?- t
-   =============  CONTAINED_ASM_TAC
-      (no goals)
+   ========  CONTAINED_ASM_TAC
+   (no subgoals)
 }
-\noindent Since nothing remains, the assumption list is untouched.
+\noindent Internally it reduces the containment to an arithmetic implication
+whose hypotheses are the arithmetic-shaped assumptions drawn from {A}, and
+succeeds only when that implication is provable by linear arithmetic.
 
 \FAILURE
-Fails when the containment in the conclusion does not follow by linear
-arithmetic from the available numeric assumptions: the internal arithmetic
-decision step finds no contradiction and raises a failure. In the observed
-traces this occurs for conclusions relating ranges whose relative placement the
-assumptions do not constrain, including ones whose length involves a non-linear
-operator.
+Fails when the arithmetic facts extracted from the assumptions do not linearly
+entail the required containment inequalities — for instance when the enclosing
+region named in the conclusion is a different region from the one the
+assumptions bound the address against, or when the bound depends on a
+nonlinear/{MIN}-shaped quantity not derivable from the extracted hypotheses.
+The failure surfaces as the arithmetic decision procedure reporting no
+contradiction for the generated implication, so it arises from the tactic's own
+arithmetic step rather than from any supplied argument.
 
 \COMMENTS
-The observed traces show only this one kind of success, always on goals of that
-single conclusion form carrying a large assumption list of machine-state, size
-and bound facts.
+All observed traces show only this all-or-nothing behaviour, on conclusions of
+this single containment form, with large assumption lists mixing arithmetic and
+machine-state facts.
 
 \ENDDOC

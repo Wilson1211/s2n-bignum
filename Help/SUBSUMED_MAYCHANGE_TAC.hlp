@@ -3,24 +3,34 @@
 \TYPE {SUBSUMED_MAYCHANGE_TAC : tactic}
 
 \SYNOPSIS
-Proves a goal of the form {t subsumed u}, where both sides are {MAYCHANGE}
-state-relation expressions, closing it outright.
+Proves a goal of the form {t subsumed u} relating two state-change
+({MAYCHANGE}-style) relations, closing it outright.
 
 \DESCRIBE
-The tactic takes no arguments. Applied to a goal whose conclusion is a
-{subsumed} statement between two {MAYCHANGE} components (possibly {,,}-composed
-and nested), it discharges the goal completely; the assumptions {A} are left
-untouched and play no role in the outcome.
+Takes no arguments.
 {
    A ?- t subsumed u
    ==================  SUBSUMED_MAYCHANGE_TAC
-   (no goals)
+      (no subgoals)
 }
+\noindent The assumptions {A} are left untouched and play no role in the
+observed traces, which include goals with no assumptions as well as goals
+carrying large sets of symbolic-execution assumptions. The two sides may be
+built from register, flag, event and memory components combined with {,,} and
+nested parenthesised groups, including cases where the right-hand side covers
+memory regions or component lists larger than, or differently decomposed from,
+the left.
+
+\FAILURE
+Fails on subsumption goals whose right-hand side is not of the form the tactic
+can match against — for instance when the covering relation is given as an
+explicit lambda-abstraction over the two states rather than a {MAYCHANGE}-style
+combination, or when the left-hand components are not covered by the right-hand
+side. Such failures arise inside the tactic's own matching and rewriting
+machinery rather than from any supplied argument, since it takes none.
 
 \COMMENTS
-The observed traces show only this single behaviour — always a {subsumed}
-conclusion between {MAYCHANGE} terms, with assumption lists ranging from a few
-side conditions to large symbolic-execution states — and never any surviving
-subgoal.
+In all observed traces, the only successful outcome is this one: goals of this
+subsumption shape being closed.
 
 \ENDDOC

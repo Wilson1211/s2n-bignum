@@ -3,26 +3,32 @@
 \TYPE {MAYCHANGE_IDEMPOT_TAC : tactic}
 
 \SYNOPSIS
-Proves goals stating that a state-relation built from {,,}-composed
-{MAYCHANGE}/{ASSIGNS} components (or a trivial relation) composed with itself
-equals itself, closing the goal.
+Proves goals asserting that a state-relation built by sequential composition of
+change/assignment components absorbs a second copy of itself, closing the goal
+outright.
 
 \DESCRIBE
-The tactic takes no arguments. It applies to a goal whose conclusion is an
-equation {t ,, u = u}, where {u} is a (possibly nested and parenthesised)
-{,,}-composition of relation components and {t} is that same composition
-bracketed as a single unit. The assumptions are left untouched and play no
-role: the same closure is observed with any assumption list, including long
-lists of arithmetic, memory-disjointness, register-read and {ensures}
-hypotheses.
+Takes no arguments. The goal's conclusion must be an equation between a
+sequential composition {(u ,, u) ,, ...} — a parenthesised relation followed by
+a repetition of the same component chain — and the single chain {u}. The tactic
+then closes the goal:
 {
-      A ?- t ,, u = u
-      ===============  MAYCHANGE_IDEMPOT_TAC
-      (no goals)
+   A ?- (u ,, u) ,, ... = u
+   ===================================  MAYCHANGE_IDEMPOT_TAC
 }
+\noindent The assumptions {A} play no role.
+
+\FAILURE
+Fails, with an error arising from the relation-absorption conversion it relies
+on, when the conclusion is an equation of this shape but the repeated
+components are not in a form that conversion can absorb — for instance when the
+composed chains, though syntactically similar, differ in some of their
+components, or when the components are plain lambda-abstraction relations
+rather than the structured change/assignment forms handled on the successful
+goals.
 
 \COMMENTS
-In all observed traces the tactic closes the goal, always on conclusions of
-this self-composition-equals-itself shape; no other kind of outcome appears.
+In all observed traces the only successful outcome is the one above, always
+with the conclusion an equation of this self-absorbing composition form.
 
 \ENDDOC

@@ -3,36 +3,39 @@
 \TYPE {LOCAL_JDOUBLE_SAFETY_TAC : string -> int -> tactic}
 
 \SYNOPSIS
-Applies a named universally quantified subroutine-correctness assumption to
-discharge a point-doubling call inside an {eventually} goal, advancing the
-symbolic state from one step index to the next and replacing the old state's
-assumptions by ones describing the state after the call.
+Advances an {eventually} goal about machine state {sn} across one subroutine
+call by instantiating a named universally quantified "safety" specification
+assumption, replacing the pre-call state assumptions with post-call ones for
+state {s(n+1)}.
 
 \DESCRIBE
-The first argument, {assump_name : string}, is the label of the assumption in
-the goal's assumption list that gets instantiated and used for the call; the
-second, {n : int}, is the index used to name the new symbolic state variable
-introduced for the post-call state. The goal's conclusion must be an
-{eventually} statement about a state variable; the resulting conclusion is the
-same {eventually} statement about a freshly named successor state variable. All
-assumptions mentioning the old state variable — register/flag/memory reads, the
-loaded-bytes fact, the event-trace equation and the accumulated {MAYCHANGE}
-relation — are dropped and replaced by corresponding assumptions about the new
-state, with the {MAYCHANGE} relation extended by the frame of the called
-routine and the event trace rewritten as an {APPEND} of a fresh existential
-trace variable {x1} with the previous trace. Two further assumptions about {x1}
-are added: one equating it to a trace-generating function applied to the call's
-arguments, and one asserting that its memory accesses are in bounds. The named
-assumption itself is kept, but moved to the end of the assumption list; the
-other quantified correctness assumption keeps its label.
+The first argument {assump_name : string} labels the quantified specification
+assumption in the goal's assumption list that is used to step over the call;
+the second, {n : int}, is the index of the current state, so the conclusion's
+state variable {sn} becomes {s(n+1)} and the new assumptions are stated about
+{s(n+1)}.
 {
-       A ?- t
-     ======================================  LOCAL_JDOUBLE_SAFETY_TAC assump_name n
-       A' ?- t'
+      A ?- eventually ... sn
+   ========================================  LOCAL_JDOUBLE_SAFETY_TAC assump_name n
+      A' ?- eventually ... s(n+1)
 }
+\noindent The conclusion is unchanged apart from the state variable. In the
+assumptions, all facts about the old state {sn} (register and memory reads,
+flag facts, {bytes_loaded}, the accumulated {MAYCHANGE} frame, and the
+event-trace equation) are discharged and replaced by corresponding facts about
+{s(n+1)}: a new program-counter and stack-pointer value, a rewritten {read
+events s(n+1) = APPEND ...} equation mentioning a freshly introduced trace
+variable {z}, two new assumptions characterising {z} (an equation defining it
+via the callee's event function and a {memaccess_inbounds} fact about it), the
+surviving loaded-code and memory reads, and an extended {MAYCHANGE} frame
+covering the callee's writes. The named assumption and the other quantified
+specification assumption are retained, with the named one moved to the end of
+the list, and non-state side conditions such as the {nonoverlapping} hypotheses
+are kept.
 
 \COMMENTS
-In all observed traces, this single-subgoal transformation is applied to goals
-of this one shape.
+The observed traces show only this single-subgoal transformation, always on
+goals whose conclusion is an {eventually} statement and whose assumptions
+include the named quantified specification.
 
 \ENDDOC

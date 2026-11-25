@@ -3,35 +3,38 @@
 \TYPE {LOCAL_JDOUBLE_TAC : int -> tactic}
 
 \SYNOPSIS
-Discharges one inlined subroutine call inside an {eventually} goal, replacing
-the pre-call machine-state assumptions by post-call ones together with a
-summarising implication about the subroutine's result, and advancing the goal's
-state variable by one step.
+Advances a symbolic-execution goal one step across a called point-doubling
+subroutine, replacing the current state's assumptions by those for the next
+state and adding a summary assumption relating the input coordinates to the
+doubled result.
 
 \DESCRIBE
-The single {int} argument {n} is the index of the state variable in the goal:
-the goal's final state term is advanced from that index to the next one, and
-the newly added assumptions are stated about the new state. Applied to a goal
-whose conclusion is an {eventually} predicate about a machine state and whose
-assumptions include a full symbolic state description, it yields one subgoal
-with the same {eventually} body:
+The single {int} argument is the index {n} of the new state variable introduced
+for the state reached after the call; the assumptions and the final state
+argument of the conclusion are re-expressed in terms of state {n}. The tactic
+applies to a goal whose conclusion is {eventually <machine> P s}, where the
+assumptions {A} contain program/register/memory {read} facts about the current
+state {s} together with a {MAYCHANGE} frame assumption.
 {
-   A ?- eventually ... s_n
-   ================================  LOCAL_JDOUBLE_TAC n
-   A' ?- eventually ... s_(n+1)
+   A ?- eventually <machine> P s
+   ========================================  LOCAL_JDOUBLE_TAC n
+   A' ?- eventually <machine> P s'
 }
-\noindent Here {A'} keeps the non-state assumptions of {A} unchanged (side
-conditions, non-overlapping facts, arithmetic and earlier result summaries),
-while the block of assumptions describing the state before the call — register
-and memory reads at {s_n}, flag values, the accumulated {MAYCHANGE} relation,
-and the program-counter/stack-pointer facts — is removed and replaced by
-corresponding reads at {s_(n+1)}, a {MAYCHANGE} relation extended with the
-frame clobbered by the call, program-counter and stack-pointer facts for the
-return site, and a new universally quantified assumption relating the
-subroutine's input to the memory contents it writes at {s_(n+1)}.
+\noindent Here {s'} is the new state named by the argument, and the
+postcondition {P} is unchanged apart from the state argument. In {A'}, every
+assumption mentioning the old state is discharged and replaced by the
+corresponding assumption about {s'}: program loaded, program counter and stack
+pointer at the caller's return point, preserved register and memory contents,
+and a {MAYCHANGE} assumption extended with the subroutine's additional
+clobbered locations. Assumptions not mentioning the state (arithmetic side
+conditions, earlier universally quantified representation facts) are kept. One
+new universally quantified assumption is added, stating that for any point {z1}
+represented by the input triple, the output memory triple in {s'} represents
+the group doubling of {z1}.
 
 \COMMENTS
-All observed traces show this single-subgoal transformation, on goals of the
-above form.
+In all observed traces this is the only kind of transformation performed,
+always on goals of this shape with a large assumption list describing a machine
+state.
 
 \ENDDOC

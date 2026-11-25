@@ -1,0 +1,36 @@
+\DOC X86_VSTEPS_TAC
+
+\TYPE {X86_VSTEPS_TAC : thm * (thm option array) -> int list -> tactic}
+
+\SYNOPSIS
+Symbolically executes a specified consecutive block of x86 instructions in an
+{eventually}-style goal, advancing the goal's current state variable and
+recording the resulting state facts as assumptions.
+
+\DESCRIBE
+{X86_VSTEPS_TAC th snums} takes {th : thm * (thm option array)}, the execution
+record for the program under verification (a code-length theorem paired with
+per-instruction decoding theorems), used to decode and step the instructions,
+and {snums : int list}, the list of step numbers to execute, which fixes the
+names of the intermediate state variables introduced (one per step). For each
+step number in {snums}, in order, a fresh state variable is introduced together
+with assumptions describing that state: register, flag, vector-register, memory
+and event-trace reads, the accumulated {MAYCHANGE} relation from the initial
+state to the new state, and a {bytes_loaded} fact for the final new state. The
+{bytes_loaded} assumption and the {MAYCHANGE} assumption for the previous
+current state are dropped, being superseded by their counterparts for the new
+state; all other prior assumptions are kept unchanged. The conclusion keeps its
+shape, with the {eventually} postcondition untouched and only the trailing
+state argument replaced by the final new state variable {u}, with {B} the newly
+added state facts:
+{
+       A ?- eventually ... t
+    ======================== X86_VSTEPS_TAC th snums
+       A, B ?- eventually ... u
+}
+
+\COMMENTS
+In all observed traces, only this single kind of outcome occurs, on goals of
+this {eventually} form with a current-state argument.
+
+\ENDDOC

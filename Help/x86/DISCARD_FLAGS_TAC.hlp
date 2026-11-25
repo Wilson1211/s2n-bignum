@@ -3,25 +3,27 @@
 \TYPE {DISCARD_FLAGS_TAC : tactic}
 
 \SYNOPSIS
-Deletes from the assumption list every hypothesis stating the value of a
-processor condition flag in a state, leaving the conclusion untouched.
+Deletes from the assumption list those assumptions that describe the value of a
+processor condition-flag component in a given state, leaving the conclusion
+unchanged.
 
 \DESCRIBE
-Takes no arguments. The tactic scans the assumptions and drops those of the
-form asserting that reading a status flag component of a machine state is
-equivalent to some boolean expression. All other assumptions — register and
-memory reads, arithmetic side conditions, loaded-code and frame assumptions —
-are kept in their original order.
+Takes no arguments. Applied to a goal, it drops every assumption whose
+left-hand side is a read of a flag component in some state, keeping all other
+assumptions (register and memory reads, arithmetic side conditions,
+frame/{MAYCHANGE} facts, the loaded-code fact) in their original relative
+order, so the remaining assumptions form a subset {A'} of {A}:
 {
-       A, f1 ... fn ?- t
-     ===================== DISCARD_FLAGS_TAC
-             A ?- t
+         A ?- t
+   ===================  DISCARD_FLAGS_TAC
+         A' ?- t
 }
-\noindent Here {f1 ... fn} are the flag-valued assumptions removed; n may be
-zero.
+\noindent The number of assumptions removed varies, and in the observed traces
+several flag assumptions are discarded at once; some flag assumptions stated in
+other syntactic forms are left in place.
 
 \COMMENTS
-All observed traces show this single kind of outcome, always on goals that do
-contain such flag assumptions.
+All observed traces show only this single-subgoal, assumption-pruning
+behaviour, on goals arising from x86 machine-state reasoning.
 
 \ENDDOC

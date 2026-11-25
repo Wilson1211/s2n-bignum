@@ -19,9 +19,6 @@ two terms of the same type, the tactic discharges it completely:
        A ?- t = u
        ==========  SAFE_UNIFY_REFL_TAC allowed_vars_ref allowed_var_prefixes_ref
 }
-{
-   
-}
 \noindent In the observed traces the right-hand side {u} is either a plain
 variable or an application of a symbol whose name matches the allowed-prefix
 list, and the left-hand side {t} is a concrete term built from the state

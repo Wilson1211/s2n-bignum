@@ -3,38 +3,36 @@
 \TYPE {ENSURES_WHILE_PUP_TAC : term -> term -> term -> term -> tactic}
 
 \SYNOPSIS
-Replaces an {ensures} goal about a loop by a single conjunctive goal containing
-a nonzero-trip-count side condition together with four {ensures} subcomponents
-(entry, loop body, back-edge, exit) built from a supplied loop invariant.
+Reduces a single {ensures} goal about a machine program containing a counted
+loop to one conjunctive goal packaging a nonzero-trip-count side condition
+together with four {ensures} subgoals (setup, loop body, back-edge, and exit)
+expressed in terms of a supplied loop invariant.
 
 \DESCRIBE
-The tactic takes four term arguments: a numeral-valued bound {t} giving the
-number of loop iterations; two terms giving program points, namely the
-body-start point and the back-edge/test address (either absolute or as an
-offset); and a loop invariant of the form {\i s. ...} parameterised by the
-iteration counter and the machine state. The assumptions are untouched and one
-goal results, whose conclusion conjoins: {~(t = 0)}; an {ensures} from the
-original precondition to the invariant at {0} at the body-start point; a clause
-carrying the invariant at {x1} from the body-start point to the invariant at
-{x1 + 1} at the back-edge point; a clause carrying the invariant at {x1} from
-the back-edge point back to the body-start point; and an {ensures} from the
-invariant at {t} at the back-edge point to the original postcondition. Every
-component keeps the original frame ({MAYCHANGE} term) unchanged, and each state
-predicate is conjoined with the program-loaded and program-counter conditions
-taken from the original precondition.
+The tactic takes four terms: a {:num} trip count {t} bounding the loop
+variable; two program-counter terms {pctop} and {pcbot} (given either as
+explicit {pc}-offsets or as offset descriptors) naming the loop's top and
+bottom code points; and an invariant of the form {\i s. ...} relating the loop
+index to the machine state.
 {
    A ?- ensures ...
-   ======================================================================  ENSURES_WHILE_PUP_TAC t body_start back_edge (\i s. ...)
+   ========================================================  ENSURES_WHILE_PUP_TAC t pctop pcbot (\i s. ...)
    A ?- ~(t = 0) /\
-        ensures ... /\
-        (forall x1. x1 < t /\ ~(x1 = t) /\ ~(t = 0) /\ 0 < t ==> ensures ...) /\
-        (forall x1. 0 < x1 /\ x1 < t /\ ~(x1 = t) /\ ~(x1 = 0) /\ ~(t = 0) /\ 0 < t
-                    ==> ensures ...) /\
-        ensures ...
+        (ensures from the original precondition to the invariant at 0 at pctop) /\
+        (!i. <guards: i < t, ~(i = t), t nonzero/positive>
+             ==> ensures from the invariant at i at pctop
+                         to the invariant at (i+1) at pcbot,
+                         with the invariant's trailing flag component attached) /\
+        (!i. <guards: i < t, ~(i = t), t nonzero/positive, i positive, ~(i = 0)>
+             ==> ensures from pcbot back to pctop at the same index i) /\
+        (ensures from the invariant at t at pcbot to the original postcondition)
 }
+\noindent In each intermediate pre/postcondition the program-loading condition
+and the current program counter are inserted, and the original frame
+({MAYCHANGE ...}) is reused unchanged in every conjunct.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, on goals
-whose conclusion is an {ensures} for the same machine model.
+All observed traces show exactly this single-goal transformation, on goals
+whose conclusion is an {ensures} for a machine model.
 
 \ENDDOC

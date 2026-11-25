@@ -3,38 +3,34 @@
 \TYPE {LOCAL_MONTMUL_SM2_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic-execution goal over one inlined Montgomery-multiplication
-subroutine call, replacing the current state variable with a successor state
-and adding an assumption characterising the product written to the destination
-buffer.
+Advances an {eventually} machine-execution goal past one inlined
+Montgomery-multiplication subroutine call, replacing the current symbolic state
+with its successor and recording the multiplication's result as a new
+assumption.
 
 \DESCRIBE
-The first argument is an {int}: an offset/index selecting the code position of
-the call being stepped over. The second is a {string list} naming the
-destination buffer followed by the two input buffers of the multiplication;
-these names determine the new assumption and the memory-read assumption that is
-added. The tactic applies to a goal {A ?- eventually ... s} whose assumptions
-describe the machine state {s}, and yields one subgoal whose conclusion
-mentions a fresh successor state {s'}. All state-dependent assumptions about
-the old state — program-counter value, loaded code, register contents,
-memory-buffer contents, and the accumulated {MAYCHANGE} relation from the
-initial state — are discharged and re-added for the new state, with the
-{MAYCHANGE} relation extended by the destination buffer, a new memory-read
-assumption giving the destination buffer's value in the new state, and a new
-program-counter assumption; the previous program-counter assumption is dropped.
-A purely arithmetic assumption is also added, stating conditionally (under a
-bound on the product of the two inputs) that the destination value is the
-Montgomery product of the inputs modulo the field prime. State-independent
-assumptions already present, including those contributed by earlier steps, are
-retained and reordered.
-{
-   A ?- t s
-   =====================================================================  LOCAL_MONTMUL_SM2_TAC n [dest; in1; in2]
-   A', new-state facts, product-characterisation ?- t s'
-}
+The first argument is an {int} offset/index used to locate the call site within
+the program; the second is a {string list} naming the three memory buffers
+involved — the destination and the two operands — which identifies the stored
+values that the new result assumption relates. Applied to a goal whose
+conclusion is an {eventually} statement about a symbolic machine state, with a
+large assumption list of the shape described below, the tactic always yields
+exactly one goal. In the conclusion, the final state variable is replaced by a
+fresh successor state variable, the {eventually} body itself being unchanged.
+Every assumption mentioning the old state — the program-counter equation, the
+{bytes_loaded} assumption, the register-value equations, the memory-content
+equations and the accumulated {MAYCHANGE} frame — is discharged and re-added in
+terms of the new state: the program counter is advanced, the {MAYCHANGE} frame
+is extended by the destination buffer's component (when not already present),
+and a memory-content equation for the destination buffer gives its new value.
+One further arithmetic assumption of the form {t ==> u} is introduced, relating
+the destination's new value to the Montgomery product of the two operand
+values. Assumptions not mentioning the state — side conditions, non-overlapping
+facts, and arithmetic facts added by earlier such steps — are retained,
+possibly reordered.
 
 \COMMENTS
-In all observed traces, only this single kind of transformation occurs, always
-on goals of this shape and always producing one subgoal.
+The observed traces show only this single kind of transformation, always on
+goals of the form just described.
 
 \ENDDOC

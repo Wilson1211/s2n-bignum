@@ -3,28 +3,30 @@
 \TYPE {LOCAL_NSQR_TAC : int -> tactic}
 
 \SYNOPSIS
-Advances an {eventually}-style machine-execution goal across one inlined
-repeated-squaring subroutine call, replacing the current state variable by its
-successor and rewriting the state assumptions accordingly.
+Discharges a call to the modular repeated-squaring subroutine inside a
+machine-code {eventually} goal, advancing the symbolic state by one step and
+replacing the pre-call register/memory assumptions with post-call ones.
 
 \DESCRIBE
-The single argument is an {int}, the index of the new state: the state variable
-in the resulting goal and assumptions carries this index, which is one more
-than the index in the incoming goal. The conclusion retains its shape — an
-{eventually} assertion about a postcondition and a frame — with the final state
-argument replaced by the new numbered state. Every assumption mentioning the
-old state is discharged and replaced by a corresponding assumption about the
-new state: the program-code assumption, the register and memory-content
-assumptions carried through the call, a new assumption giving the result
-written at the output buffer as a modular repeated-squaring expression in the
-input value, an updated instruction-pointer assumption, and an updated
-accumulated frame ({MAYCHANGE ... s0 sNew}), which may gain extra components
-for the registers, flags and memory ranges clobbered by the call. Assumptions
-that do not refer to the state (side conditions such as non-overlapping and
-arithmetic facts) are left untouched, and exactly one subgoal results.
+The single {int} argument {n} is the index of the new symbolic state: the
+goal's current state variable is numbered {n-1} and the resulting state is
+numbered {n}. Applied to a goal whose conclusion is an {eventually ...}
+statement, it yields one subgoal in which the final state argument of
+{eventually} is replaced by the new state variable with index {n}, the body of
+the predicate being unchanged. On the assumption side, the block describing the
+old state — the program-counter value, the argument registers set up for the
+call, the loaded-code fact, the stack-pointer and saved-return-address facts,
+the accumulated {MAYCHANGE} relation, and the memory contents at the relevant
+buffers — is removed and replaced by the corresponding facts about the new
+state: a new program-counter value, the loaded-code, stack and return-address
+facts restated at the new state, the surviving memory contents carried over, a
+new assumption giving the contents of the destination buffer as a modular power
+of the input, and an extended {MAYCHANGE} relation from the initial state to
+the new state. Assumptions that do not mention the state (side conditions such
+as non-overlapping and arithmetic facts) are kept unchanged at the front.
 
 \COMMENTS
-The observed traces show only this single kind of transformation, always on
-goals of this {eventually} form with a full set of machine-state assumptions.
+In all observed traces, exactly this one transformation occurs, always on goals
+whose conclusion is such an {eventually} statement.
 
 \ENDDOC

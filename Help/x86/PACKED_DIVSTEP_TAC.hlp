@@ -3,39 +3,36 @@
 \TYPE {PACKED_DIVSTEP_TAC : int -> int list -> int -> tactic}
 
 \SYNOPSIS
-Advances a symbolic-execution goal about an {eventually} property by one block
-of machine steps, replacing the state-describing assumptions for the current
-state with the corresponding assumptions for a new, later state.
+Advances a symbolic-execution goal over one block of machine instructions,
+replacing the assumptions that describe the current state by assumptions
+describing a later state and retargeting the {eventually} conclusion at that
+later state.
 
 \DESCRIBE
-The arguments are {n : int}, {shf : int list} and {s : int}. In the observed
-traces {n} is an unbound index appearing in the expression supplied for {s};
-{shf} is a one-element list of integers; {s} is an arithmetic expression in {n}
-giving the step/state numbering used for the new state. Together they determine
-which block of execution is taken, and hence the new state name and
-program-counter offset. The conclusion of the goal has the form
-{eventually ... P s_old}, the {eventually} property applied to a current state
-variable; the tactic produces exactly one subgoal whose conclusion is the same
-property applied to a fresh later state variable {s_new}. All assumptions
-mentioning the old state — the {bytes_loaded} assumption, every
-{read <component> s_old = ...} equation, the flag assumptions, and the
-accumulated {MAYCHANGE ... s0 s_old} assumption — are discharged and replaced
-by analogous assumptions about {s_new}, with the register/flag right-hand sides
-advanced (for example the step index inside the symbolic {divstep_*} terms
-incremented and the program-counter offset increased); the {MAYCHANGE}
-assumption may also gain further components. Assumptions not mentioning the
-state (the arithmetic side conditions, the nonoverlapping hypothesis, and the
-definitional equations) are kept unchanged, although the order in which
-assumptions are listed can change.
+{PACKED_DIVSTEP_TAC n shf s} takes {n : int}, an index used in forming the
+state names/offsets for the step; {shf : int list}, a list of integer
+parameters (a singleton in all observed traces) controlling the step; and
+{s : int}, an integer expression (typically built from {n}) giving the step's
+position, which fixes which instructions are executed and hence the numbering
+of the resulting state. Assumptions not about the state (arithmetic side
+conditions, invariants relating the abstract values) are kept unchanged; every
+assumption mentioning the current state variable — the program-image
+assumption, the register/flag/memory {read} equations, and the accumulated
+{MAYCHANGE} relation — is discharged and replaced by the corresponding
+assumptions about a fresh, later state variable, with their right-hand sides
+rewritten into the form produced by executing the block. The {eventually}
+conclusion is re-applied to the new state variable, its predicate and
+{MAYCHANGE} part unchanged. Writing {R} and {R'} for the state-describing
+assumption sets:
 {
-   A_nostate, A_state(s_old) ?- eventually ... P s_old
-   =============================================  PACKED_DIVSTEP_TAC n shf s
-   A_nostate, A_state'(s_new) ?- eventually ... P s_new
+   A, R(s_i) ?- eventually ... s_i
+   ================================  PACKED_DIVSTEP_TAC n shf s
+   A, R'(s_j) ?- eventually ... s_j
 }
 
 \COMMENTS
-The observed traces show only this single kind of outcome, always on goals
-whose conclusion is an {eventually} statement about a state with a large set of
-such state-describing assumptions.
+The observed traces show only this single kind of transformation, always on
+goals of this shape: a machine-state symbolic-execution goal whose conclusion
+is an {eventually} claim about the current state.
 
 \ENDDOC

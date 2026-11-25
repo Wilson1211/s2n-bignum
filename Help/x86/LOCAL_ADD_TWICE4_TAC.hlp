@@ -3,38 +3,39 @@
 \TYPE {LOCAL_ADD_TWICE4_TAC : int -> string list -> tactic}
 
 \SYNOPSIS
-Advances a symbolic {eventually} execution goal across one inlined
-modular-addition subroutine, replacing the current state variable with a
-successor state and recording the new buffer contents together with an
-arithmetic characterisation of the result.
+Symbolically executes an inlined modular-addition subroutine over a block of
+machine instructions, advancing an {eventually} goal from the current symbolic
+state to a successor state and recording the resulting value together with its
+congruence as new assumptions.
 
 \DESCRIBE
-The tactic takes an {int} — in all observed traces the same fixed value —
-selecting an offset/variant used to locate the code segment being stepped over,
-and a {string list} of three names giving the destination variable and the two
-operand variables of the addition; these names are those that appear in the new
-assumptions and in the updated memory-read assumption. Applied to a goal whose
-conclusion is an {eventually} statement about a state {s}, it produces one goal
-about a fresh successor state variable {s'}:
+The first argument is an {int} selecting which code offset/variant of the
+addition block to step through ({0} and {2} occur in the observed traces). The
+second is a {string list} of three names: the name to bind to the result value,
+and the names of the two summand values whose stored contents are read; these
+are used to form the new value and congruence assumptions. The goal's
+assumptions {A} describe a symbolic machine state at step {s}.
 {
    A ?- eventually ... s
-   ================================================ LOCAL_ADD_TWICE4_TAC n [dest; op1; op2]
+   ================================================  LOCAL_ADD_TWICE4_TAC n ["t"; "x1"; "x2"]
    A' ?- eventually ... s'
 }
-\noindent Here the conclusion retains the same postcondition body with only the
-state argument updated. In {A'}, every assumption mentioning the old state —
-the program-counter read, {bytes_loaded}, register and memory reads, and the
-accumulated {MAYCHANGE} frame — is discharged and re-added in the same form for
-{s'}, with the program counter advanced, the {MAYCHANGE} frame possibly
-extended with a further memory component, and the memory read for the
-destination buffer now equated to the newly named result value. Purely
-mathematical assumptions that do not mention the state are kept unchanged, and
-one new assumption is added stating that the new result is congruent to the sum
-of the two operands modulo the prime, sometimes guarded by a bound hypothesis
-on an operand.
+\noindent Here {s'} is a fresh successor state. All state-describing
+assumptions mentioning {s} — program-counter, loaded-code, register and memory
+reads, and the accumulated {MAYCHANGE} relation — are discharged and replaced
+in {A'} by the corresponding assumptions about {s'}, with the program counter
+advanced and the {MAYCHANGE} relation extended by the registers, flags and
+memory region written. {A'} also gains an assumption that the chosen memory
+region of {s'} holds the named result {t}, and a further assumption relating
+{t} to the sum of the two named operands modulo the field prime; in some
+applications this congruence is unconditional, in others it is guarded by range
+hypotheses on the operands. Assumptions not mentioning the state (side
+conditions, non-overlapping facts, earlier value facts) are retained, and the
+conclusion's {eventually} postcondition is unchanged apart from the state
+argument.
 
 \COMMENTS
-All observed traces show exactly this single-goal state-advancing behaviour on
-goals of this one shape.
+The observed traces show only this single-successor behaviour, always on goals
+whose conclusion is an {eventually} statement about a symbolic machine state.
 
 \ENDDOC

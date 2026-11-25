@@ -3,40 +3,41 @@
 \TYPE {X86_PROMOTE_RETURN_NOSTACK_TAC : thm -> thm -> tactic}
 
 \SYNOPSIS
-Given the machine-code definition theorem and an {ensures} theorem about the
-stack-free core body, discharges a top-level subroutine-level {ensures x86}
-specification stated with a stack pointer and return address.
+Proves a top-level {ensures} specification for a stack-free x86 subroutine (one
+that only pops a return address) from a specification of its body, either
+closing the goal or leaving a residual goal about the event trace.
 
 \DESCRIBE
-{mc : thm} is the theorem defining the byte list of the full machine code;
-{core : thm} is the already-proved {ensures} specification for the core of the
-code (the body without the final return), whose preconditions, postconditions
-and {MAYCHANGE} frame are lifted to the subroutine level. The tactic applies to
-an assumption-free goal whose conclusion is a universally quantified (possibly
-also existentially quantified over an event-trace function) implication from
-nonoverlapping/alignment side conditions to an {ensures x86} statement about
-the whole code, with {read RSP}/return-address pre- and postconditions and a
-{MAYCHANGE [RSP] ,, ...} frame. Normally it closes such a goal outright:
+{mc : thm} names (or gives the byte-list definition of) the full machine-code
+program appearing in the goal; {core : thm} is the correctness/safety theorem
+for the body of that program, stated with {BUTLAST} of the code and an explicit
+end-of-body program counter. The goal it is applied to has no assumptions and
+is a universally quantified (optionally also existentially quantified over an
+event function) implication whose antecedent is a conjunction or
+{ALL (nonoverlapping ...)} list of separation and alignment side conditions,
+and whose conclusion is an {ensures} triple for the whole program, with pre-
+and postconditions referring to the stack pointer and return address. In many
+cases the goal is closed outright, producing no subgoals; otherwise exactly one
+subgoal remains:
 {
-         ?- t
-   =============================  X86_PROMOTE_RETURN_NOSTACK_TAC mc core
+   ?- t
+   ========================================  X86_PROMOTE_RETURN_NOSTACK_TAC mc core
+   A ?- u
 }
-\noindent If the postcondition additionally asserts an existential property of
-the event trace, one subgoal remains instead: the universal variables (and the
-stack/return variables) are specialised, and the side conditions, the
-event-trace conclusions of {core}, and facts about the loaded code, the final
-{RIP}, {RSP}, event list and the {MAYCHANGE} relation between the intermediate
-states are added as assumptions {A}; the remaining conclusion {u} is the
-event-trace existential instantiated to the concrete trace extended by the load
-and jump events.
-{
-         ?- t
-   =============================  X86_PROMOTE_RETURN_NOSTACK_TAC mc core
-         A ?- u
-}
+\noindent Here all the universal variables have been stripped; {A} collects the
+side conditions of the antecedent in expanded form ({nonoverlapping} unfolded
+to {nonoverlapping_modulo} on the word values, and {LENGTH} of the code
+evaluated to a numeral), the instantiated conclusions of {core} (including the
+memory-access-bounds fact and, when {core} is existentially quantified over an
+event function, an equation naming a witness function), and assumptions
+describing two states: code loaded, the saved return address, a {MAYCHANGE}
+relation between them, and the resulting program counter, stack pointer and
+event list. The remaining conclusion {u} is the existential event-trace
+statement from the postcondition, with the event list instantiated to the
+concrete trace built from the body's events, a stack load and a jump.
 
 \COMMENTS
-The observed traces show only these two outcomes, on goals of this single
-subroutine-specification shape with no initial assumptions.
+The observed traces show only these two outcomes, always starting from
+assumption-free goals of this {ensures}-promotion shape.
 
 \ENDDOC

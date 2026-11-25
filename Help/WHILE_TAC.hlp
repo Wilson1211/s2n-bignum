@@ -3,33 +3,32 @@
 \TYPE {WHILE_TAC : bool ref -> tactic -> tactic}
 
 \SYNOPSIS
-Repeatedly applies a tactic for as long as a boolean reference flag remains
-set, leaving a single transformed goal.
+Repeatedly applies a tactic to the goal while a supplied boolean reference
+remains set, yielding a single transformed goal.
 
 \DESCRIBE
-{flag : bool ref} is a mutable boolean tested between iterations; the supplied
-tactic may clear it to terminate the loop. {tac : tactic} is the tactic run on
-each iteration. The combinator runs {tac} on the current goal over and over
-while {flag} holds, yielding exactly one goal.
+{flag : bool ref} is a mutable flag consulted between iterations: applications
+continue while it holds, and the loop stops once the argument tactic clears it.
+{tac : tactic} is the tactic run on each iteration; here it advances the proof
+state and rewrites the assumptions. The conclusion is left structurally
+unchanged except for the final argument of the top-level predicate, which is
+replaced by a new term introduced by the iterated tactic. The assumptions are
+rewritten: those mentioning the original final argument are discharged and
+replaced by corresponding assumptions about the new term, further derived facts
+about it are added, and a relational assumption linking the original and new
+terms, plus one further derived property, are introduced; assumptions not
+mentioning that argument are left in place (sometimes removed and re-added
+unchanged).
 {
-       A ?- t
-     ==================  WHILE_TAC flag tac
-       A' ?- t'
+   A, B(t) ?- P t
+   ==============================  WHILE_TAC flag tac
+   A, B'(u), R t u, C u ?- P u
 }
-\noindent In the observed traces, the conclusion {t'} is {t} structurally
-unchanged except that its final argument is replaced by a later term introduced
-during the iterations. The assumption list is extensively rewritten:
-assumptions phrased in terms of the original argument are discharged and
-replaced by corresponding ones about the new term, together with further
-derived assumptions — extra equations about state components, a combined
-accumulated-change assumption relating the original and new terms, and a side
-condition about an abbreviated term. Assumptions unrelated to the changing term
-are re-asserted unchanged, so {A'} contains both the preserved part of {A} and
-the new assumptions.
+\noindent where the set of added facts {C u} may be empty.
 
 \COMMENTS
-The observed traces show only this single-goal, assumption-rewriting outcome,
-always on goals of the same shape and with a loop body that performs
-incremental stepping.
+In all observed traces only this single-goal transformation occurs, all on
+goals of the same shape — a stepwise state-advancing predicate with a block of
+side conditions as assumptions.
 
 \ENDDOC
